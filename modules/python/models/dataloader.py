@@ -23,7 +23,7 @@ class SequenceDataset(Dataset):
     def __getitem__(self, index):
         # load the image
         hdf5_image = self.file_info[index]
-        label_decoder = {'A': 0, 'C': 1, 'G': 2, 'T': 3, '_': 4}
+        label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
         hdf5_file = h5py.File(hdf5_image, 'r')
         image_dataset = hdf5_file['simpleWeight']
         label_dataset = hdf5_file['label']

@@ -23,14 +23,14 @@ class SequenceDataset(Dataset):
     def __getitem__(self, index):
         # load the image
         hdf5_filename = self.file_info[index]
-        label_decoder = {'A': 0, 'C': 1, 'G': 2, 'T': 3, '_': 4}
+        label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
 
         hdf5_file = h5py.File(hdf5_filename, 'r')
         chromosome_name = hdf5_filename.split('.')[-3].split('-')[0]
 
         image_dataset = hdf5_file['simpleWeight']
         label_dataset = hdf5_file['label']
-        position_dataset = hdf5_file['position']
+        # position_dataset = hdf5_file['position']
 
         image = []
         for image_line in image_dataset:
@@ -40,19 +40,19 @@ class SequenceDataset(Dataset):
         for label in label_dataset:
             labels.append(label_decoder[chr(label[0])])
 
-        position = []
-        index = []
-        for pos in position_dataset:
-            pos, indx = pos
-            position.append(pos)
-            index.append(indx)
+        # position = []
+        # index = []
+        # for pos in position_dataset:
+        #     pos, indx = pos
+        #     position.append(pos)
+        #     index.append(indx)
 
         hdf5_file.close()
 
         image = torch.Tensor(image)
         label = np.array(labels, dtype=np.int)
 
-        return image, label, chromosome_name, position, index
+        return image, label, chromosome_name
 
     def __len__(self):
         return len(self.file_info)
