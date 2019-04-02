@@ -19,33 +19,40 @@ class SequenceDataset(Dataset):
         #     "Some images referenced in the CSV file were not found"
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.file_info = list(data_frame[0])
-        self.file_index = list(data_frame[1])
-        self.chromosome_name = list(data_frame[2])
 
     def __getitem__(self, index):
         # load the image
-        chromosome = self.chromosome_name[index]
+        hdf5_filename = self.file_info[index]
+        label_decoder = {'A': 0, 'C': 1, 'G': 2, 'T': 3, '_': 4}
 
-        hdf5_image = self.file_info[index]
-        hdf5_index = int(self.file_index[index])
+        hdf5_file = h5py.File(hdf5_filename, 'r')
+        chromosome_name = hdf5_filename.split('.')[-3].split('-')[0]
 
-        hdf5_file = h5py.File(hdf5_image, 'r')
-
-        image_dataset = hdf5_file['image']
-        image = image_dataset[hdf5_index]
-        image = torch.Tensor(image)
-
-        pos_dataset = hdf5_file['position']
-        position = np.array(pos_dataset[hdf5_index], dtype=np.long)
-
-        index_dataset = hdf5_file['index']
-        index = np.array(index_dataset[hdf5_index], dtype=np.int16)
-
+        image_dataset = hdf5_file['simpleWeight']
         label_dataset = hdf5_file['label']
-        label = label_dataset[hdf5_index]
-        label = np.array(label, dtype=np.int)
+        position_dataset = hdf5_file['position']
 
-        return image, label, chromosome, position, index
+        image = []
+        for image_line in image_dataset:
+            image.append(list(image_line))
+
+        labels = []
+        for label in label_dataset:
+            labels.append(label_decoder[chr(label[0])])
+
+        position = []
+        index = []
+        for pos in position_dataset:
+            pos, indx = pos
+            position.append(pos)
+            index.append(indx)
+
+        hdf5_file.close()
+
+        image = torch.Tensor(image)
+        label = np.array(labels, dtype=np.int)
+
+        return image, label, chromosome_name, position, index
 
     def __len__(self):
         return len(self.file_info)

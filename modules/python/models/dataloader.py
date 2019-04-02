@@ -19,23 +19,28 @@ class SequenceDataset(Dataset):
             "Some images referenced in the CSV file were not found"
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.file_info = list(data_frame[0])
-        self.file_index = list(data_frame[1])
 
     def __getitem__(self, index):
         # load the image
         hdf5_image = self.file_info[index]
-        hdf5_index = int(self.file_index[index])
-
+        label_decoder = {'A': 0, 'C': 1, 'G': 2, 'T': 3, '_': 4}
         hdf5_file = h5py.File(hdf5_image, 'r')
-        image_dataset = hdf5_file['image']
+        image_dataset = hdf5_file['simpleWeight']
         label_dataset = hdf5_file['label']
-        image = image_dataset[hdf5_index]
-        label = label_dataset[hdf5_index]
+
+        image = []
+        for image_line in image_dataset:
+            image.append(list(image_line))
+
+        labels = []
+        for label in label_dataset:
+            labels.append(label_decoder[chr(label[0])])
+
         hdf5_file.close()
 
         image = torch.Tensor(image)
         # label = torch.(image).type(torch.DoubleStorage)
-        label = np.array(label, dtype=np.int)
+        label = np.array(labels, dtype=np.int)
         # label = torch.from_numpy(label).type(torch.LongStorage)
 
         return image, label
