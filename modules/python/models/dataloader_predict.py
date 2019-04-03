@@ -19,28 +19,33 @@ class SequenceDataset(Dataset):
         self.transform = transform
 
         self.file_info = list(data_frame[0])
-        self.file_index = list(data_frame[1])
-        self.chromosome_name = list(data_frame[2])
 
     def __getitem__(self, index):
-        chromosome = self.chromosome_name[index]
+        hdf5_filename = self.file_info[index]
 
-        hdf5_image = self.file_info[index]
-        hdf5_index = int(self.file_index[index])
+        hdf5_file = h5py.File(hdf5_filename, 'r')
+        chromosome_name = hdf5_filename.split('.')[-3].split('-')[0]
 
-        hdf5_file = h5py.File(hdf5_image, 'r')
+        image_dataset = hdf5_file['simpleWeight']
+        position_dataset = hdf5_file['position']
 
-        image_dataset = hdf5_file['image']
-        image = image_dataset[hdf5_index]
+        image = []
+        for image_line in image_dataset:
+            image.append(list(image_line))
+
+        position = []
+        index = []
+        for pos, indx in position_dataset:
+            position.append(pos)
+            index.append(indx)
+
+        hdf5_file.close()
+
         image = torch.Tensor(image)
+        position = np.array(position, dtype=np.int)
+        index = np.array(index, dtype=np.int)
 
-        pos_dataset = hdf5_file['position']
-        position = np.array(pos_dataset[hdf5_index], dtype=np.long)
-
-        index_dataset = hdf5_file['index']
-        index = np.array(index_dataset[hdf5_index], dtype=np.int16)
-
-        return image, chromosome, position, index
+        return image, chromosome_name, position, index
 
     def __len__(self):
         return len(self.file_info)

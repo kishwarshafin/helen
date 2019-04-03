@@ -35,7 +35,7 @@ Output:
 prediction_dict = defaultdict(lambda: [0.0] * ImageSizeOptions.TOTAL_LABELS)
 position_dict = defaultdict(set)
 chromosome_list = set()
-label_decoder = {0: '', 1: 'A', 2: 'C', 3: 'G', 4: 'T', 5: ''}
+label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
 
 
 def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
@@ -99,7 +99,7 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
                 output_preds = soft_probs.cpu()
                 max_value, predicted_label = torch.max(output_preds, dim=2)
 
-                # convert everythin to list
+                # convert everything to list
                 max_value = max_value.numpy().tolist()
                 predicted_label = predicted_label.numpy().tolist()
                 position_chunk = position_chunk.numpy().tolist()
@@ -198,7 +198,7 @@ def merge_call_files(vcf_file_directory):
     return all_records
 
 
-def polish_genome(csv_file, model_path, batch_size, num_workers, bam_file_path, output_dir, gpu_mode, max_threads):
+def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode, max_threads):
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "OUTPUT DIRECTORY: " + output_dir + "\n")
     predict(csv_file, model_path, batch_size, num_workers, gpu_mode)
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "PREDICTION GENERATED SUCCESSFULLY.\n")
@@ -257,12 +257,6 @@ if __name__ == '__main__':
         help="CSV file containing all image segments for prediction."
     )
     parser.add_argument(
-        "--bam_file",
-        type=str,
-        required=True,
-        help="Path to the BAM file."
-    )
-    parser.add_argument(
         "--model_path",
         type=str,
         required=True,
@@ -307,7 +301,6 @@ if __name__ == '__main__':
                   FLAGS.model_path,
                   FLAGS.batch_size,
                   FLAGS.num_workers,
-                  FLAGS.bam_file,
                   FLAGS.output_dir,
                   FLAGS.gpu_mode,
                   FLAGS.max_threads)
