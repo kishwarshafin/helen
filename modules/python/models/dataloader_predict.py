@@ -24,7 +24,9 @@ class SequenceDataset(Dataset):
         hdf5_filename = self.file_info[index]
 
         hdf5_file = h5py.File(hdf5_filename, 'r')
+
         chromosome_name = hdf5_filename.split('.')[-3].split('-')[0]
+        pos_start = int(hdf5_filename.split('.')[-3].split('-')[1])
 
         image_dataset = hdf5_file['simpleWeight']
         position_dataset = hdf5_file['position']
@@ -36,7 +38,7 @@ class SequenceDataset(Dataset):
         position = []
         index = []
         for pos, indx in position_dataset:
-            position.append(pos)
+            position.append(pos + pos_start)
             index.append(indx)
 
         hdf5_file.close()
