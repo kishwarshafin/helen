@@ -122,82 +122,6 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
                         chromosome_list.add(chromosome[ii])
 
 
-def get_record_from_prediction(pos, positional_record):
-    predictions = prediction_dict[pos]
-    genotype, qual, gq = VCFWriter.process_prediction(pos, predictions)
-    return positional_record, genotype, qual, gq
-
-
-def produce_vcf_records(chromosome_name, output_dir, thread_no, pos_list):
-    """
-    Convert prediction dictionary to a VCF file
-    :param: arg_tuple: Tuple of arguments containing these values:
-    - chromosome_name: Chromosome name
-    - pos_list: List of positions where we will search for variants
-    - prediction_dict: prediction dictionary containing predictions of each image records
-    - reference_dict: Dictionary containing reference information
-    - bam_file_path: Path to the BAM file
-    - sample_name: Name of the sample in the BAM file
-    - output_dir: Output directory
-    - thread_id: Unique id assigned to each thread
-    :return:
-    """
-    # object that can write and handle VCF
-    # vcf_writer = VCFWriter(bam_file_path, sample_name, output_dir, thread_id)
-    # collate multi-allelic records to a single record
-    current_allele_dict = ''
-    allele_dict = {}
-    record_file = open(output_dir + chromosome_name + "_" + str(thread_no) + ".tsv", 'w')
-    for pos in pos_list:
-        allele_dict_path = reference_dict[pos]
-        if allele_dict_path != current_allele_dict:
-            allele_dict = pickle.load(open(allele_dict_path, 'rb'))
-            current_allele_dict = allele_dict_path
-
-        if pos not in allele_dict:
-            continue
-        positional_record = allele_dict[pos] if pos in allele_dict else None
-        if positional_record is None:
-            continue
-
-        positional_record, genotype, qual, gq = get_record_from_prediction(pos, positional_record)
-
-        if genotype == '0/0':
-            continue
-        # print('BEFORE', record)
-        ref, alts, genotype = VCFWriter.get_proper_alleles(positional_record, genotype)
-        # print('AFTER', record)
-        if len(alts) == 1:
-            alts.append('.')
-        rec_end = int(pos + len(ref) - 1)
-        record_string = chromosome_name + "\t" + str(pos) + "\t" + str(rec_end) + "\t" + ref + "\t" + '\t'.join(alts) \
-                        + "\t" + genotype + "\t" + str(qual) + "\t" + str(gq) + "\t" + "\n"
-        record_file.write(record_string)
-
-
-def merge_call_files(vcf_file_directory):
-    filemanager_object = FileManager()
-    # get all bed file paths from the directory
-    file_paths = filemanager_object.get_file_paths_from_directory(vcf_file_directory)
-    all_records = []
-    for file_path in file_paths:
-        with open(file_path, 'r') as tsv:
-            for line in tsv:
-                chr_name, pos_st, pos_end, ref, alt1, alt2, genotype, qual, gq = line.strip().split('\t')
-                alts = []
-                pos_st, pos_end, qual, gq = int(pos_st), int(pos_end), float(qual), float(gq)
-                if alt1 != '.':
-                    alts.append(alt1)
-                if alt2 != '.':
-                    alts.append(alt2)
-                all_records.append((chr_name, pos_st, pos_end, ref, alts, genotype, qual, gq))
-
-    filemanager_object.delete_files(file_paths)
-    os.rmdir(vcf_file_directory)
-
-    return all_records
-
-
 def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode, max_threads):
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "OUTPUT DIRECTORY: " + output_dir + "\n")
     predict(csv_file, model_path, batch_size, num_workers, gpu_mode)
@@ -251,10 +175,10 @@ if __name__ == '__main__':
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--csv_file",
+        "--image_file",
         type=str,
         required=True,
-        help="CSV file containing all image segments for prediction."
+        help="HDF5 file containing all image segments for prediction."
     )
     parser.add_argument(
         "--model_path",
@@ -297,7 +221,7 @@ if __name__ == '__main__':
     )
     FLAGS, unparsed = parser.parse_known_args()
     FLAGS.output_dir = handle_output_directory(FLAGS.output_dir)
-    polish_genome(FLAGS.csv_file,
+    polish_genome(FLAGS.image_file,
                   FLAGS.model_path,
                   FLAGS.batch_size,
                   FLAGS.num_workers,

@@ -14,40 +14,34 @@ class SequenceDataset(Dataset):
         A CSV file path
     """
 
-    def __init__(self, csv_path, transform=None):
-        data_frame = pd.read_csv(csv_path, header=None, dtype=str)
-        self.transform = transform
-
-        self.file_info = list(data_frame[0])
-
-    def __getitem__(self, index):
-        hdf5_filename = self.file_info[index]
-
-        hdf5_file = h5py.File(hdf5_filename, 'r')
-
-        chromosome_name = hdf5_filename.split('.')[-3].split('-')[0]
-        pos_start = int(hdf5_filename.split('.')[-3].split('-')[1])
-
-        image_dataset = hdf5_file['simpleWeight']
-        position_dataset = hdf5_file['position']
-
-        image = []
-        for image_line in image_dataset:
-            image.append(list(image_line))
-
-        position = []
-        index = []
-        for pos, indx in position_dataset:
-            position.append(pos + pos_start)
-            index.append(indx)
-
+    def __init__(self, hdf5_path):
+        self.transform = transforms.Compose([transforms.ToTensor()])
+        self.hdf_filepath = hdf5_path
+        hdf5_file = h5py.File(hdf5_path, 'r')
+        self.total_summary_keys = len(list(hdf5_file['summaries'].keys()))
         hdf5_file.close()
 
-        image = torch.Tensor(image)
-        position = np.array(position, dtype=np.int)
-        index = np.array(index, dtype=np.int)
+    def __getitem__(self, index):
+        # load the image
+        hdf5_file_ref = h5py.File(self.hdf_filepath, 'r')
+        key = list(hdf5_file_ref['summaries'].keys())[index]
+        hdf5_file = hdf5_file_ref['summaries'][key]
 
-        return image, chromosome_name, position, index
+        image = hdf5_file['image']
+        chromosome = hdf5_file['chromosome_name'][()]
+        position = hdf5_file['position']
+        index = hdf5_file['index']
+        # chromosome_name = hdf5_file['chromosome_name']
+
+        image = torch.Tensor(image)
+        # label = torch.(image).type(torch.DoubleStorage)
+        position = np.array(position, dtype=np.int64)
+        index = np.array(index, dtype=np.int)
+        chromosome = str(chromosome)
+        # label = torch.from_numpy(label).type(torch.LongStorage)
+        hdf5_file_ref.close()
+
+        return image, chromosome, position, index
 
     def __len__(self):
-        return len(self.file_info)
+        return self.total_summary_keys
