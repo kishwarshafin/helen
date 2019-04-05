@@ -94,7 +94,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
     # generate the dictionary in parallel
     with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
-        file_chunks = chunks(sequence_chunk_keys, min(100, int(len(sequence_chunk_keys) / threads) + 1))
+        file_chunks = chunks(sequence_chunk_keys, int(len(sequence_chunk_keys) / threads) + 1)
 
         futures = [executor.submit(small_chunk_stitch, hdf5_file_path, contig, file_chunk) for file_chunk in file_chunks]
         for fut in concurrent.futures.as_completed(futures):
@@ -103,7 +103,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
                 for chunk_name, chunk_sequence in name_sequence_tuples:
                     chunk_name_to_sequence[chunk_name] = chunk_sequence
             else:
-                sys.stderr.write(str(fut.exception()))
+                sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
             fut._result = None  # python issue 27144
     print("ALL DICTIONARY GENERATION DONE")
     exit(0)
