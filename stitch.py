@@ -105,8 +105,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             else:
                 sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
             fut._result = None  # python issue 27144
-    print("ALL DICTIONARY GENERATION DONE")
-    exit(0)
+
     # but you cant do this part in parallel, this has to be linear
     chunk_names = sorted(sequence_chunk_keys)
     running_sequence = chunk_name_to_sequence[chunk_names[0]]
