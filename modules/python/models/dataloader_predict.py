@@ -24,24 +24,21 @@ class SequenceDataset(Dataset):
     def __getitem__(self, index):
         # load the image
         hdf5_file_ref = h5py.File(self.hdf_filepath, 'r')
-        key = list(hdf5_file_ref['summaries'].keys())[index]
-        hdf5_file = hdf5_file_ref['summaries'][key]
+        hdf5_file_key = list(hdf5_file_ref['summaries'].keys())[index]
+        hdf5_file = hdf5_file_ref['summaries'][hdf5_file_key]
 
         image = hdf5_file['image']
-        chromosome = hdf5_file['chromosome_name'][()]
         position = hdf5_file['position']
         index = hdf5_file['index']
-        # chromosome_name = hdf5_file['chromosome_name']
-
+        chromosome_name = hdf5_file['chromosome_name'][()]
         image = torch.Tensor(image)
-        # label = torch.(image).type(torch.DoubleStorage)
+
         position = np.array(position, dtype=np.int64)
         index = np.array(index, dtype=np.int)
-        chromosome = str(chromosome)
-        # label = torch.from_numpy(label).type(torch.LongStorage)
+
         hdf5_file_ref.close()
 
-        return image, chromosome, position, index
+        return image, position, index, chromosome_name, hdf5_file_key
 
     def __len__(self):
         return self.total_summary_keys

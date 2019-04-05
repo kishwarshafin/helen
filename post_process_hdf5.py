@@ -33,7 +33,6 @@ def file_reader_worker(file_names):
         label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
 
         chromosome_name = hdf5_filename.split('.')[-3].split("-")[0]
-        pos_start = int(hdf5_filename.split('.')[-3].split('-')[1])
 
         image_dataset = hdf5_file['simpleWeight']
         position_dataset = hdf5_file['position']
@@ -52,7 +51,7 @@ def file_reader_worker(file_names):
         position = []
         index = []
         for pos, indx in position_dataset:
-            position.append(pos + pos_start)
+            position.append(pos)
             index.append(indx)
         gathered_values.append((chromosome_name, image, position, index, label, hdf5_filename.split('/')[-1]))
     return gathered_values
@@ -61,7 +60,7 @@ def file_reader_worker(file_names):
 def write_to_file_parallel(input_files, hdf5_output_file_name, threads):
     with DataStore(hdf5_output_file_name, 'w') as ds:
         with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
-            file_chunks = chunks(input_files, max(64, int(len(input_files) / threads) + 1))
+            file_chunks = chunks(input_files, min(64, int(len(input_files) / threads) + 1))
             futures = [executor.submit(file_reader_worker, file_chunk) for file_chunk in file_chunks]
             for fut in concurrent.futures.as_completed(futures):
                 if fut.exception() is None:

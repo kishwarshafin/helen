@@ -18,6 +18,7 @@ import time
 import numpy as np
 from modules.python.models.ModelHander import ModelHandler
 from modules.python.Options import ImageSizeOptions, TrainOptions
+from modules.python.DataStore_predict import DataStore
 """
 This script uses a trained model to call variants on a given set of images generated from the genome.
 The process is:
@@ -32,13 +33,11 @@ Output:
 - A VCF file containing all the variants.
 """
 
-prediction_dict = defaultdict(lambda: [0.0] * ImageSizeOptions.TOTAL_LABELS)
-position_dict = defaultdict(set)
-chromosome_list = set()
+
 label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
 
 
-def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
+def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu_mode):
     """
     Create a prediction table/dictionary of an images set using a trained model.
     :param test_file: File to predict on
@@ -48,6 +47,7 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
     :param num_workers: Number of workers to be used by the dataloader
     :return: Prediction dictionary
     """
+    prediction_data_file = DataStore(output_filename, mode='w')
     sys.stderr.write(TextColor.PURPLE + 'Loading data\n' + TextColor.END)
 
     # data loader
@@ -70,7 +70,7 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
     sys.stderr.write(TextColor.CYAN + 'MODEL LOADED\n')
 
     with torch.no_grad():
-        for images, chromosome, position, index in tqdm(test_loader, ncols=50):
+        for images, position, index, chromosome_name, chunk_name in tqdm(test_loader, ncols=50):
             if gpu_mode:
                 # encoder_hidden = encoder_hidden.cuda()
                 images = images.cuda()
@@ -80,6 +80,8 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
             if gpu_mode:
                 hidden = hidden.cuda()
 
+            prediction_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_LABELS))
+
             for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
                 if i + TrainOptions.TRAIN_WINDOW > ImageSizeOptions.SEQ_LENGTH:
                     break
@@ -87,8 +89,6 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
                 chunk_end = i + TrainOptions.TRAIN_WINDOW
                 # chunk all the data
                 image_chunk = images[:, chunk_start:chunk_end]
-                position_chunk = position[:, chunk_start:chunk_end]
-                index_chunk = index[:, chunk_start:chunk_end]
 
                 # run inference
                 output_, hidden = transducer_model(image_chunk, hidden)
@@ -102,56 +102,28 @@ def predict(test_file, model_path, batch_size, num_workers, gpu_mode):
                 # convert everything to list
                 max_value = max_value.numpy().tolist()
                 predicted_label = predicted_label.numpy().tolist()
-                position_chunk = position_chunk.numpy().tolist()
-                index_chunk = index_chunk.numpy().tolist()
 
-                assert(len(index_chunk) == len(position_chunk) == len(max_value) == len(predicted_label))
+                assert(len(max_value) == len(predicted_label))
 
-                for ii in range(0, len(position_chunk)):
-                    counter = 0
+                for ii in range(0, len(predicted_label)):
+                    chunk_pos = chunk_start
+                    for p, label in zip(max_value[ii], predicted_label[ii]):
+                        prediction_dict[ii][chunk_pos][label] += p
+                        chunk_pos += 1
+            predicted_labels = np.argmax(np.array(prediction_dict), axis=2)
 
-                    for pos, idx, p, label in zip(position_chunk[ii],
-                                                  index_chunk[ii],
-                                                  max_value[ii],
-                                                  predicted_label[ii]):
-                        if pos < 0 or idx < 0:
-                            continue
-                        prediction_dict[(chromosome[ii], pos, idx)][label] += p
-                        counter += 1
-                        position_dict[chromosome[ii]].add((chromosome[ii], pos, idx))
-                        chromosome_list.add(chromosome[ii])
+            for i in range(images.size(0)):
+                chunk_prefix = '.'.join(chunk_name[i].split('.')[:-2])
+                chunk_suffix = '.'.join(chunk_name[i].split('.')[-2])
+                prediction_data_file.write_prediction(chromosome_name[i], chunk_prefix, chunk_suffix, position[i], index[i], predicted_labels[i])
 
 
-def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode, max_threads):
+def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode):
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "OUTPUT DIRECTORY: " + output_dir + "\n")
-    predict(csv_file, model_path, batch_size, num_workers, gpu_mode)
+    output_filename = output_dir + "helen_predictions.hdf"
+    predict(csv_file, output_filename, model_path, batch_size, num_workers, gpu_mode)
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "PREDICTION GENERATED SUCCESSFULLY.\n")
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "COMPILING PREDICTIONS TO CALL VARIANTS.\n")
-
-    fasta_file = open(output_dir + "helen_polished.fa", 'w')
-
-    for chromosome in chromosome_list:
-        pos_list = list(position_dict[chromosome])
-        pos_list = sorted(list(pos_list), key=lambda element: (element[0], element[1], element[2]))
-
-        chr_prev, pos_prev, indx_prev = pos_list[0]
-        for i in range(1, len(pos_list)):
-            chr, pos, indx = pos_list[i]
-            if indx > 0:
-                continue
-            else:
-                if pos - pos_prev != 1:
-                    print(pos_prev, pos)
-                    exit()
-                chr_prev, pos_prev, indx_prev = pos_list[i]
-        dict_fetch = operator.itemgetter(*pos_list)
-        predicted_labels = list(dict_fetch(prediction_dict))
-        predicted_labels = np.argmax(np.array(predicted_labels), axis=1).tolist()
-        sequence = ''.join([label_decoder[x] for x in predicted_labels])
-
-        if len(sequence) > 0:
-            fasta_file.write('>'+chromosome+"\n")
-            fasta_file.write(sequence+"\n")
 
 
 def handle_output_directory(output_dir):
@@ -208,12 +180,6 @@ if __name__ == '__main__':
         help="Output directory."
     )
     parser.add_argument(
-        "--max_threads",
-        type=int,
-        default=8,
-        help="Number of maximum threads for this region."
-    )
-    parser.add_argument(
         "--gpu_mode",
         type=bool,
         default=False,
@@ -226,6 +192,5 @@ if __name__ == '__main__':
                   FLAGS.batch_size,
                   FLAGS.num_workers,
                   FLAGS.output_dir,
-                  FLAGS.gpu_mode,
-                  FLAGS.max_threads)
+                  FLAGS.gpu_mode)
 
