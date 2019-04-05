@@ -61,6 +61,8 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         sequence = ''.join([label_decoder[x] for x in predicted_labels])
         name_sequence_tuples.append((chunk_name, sequence))
 
+    hdf5_file.close()
+
     return name_sequence_tuples
 
 
@@ -87,7 +89,6 @@ def get_confident_positions(alignment_a, alignment_b):
     return -1, -1
 
 
-
 def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threads):
     chunk_name_to_sequence = defaultdict()
 
@@ -104,6 +105,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             else:
                 sys.stderr.write(str(fut.exception()))
             fut._result = None  # python issue 27144
+    print("ALL DICTIONARY GENERATION DONE")
+    exit(0)
     # but you cant do this part in parallel, this has to be linear
     chunk_names = sorted(sequence_chunk_keys)
     running_sequence = chunk_name_to_sequence[chunk_names[0]]
@@ -142,16 +145,18 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
 
 def process_marginpolish_h5py(hdf_file_path, output_path, threads):
-    hdf5_file = h5py.File(hdf_file_path, 'r')['predictions']
-    contigs = list(hdf5_file.keys())
+    hdf5_file = h5py.File(hdf_file_path, 'r')
+    contigs = list(hdf5_file['predictions'].keys())
 
     consensus_fasta_file = open(output_path+'consensus.fa', 'w')
     for contig in contigs:
-        chunk_keys = sorted(hdf5_file[contig].keys())
+        chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
         consensus_sequence = create_consensus_sequence(hdf_file_path, contig, chunk_keys, threads)
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")
             consensus_fasta_file.write(consensus_sequence+"\n")
+
+    hdf5_file.close()
 
 
 if __name__ == '__main__':
