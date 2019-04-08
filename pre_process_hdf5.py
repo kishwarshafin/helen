@@ -146,69 +146,6 @@ def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_
         write_to_file_parallel(all_hdf5_file_paths, train_data_file_name, threads, train_mode)
 
 
-def write_to_file(all_hdf5_file_paths, hdf5_data_file):
-    for i in tqdm(range(0, len(all_hdf5_file_paths)), ncols=100):
-        hdf5_filename = all_hdf5_file_paths[i]
-        hdf5_file = h5py.File(all_hdf5_file_paths[i], 'r')
-        label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
-
-        chromosome_name = hdf5_filename.split('.')[-3].split("-")[0]
-        pos_start = int(hdf5_filename.split('.')[-3].split('-')[1])
-
-        image_dataset = hdf5_file['simpleWeight']
-        position_dataset = hdf5_file['position']
-
-        image = []
-        for image_line in image_dataset:
-            a_fwd, a_rev, c_fwd, c_rev, g_fwd, g_rev, t_fwd, t_rev, gap_fwd, gap_rev = list(image_line)
-            image.append([a_fwd, c_fwd, g_fwd, t_fwd, a_rev, c_rev, g_rev, t_rev, gap_fwd, gap_rev])
-
-        label = []
-        if 'label' in hdf5_file.keys():
-            label_dataset = hdf5_file['label']
-            for l in label_dataset:
-                label.append(label_decoder[chr(l[0])])
-
-        position = []
-        index = []
-        for pos, indx in position_dataset:
-            position.append(pos + pos_start)
-            index.append(indx)
-        hdf5_data_file.write_train_summary(chromosome_name, image, position, index, label, hdf5_filename.split('/')[-1])
-
-
-def read_marginpolish_h5py(marginpolish_output_directory, output_path, train_mode, threads):
-    all_hdf5_file_paths = sorted(get_file_paths_from_directory(marginpolish_output_directory))
-
-    if train_mode:
-        total_length = len(all_hdf5_file_paths)
-        selected_training_samples = int(total_length * 0.8)
-
-        training_samples = all_hdf5_file_paths[:selected_training_samples]
-        testing_samples = all_hdf5_file_paths[selected_training_samples:]
-
-        train_data_file_name = output_path + "train" + "_images_marginpolish" + ".hdf"
-        sys.stderr.write("WRITING " + str(len(training_samples)) + "SAMPLES TO train_images_marginpolish.hdf")
-
-        train_data_file = DataStore(train_data_file_name, mode='w')
-        train_data_file.__enter__()
-        write_to_file(training_samples, train_data_file)
-
-        test_data_file_name = output_path + "test" + "_images_marginpolish" + ".hdf"
-        sys.stderr.write("WRITING " + str(len(testing_samples)) + "SAMPLES TO test_images_marginpolish.hdf")
-
-        test_data_file = DataStore(test_data_file_name, mode='w')
-        test_data_file.__enter__()
-        write_to_file(testing_samples, test_data_file)
-    else:
-        train_data_file_name = output_path + "images_marginpolish" + ".hdf"
-
-        sys.stderr.write("WRITING " + str(len(all_hdf5_file_paths)) + "SAMPLES TO images_marginpolish.hdf")
-        train_data_file = DataStore(train_data_file_name, mode='w')
-        train_data_file.__enter__()
-        write_to_file(all_hdf5_file_paths, train_data_file)
-
-
 if __name__ == '__main__':
     '''
     Processes arguments and performs tasks.
