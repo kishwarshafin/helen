@@ -26,16 +26,18 @@ class SequenceDataset(Dataset):
         hdf5_file = hdf5_file_ref['summaries'][key]
 
         image = hdf5_file['image']
-        labels = hdf5_file['label']
+        label_base = hdf5_file['label_base']
+        label_rle = hdf5_file['label_rle']
         # chromosome_name = hdf5_file['chromosome_name']
 
         image = torch.Tensor(image)
         # label = torch.(image).type(torch.DoubleStorage)
-        label = np.array(labels, dtype=np.int)
+        label_base = np.array(label_base, dtype=np.int)
+        label_rle = np.array(label_rle, dtype=np.int)
         # label = torch.from_numpy(label).type(torch.LongStorage)
         hdf5_file_ref.close()
 
-        return image, label
+        return image, label_base, label_rle
 
     def __len__(self):
         return self.total_summary_keys

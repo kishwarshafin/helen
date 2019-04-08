@@ -11,21 +11,7 @@ from collections import  defaultdict
 import operator
 
 BASE_ERROR_RATE = 0.2
-
-
-def label_to_sequence(label):
-    if label == 0:
-        return ''
-    if label <= 20:
-        return 'A' * label
-    if label <= 40:
-        return 'C' * (label - 20)
-    if label <= 60:
-        return 'G' * (label - 40)
-    if label <= 80:
-        return 'T' * (label - 60)
-    else:
-        print("INVALID LABEL VALUE: ", label)
+label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
 
 
 def get_file_paths_from_directory(directory_path):
@@ -55,24 +41,30 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         smaller_chunks = list(hdf5_file['predictions'][contig][chunk_name].keys())
 
         positions = set()
-        prediction_dict = defaultdict()
+        base_prediction_dict = defaultdict()
+        rle_prediction_dict = defaultdict()
         for chunk in smaller_chunks:
-            predictions = hdf5_file['predictions'][contig][chunk_name][chunk]['predictions']
+            bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases']
+            rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles']
             index = hdf5_file['predictions'][contig][chunk_name][chunk]['index']
             position = hdf5_file['predictions'][contig][chunk_name][chunk]['position']
             position = np.array(position, dtype=np.int64)
             index = np.array(index, dtype=np.int)
-            predictions = np.array(predictions, dtype=np.int)
+            base_predictions = np.array(bases, dtype=np.int)
+            rle_predictions = np.array(rles, dtype=np.int)
 
-            for pos, indx, pred in zip(position, index, predictions):
-                if (pos, indx) not in prediction_dict:
-                    prediction_dict[(pos, indx)] = pred
+            for pos, indx, base_pred, rle_pred in zip(position, index, base_predictions, rle_predictions):
+                if (pos, indx) not in base_prediction_dict:
+                    base_prediction_dict[(pos, indx)] = base_pred
+                    rle_prediction_dict[(pos, indx)] = rle_pred
                     positions.add((pos, indx))
 
         pos_list = sorted(list(positions), key=lambda element: (element[0], element[1]))
         dict_fetch = operator.itemgetter(*pos_list)
-        predicted_labels = list(dict_fetch(prediction_dict))
-        sequence = ''.join([label_to_sequence(x) for x in predicted_labels])
+        predicted_base_labels = list(dict_fetch(base_prediction_dict))
+        predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
+        sequence = ''.join([label_decoder[base] * int(rle) for base, rle in zip(predicted_base_labels,
+                                                                                predicted_rle_labels)])
         name_sequence_tuples.append((chunk_name, sequence))
 
     hdf5_file.close()
@@ -132,7 +124,6 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
         exit()
 
     for i in range(1, len(chunk_names)):
-        print(chunk_names[i])
         this_sequence = chunk_name_to_sequence[chunk_names[i]]
         this_start = int(chunk_names[i].split('-')[-2])
         this_end = int(chunk_names[i].split('-')[-1])

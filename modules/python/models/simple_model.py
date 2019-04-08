@@ -3,12 +3,14 @@ import torch.nn as nn
 
 
 class TransducerGRU(nn.Module):
-    def __init__(self, image_channels, image_features, gru_layers, hidden_size, num_classes, bidirectional=True):
+    def __init__(self, image_channels, image_features, gru_layers, hidden_size, num_base_classes, num_rle_classes,
+                 bidirectional=True):
         super(TransducerGRU, self).__init__()
         self.hidden_size = hidden_size
         self.bidirectional = bidirectional
         self.num_layers = gru_layers
-        self.num_classes = num_classes
+        self.num_base_classes = num_base_classes
+        self.num_rle_classes = num_rle_classes
         self.gru_encoder = nn.GRU(image_features,
                                   hidden_size,
                                   num_layers=self.num_layers,
@@ -21,8 +23,8 @@ class TransducerGRU(nn.Module):
                                   batch_first=True)
         self.gru_encoder.flatten_parameters()
         self.gru_decoder.flatten_parameters()
-        self.dense1 = nn.Linear(self.hidden_size * 2, self.num_classes)
-        # self.dense2 = nn.Linear(self.hidden_size, self.num_classes)
+        self.dense1_base = nn.Linear(self.hidden_size * 2, self.num_base_classes)
+        self.dense2_rle = nn.Linear(self.hidden_size * 2, self.num_rle_classes)
 
     def forward(self, x, hidden):
         hidden = hidden.transpose(0, 1).contiguous()
@@ -30,7 +32,8 @@ class TransducerGRU(nn.Module):
         x_out, hidden_out = self.gru_encoder(x, hidden)
         x_out, hidden_final = self.gru_decoder(x_out, hidden_out)
 
-        x_out = self.dense1(x_out)
+        base_out = self.dense1_base(x_out)
+        rle_out = self.dense2_rle(x_out)
         # x = self.dense2(x)
         # if self.bidirectional:
         #     output_rnn = output_rnn.contiguous()
@@ -38,7 +41,7 @@ class TransducerGRU(nn.Module):
         #         .sum(2).view(output_rnn.size(0), output_rnn.size(1), -1)
 
         hidden_final = hidden_final.transpose(0, 1).contiguous()
-        return x_out, hidden_final
+        return base_out, rle_out, hidden_final
 
     def init_hidden(self, batch_size, num_layers, bidirectional=True):
         num_directions = 1

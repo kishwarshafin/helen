@@ -5,7 +5,7 @@ import torchnet.meter as meter
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
-from modules.python.models.dataloader_test import SequenceDataset
+from modules.python.models.dataloader import SequenceDataset
 from modules.python.TextColor import TextColor
 from modules.python.Options import ImageSizeOptions, TrainOptions
 """
@@ -41,7 +41,7 @@ def label_to_literal(label):
 
 
 def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size,
-         num_classes=ImageSizeOptions.TOTAL_LABELS, print_details=False):
+         num_base_classes, num_rle_classes, print_details=False):
     # transformations = transforms.Compose([transforms.ToTensor()])
 
     # data loader
@@ -58,14 +58,17 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
     # class_weights = torch.Tensor(CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
-    criterion = nn.CrossEntropyLoss()
+    criterion_base = nn.CrossEntropyLoss()
+    criterion_rle = nn.CrossEntropyLoss()
 
     if gpu_mode is True:
-        criterion = criterion.cuda()
+        criterion_base = criterion_base.cuda()
+        criterion_rle = criterion_rle.cuda()
 
     # Test the Model
     sys.stderr.write(TextColor.PURPLE + 'Test starting\n' + TextColor.END)
-    confusion_matrix = meter.ConfusionMeter(num_classes)
+    base_confusion_matrix = meter.ConfusionMeter(num_base_classes)
+    rle_confusion_matrix = meter.ConfusionMeter(num_rle_classes)
 
     total_loss = 0
     total_images = 0
@@ -73,7 +76,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
     with torch.no_grad():
         with tqdm(total=len(test_loader), desc='Accuracy: ', leave=True, ncols=100) as pbar:
-            for ii, (images, labels) in enumerate(test_loader):
+            for ii, (images, label_base, label_rle) in enumerate(test_loader):
                 if gpu_mode:
                     # encoder_hidden = encoder_hidden.cuda()
                     images = images.cuda()
@@ -89,33 +92,51 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                         break
 
                     image_chunk = images[:, i:i+TrainOptions.TRAIN_WINDOW]
-                    label_chunk = labels[:, i:i+TrainOptions.TRAIN_WINDOW]
-                    output_, hidden = transducer_model(image_chunk, hidden)
+                    label_base_chunk = label_base[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
-                    loss = criterion(output_.contiguous().view(-1, num_classes), label_chunk.contiguous().view(-1))
+                    output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
 
-                    confusion_matrix.add(output_.data.contiguous().view(-1, num_classes),
-                                         label_chunk.data.contiguous().view(-1))
+                    loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
+                                               label_base_chunk.contiguous().view(-1))
+                    loss_rle = criterion_base(output_rle.contiguous().view(-1, num_rle_classes),
+                                              label_rle_chunk.contiguous().view(-1))
+
+                    loss = loss_base + loss_rle
+
+                    base_confusion_matrix.add(output_base.data.contiguous().view(-1, num_base_classes),
+                                              label_base_chunk.data.contiguous().view(-1))
+                    rle_confusion_matrix.add(output_rle.data.contiguous().view(-1, num_rle_classes),
+                                             label_rle_chunk.data.contiguous().view(-1))
 
                     total_loss += loss.item()
                     total_images += images.size(0)
 
                 pbar.update(1)
-                cm_value = confusion_matrix.value()
-                denom = cm_value.sum()
-                corrects = 0
-                for label in range(0, ImageSizeOptions.TOTAL_LABELS):
-                    corrects = corrects + cm_value[label][label]
-                accuracy = 100.0 * (corrects / max(1.0, denom))
-                pbar.set_description("Accuracy: " + str(round(accuracy, 5)))
+                base_cm_value = base_confusion_matrix.value()
+                rle_cm_value = rle_confusion_matrix.value()
+                base_denom = base_cm_value.sum()
+                rle_denom = rle_cm_value.sum()
+
+                base_corrects = 0
+                for label in range(0, ImageSizeOptions.TOTAL_BASE_LABELS):
+                    base_corrects = base_corrects + base_cm_value[label][label]
+
+                rle_corrects = 0
+                for label in range(0, ImageSizeOptions.TOTAL_RLE_LABELS):
+                    rle_corrects = rle_corrects + rle_cm_value[label][label]
+
+                base_accuracy = 100.0 * (base_corrects / max(1.0, base_denom))
+                rle_accuracy = 100.0 * (rle_corrects / max(1.0, rle_denom))
+                pbar.set_description("Base acc: " + str(round(base_accuracy, 4)) + ", RLE acc: " + str(round(rle_accuracy, 4)))
 
     avg_loss = total_loss / total_images if total_images else 0
     np.set_printoptions(threshold=np.inf)
 
     sys.stderr.write(TextColor.YELLOW+'\nTest Loss: ' + str(avg_loss) + "\n"+TextColor.END)
     # sys.stderr.write("Confusion Matrix: \n" + str(class_error_meter.value()) + "\n" + TextColor.END)
-    sys.stderr.write("label\t\tprecision\n")
-    for label in range(0, ImageSizeOptions.TOTAL_LABELS):
-        sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")
+    # sys.stderr.write("label\t\tprecision\n")
+    # for label in range(0, ImageSizeOptions.TOTAL_LABELS):
+    #     sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")
 
-    return {'loss': avg_loss, 'accuracy': accuracy, 'confusion_matrix': str(confusion_matrix.conf)}
+    return {'loss': avg_loss, 'accuracy': accuracy, 'confusion_matrix': str(base_confusion_matrix.conf)}

@@ -21,7 +21,8 @@ class ImageSizeOptions(object):
     SEQ_OVERLAP = 200
     LABEL_LENGTH = SEQ_LENGTH
 
-    TOTAL_LABELS = 81
+    TOTAL_BASE_LABELS = 5
+    TOTAL_RLE_LABELS = 20
 
 
 class TrainOptions(object):

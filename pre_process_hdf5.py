@@ -43,6 +43,8 @@ def decode_label(base, run_length):
 def file_reader_worker(file_names):
     gathered_values = []
     total_counts = defaultdict(int)
+    label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
+
     for hdf5_filename in file_names:
         hdf5_file = h5py.File(hdf5_filename, 'r')
 
@@ -53,19 +55,21 @@ def file_reader_worker(file_names):
 
         image = np.array(image_dataset, dtype=np.float)
 
-        label = []
+        label_base = []
+        label_rle = []
         if 'label' in hdf5_file.keys():
             label_dataset = hdf5_file['label']
             for base, run_length in label_dataset:
                 total_counts[decode_label(chr(base), run_length)] += 1
-                label.append(decode_label(chr(base), run_length))
+                label_base.append(label_decoder[chr(base)])
+                label_rle.append(run_length)
 
         position = []
         index = []
         for pos, indx in position_dataset:
             position.append(pos)
             index.append(indx)
-        gathered_values.append((chromosome_name, image, position, index, label, hdf5_filename.split('/')[-1]))
+        gathered_values.append((chromosome_name, image, position, index, label_base, label_rle, hdf5_filename.split('/')[-1]))
     return gathered_values, total_counts
 
 
@@ -96,8 +100,8 @@ def write_to_file_parallel(input_files, hdf5_output_file_name, threads, train_mo
                     gathered_values, label_dict = fut.result()
                     label_count.update(label_dict)
 
-                    for chromosome_name, image, position, index, label, summary_name in gathered_values:
-                        ds.write_train_summary(chromosome_name, image, position, index, label, summary_name)
+                    for chromosome_name, image, position, index, label_base, label_rle, summary_name in gathered_values:
+                        ds.write_train_summary(chromosome_name, image, position, index, label_base, label_rle, summary_name)
                 else:
                     sys.stderr.write(str(fut.exception()))
                 fut._result = None  # python issue 27144

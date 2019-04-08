@@ -67,7 +67,8 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                               shuffle=True,
                               num_workers=num_workers,
                               pin_memory=gpu_mode)
-    num_classes = ImageSizeOptions.TOTAL_LABELS
+    num_base_classes = ImageSizeOptions.TOTAL_BASE_LABELS
+    num_rle_classes = ImageSizeOptions.TOTAL_RLE_LABELS
 
     if retrain_model is True:
         if os.path.isfile(retrain_model_path) is False:
@@ -79,7 +80,8 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                                                         input_channels=ImageSizeOptions.IMAGE_CHANNELS,
                                                         image_features=ImageSizeOptions.IMAGE_HEIGHT,
                                                         seq_len=ImageSizeOptions.SEQ_LENGTH,
-                                                        num_classes=num_classes)
+                                                        num_base_classes=num_base_classes,
+                                                        num_rle_classes=num_rle_classes)
 
         if train_mode is True:
             epoch_limit = prev_ite + epoch_limit
@@ -90,7 +92,8 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                                                           image_features=ImageSizeOptions.IMAGE_HEIGHT,
                                                           gru_layers=gru_layers,
                                                           hidden_size=hidden_size,
-                                                          num_classes=num_classes)
+                                                          num_base_classes=num_base_classes,
+                                                          num_rle_classes=num_rle_classes)
         prev_ite = 0
 
     param_count = sum(p.numel() for p in transducer_model.parameters() if p.requires_grad)
@@ -110,10 +113,12 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
     # class_weights = torch.Tensor(CLASS_WEIGHTS)
     # not using class weights for the first pass
     # Loss
-    criterion = nn.CrossEntropyLoss()
+    criterion_base = nn.CrossEntropyLoss()
+    criterion_rle = nn.CrossEntropyLoss()
 
     if gpu_mode is True:
-        criterion = criterion.cuda()
+        criterion_base = criterion_base.cuda()
+        criterion_rle = criterion_rle.cuda()
 
     start_epoch = prev_ite
 
@@ -132,7 +137,7 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
         batch_no = 1
         with tqdm(total=len(train_loader), desc='Loss', leave=True, ncols=100) as progress_bar:
             transducer_model.train()
-            for images, labels in train_loader:
+            for images, label_base, label_rle in train_loader:
                 # from modules.python.helper.tensor_analyzer import analyze_tensor
                 # for label in labels[0].data:
                 #     print(label.item(), end='')
@@ -142,7 +147,8 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                 if gpu_mode:
                     # encoder_hidden = encoder_hidden.cuda()
                     images = images.cuda()
-                    labels = labels.cuda()
+                    label_base = label_base.cuda()
+                    label_rle = label_rle.cuda()
 
                 hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
 
@@ -155,12 +161,17 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                         break
 
                     image_chunk = images[:, i:i+TrainOptions.TRAIN_WINDOW]
-                    label_chunk = labels[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    label_base_chunk = label_base[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
-                    output_, hidden = transducer_model(image_chunk, hidden)
+                    output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
 
-                    loss = criterion(output_.contiguous().view(-1, num_classes), label_chunk.contiguous().view(-1))
+                    loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
+                                               label_base_chunk.contiguous().view(-1))
+                    loss_rle = criterion_base(output_rle.contiguous().view(-1, num_rle_classes),
+                                              label_rle_chunk.contiguous().view(-1))
 
+                    loss = loss_base + loss_rle
                     loss.backward()
                     model_optimizer.step()
 
@@ -181,12 +192,13 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
 
             progress_bar.close()
 
-        stats_dictioanry = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
-                                gru_layers, hidden_size, num_classes=ImageSizeOptions.TOTAL_LABELS)
-        stats['loss'] = stats_dictioanry['loss']
-        stats['accuracy'] = stats_dictioanry['accuracy']
-        stats['loss_epoch'].append((epoch, stats_dictioanry['loss']))
-        stats['accuracy_epoch'].append((epoch, stats_dictioanry['accuracy']))
+        stats_dictionary = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
+                                gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
+                                num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS)
+        stats['loss'] = stats_dictionary['loss']
+        stats['accuracy'] = stats_dictionary['accuracy']
+        stats['loss_epoch'].append((epoch, stats_dictionary['loss']))
+        stats['accuracy_epoch'].append((epoch, stats_dictionary['accuracy']))
 
         lr_scheduler.step(stats['loss'])
 
@@ -199,7 +211,7 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                             hidden_size, gru_layers, epoch, model_dir + "_epoch_" + str(epoch + 1) + '_checkpoint.pkl')
 
             test_loss_logger.write(str(epoch + 1) + "," + str(stats['loss']) + "," + str(stats['accuracy']) + "\n")
-            confusion_matrix_logger.write(str(epoch + 1) + "\n" + str(stats_dictioanry['confusion_matrix']) + "\n")
+            confusion_matrix_logger.write(str(epoch + 1) + "\n" + str(stats_dictionary['confusion_matrix']) + "\n")
             train_loss_logger.flush()
             test_loss_logger.flush()
             confusion_matrix_logger.flush()

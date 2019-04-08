@@ -7,7 +7,7 @@ from modules.python.Options import ImageSizeOptions
 class DataStore(object):
     """Class to read/write to a FRIDAY's file"""
     _prediction_path_ = 'predictions'
-    _groups_ = ('predictions', 'position', 'index')
+    _groups_ = ('position', 'index', 'bases', 'rles')
 
     def __init__(self, filename, mode='r'):
         self.filename = filename
@@ -52,12 +52,14 @@ class DataStore(object):
         self._meta = self.meta
         self._meta.update(meta)
 
-    def write_prediction(self, chromosome_name, chunk_name_prefix, chunk_name_suffix, position, index, predictions):
+    def write_prediction(self, chromosome_name, chunk_name_prefix, chunk_name_suffix, position, index, bases, rles):
         self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
                                                   chunk_name_suffix, 'position')] = position
         self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
                                                   chunk_name_suffix, 'index')] = index
         self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
-                                                  chunk_name_suffix, 'predictions')] = predictions
+                                                  chunk_name_suffix, 'bases')] = bases
+        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
+                                                  chunk_name_suffix, 'rles')] = rles
 
 

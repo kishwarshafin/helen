@@ -59,7 +59,8 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
                                                     input_channels=ImageSizeOptions.IMAGE_CHANNELS,
                                                     image_features=ImageSizeOptions.IMAGE_HEIGHT,
                                                     seq_len=ImageSizeOptions.SEQ_LENGTH,
-                                                    num_classes=ImageSizeOptions.TOTAL_LABELS)
+                                                    num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
+                                                    num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS)
     transducer_model.eval()
 
     if gpu_mode:
@@ -77,7 +78,8 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
             if gpu_mode:
                 hidden = hidden.cuda()
 
-            prediction_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_LABELS))
+            prediction_base_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_BASE_LABELS))
+            prediction_rle_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_RLE_LABELS))
 
             for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
                 if i + TrainOptions.TRAIN_WINDOW > ImageSizeOptions.SEQ_LENGTH:
@@ -88,31 +90,47 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
                 image_chunk = images[:, chunk_start:chunk_end]
 
                 # run inference
-                output_, hidden = transducer_model(image_chunk, hidden)
+                output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
 
                 # do softmax and get prediction
                 m = nn.Softmax(dim=2)
-                soft_probs = m(output_)
+                soft_probs = m(output_base)
                 output_preds = soft_probs.cpu()
-                max_value, predicted_label = torch.max(output_preds, dim=2)
+                base_max_value, predicted_base_label = torch.max(output_preds, dim=2)
 
                 # convert everything to list
-                max_value = max_value.numpy().tolist()
-                predicted_label = predicted_label.numpy().tolist()
+                base_max_value = base_max_value.numpy().tolist()
+                predicted_base_label = predicted_base_label.numpy().tolist()
 
-                assert(len(max_value) == len(predicted_label))
+                # do softmax and get prediction for rle
+                m_rle = nn.Softmax(dim=2)
+                rle_soft_probs = m_rle(output_rle)
+                rle_output_preds = rle_soft_probs.cpu()
+                rle_max_value, predicted_rle_labels = torch.max(rle_output_preds, dim=2)
 
-                for ii in range(0, len(predicted_label)):
+                # convert everything to list
+                rle_max_value = rle_max_value.numpy().tolist()
+                predicted_rle_labels = predicted_rle_labels.numpy().tolist()
+
+                assert(len(base_max_value) == len(predicted_base_label) == len(predicted_rle_labels))
+
+                for ii in range(0, len(predicted_base_label)):
                     chunk_pos = chunk_start
-                    for p, label in zip(max_value[ii], predicted_label[ii]):
-                        prediction_dict[ii][chunk_pos][label] += p
+                    for p_base, p_rle, base, rle in zip(base_max_value[ii],
+                                                        rle_max_value[ii],
+                                                        predicted_base_label[ii],
+                                                        predicted_rle_labels[ii]):
+                        prediction_base_dict[ii][chunk_pos][base] += p_base
+                        prediction_rle_dict[ii][chunk_pos][rle] += p_rle
                         chunk_pos += 1
-            predicted_labels = np.argmax(np.array(prediction_dict), axis=2)
+            predicted_base_labels = np.argmax(np.array(prediction_base_dict), axis=2)
+            predicted_rle_labels = np.argmax(np.array(prediction_rle_dict), axis=2)
 
             for i in range(images.size(0)):
                 chunk_prefix = '.'.join(chunk_name[i].split('.')[:-2])
                 chunk_suffix = '.'.join(chunk_name[i].split('.')[-2])
-                prediction_data_file.write_prediction(chromosome_name[i], chunk_prefix, chunk_suffix, position[i], index[i], predicted_labels[i])
+                prediction_data_file.write_prediction(chromosome_name[i], chunk_prefix, chunk_suffix, position[i],
+                                                      index[i], predicted_base_labels[i], predicted_rle_labels[i])
 
 
 def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode):

@@ -52,7 +52,7 @@ class DataStore(object):
         self._meta = self.meta
         self._meta.update(meta)
 
-    def write_train_summary(self, chromosome_name, image, position, index, label, summary_name):
+    def write_train_summary(self, chromosome_name, image, position, index, label_base, label_rle, summary_name):
         # if 'summary' not in self.meta:
         #     self.meta['summary'] = set()
 
@@ -63,6 +63,5 @@ class DataStore(object):
         self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'chromosome_name')] = chromosome_name
         self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'position')] = position
         self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'index')] = index
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'label')] = label
-
-
+        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'label_base')] = label_base
+        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'label_rle')] = label_rle

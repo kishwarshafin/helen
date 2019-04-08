@@ -17,10 +17,10 @@ class ModelHandler:
 
 
     @staticmethod
-    def get_new_gru_model(input_channels, image_features, gru_layers, hidden_size, num_classes=5):
+    def get_new_gru_model(input_channels, image_features, gru_layers, hidden_size, num_base_classes, num_rle_classes):
         # get a new model
-        transducer_model = TransducerGRU(input_channels, image_features, gru_layers, hidden_size, num_classes,
-                                         bidirectional=True)
+        transducer_model = TransducerGRU(input_channels, image_features, gru_layers, hidden_size, num_base_classes,
+                                         num_rle_classes, bidirectional=True)
         return transducer_model
 
     @staticmethod
@@ -84,7 +84,7 @@ class ModelHandler:
 
 
     @staticmethod
-    def load_simple_model_for_training(model_path, input_channels, image_features, seq_len, num_classes):
+    def load_simple_model_for_training(model_path, input_channels, image_features, seq_len, num_base_classes, num_rle_classes):
         checkpoint = torch.load(model_path, map_location='cpu')
         hidden_size = checkpoint['hidden_size']
         gru_layers = checkpoint['gru_layers']
@@ -94,7 +94,8 @@ class ModelHandler:
                                                           image_features=image_features,
                                                           gru_layers=gru_layers,
                                                           hidden_size=hidden_size,
-                                                          num_classes=num_classes)
+                                                          num_base_classes=num_base_classes,
+                                                          num_rle_classes=num_rle_classes)
         model_state_dict = checkpoint['model_state_dict']
 
         from collections import OrderedDict
