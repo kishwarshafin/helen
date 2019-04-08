@@ -84,7 +84,7 @@ def merge_dicts(d, d1):
     return d
 
 
-def write_to_file_parallel(input_files, hdf5_output_file_name, threads):
+def write_to_file_parallel(input_files, hdf5_output_file_name, threads, train_mode):
     label_count = defaultdict(int)
 
     with DataStore(hdf5_output_file_name, 'w') as ds:
@@ -102,18 +102,19 @@ def write_to_file_parallel(input_files, hdf5_output_file_name, threads):
                     sys.stderr.write(str(fut.exception()))
                 fut._result = None  # python issue 27144
 
-    print("THE LOSS-FUNCTION WEIGHTS SHOULD BE: ")
-    print("[", end='')
-    max_label, max_value = max(label_count.items(), key=operator.itemgetter(1))
-    for i in range(0, 81):
-        if i not in label_count.keys():
-            print(float(max_value), end='')
-        else:
-            print(float(max_value) / float(label_count[i]), end='')
+    if train_mode:
+        print("THE LOSS-FUNCTION WEIGHTS SHOULD BE: ")
+        print("[", end='')
+        max_label, max_value = max(label_count.items(), key=operator.itemgetter(1))
+        for i in range(0, 81):
+            if i not in label_count.keys():
+                print(float(max_value), end='')
+            else:
+                print(float(max_value) / float(label_count[i]), end='')
 
-        if i < 80:
-            print(', ', end='')
-    print("]")
+            if i < 80:
+                print(', ', end='')
+        print("]")
 
 
 def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_mode, threads):
@@ -129,16 +130,16 @@ def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_
         train_data_file_name = output_path + "train" + "_images_marginpolish" + ".hdf"
         sys.stderr.write("WRITING " + str(len(training_samples)) + " SAMPLES TO train_images_marginpolish.hdf\n")
 
-        write_to_file_parallel(training_samples, train_data_file_name, threads)
+        write_to_file_parallel(training_samples, train_data_file_name, threads, train_mode)
 
         test_data_file_name = output_path + "test" + "_images_marginpolish" + ".hdf"
         sys.stderr.write("WRITING " + str(len(testing_samples)) + " SAMPLES TO test_images_marginpolish.hdf\n")
 
-        write_to_file_parallel(testing_samples, test_data_file_name, threads)
+        write_to_file_parallel(testing_samples, test_data_file_name, threads, train_mode)
     else:
         train_data_file_name = output_path + "images_marginpolish" + ".hdf"
         sys.stderr.write("WRITING " + str(len(all_hdf5_file_paths)) + " SAMPLES TO images_marginpolish.hdf\n")
-        write_to_file_parallel(all_hdf5_file_paths, train_data_file_name, threads)
+        write_to_file_parallel(all_hdf5_file_paths, train_data_file_name, threads, train_mode)
 
 
 def write_to_file(all_hdf5_file_paths, hdf5_data_file):
