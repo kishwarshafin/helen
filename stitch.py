@@ -122,7 +122,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
     print("DONE GENERATING THE CHUNK SEQUENCES")
     # but you cant do this part in parallel, this has to be linear
-    chunk_names = sorted(sequence_chunk_keys)
+    chunk_names = sorted(chunk_name_to_sequence.keys())
     running_sequence = chunk_name_to_sequence[chunk_names[0]]
     running_start = int(chunk_names[0].split('-')[-2])
     running_end = int(chunk_names[0].split('-')[-1])
@@ -132,6 +132,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
         exit()
 
     for i in range(1, len(chunk_names)):
+        print(chunk_names[i])
         this_sequence = chunk_name_to_sequence[chunk_names[i]]
         this_start = int(chunk_names[i].split('-')[-2])
         this_end = int(chunk_names[i].split('-')[-1])
