@@ -10,8 +10,22 @@ import numpy as np
 from collections import  defaultdict
 import operator
 
-label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
 BASE_ERROR_RATE = 0.1
+
+
+def label_to_sequence(label):
+    if label == 0:
+        return ''
+    if label <= 20:
+        return 'A' * label
+    if label <= 40:
+        return 'C' * (label - 20)
+    if label <= 60:
+        return 'G' * (label - 40)
+    if label <= 80:
+        return 'T' * (label - 60)
+    else:
+        print("INVALID LABEL VALUE: ", label)
 
 
 def get_file_paths_from_directory(directory_path):
@@ -58,7 +72,7 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         pos_list = sorted(list(positions), key=lambda element: (element[0], element[1]))
         dict_fetch = operator.itemgetter(*pos_list)
         predicted_labels = list(dict_fetch(prediction_dict))
-        sequence = ''.join([label_decoder[x] for x in predicted_labels])
+        sequence = ''.join([label_to_sequence(x) for x in predicted_labels])
         name_sequence_tuples.append((chunk_name, sequence))
 
     hdf5_file.close()
@@ -139,6 +153,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
             running_sequence = left_sequence + right_sequence
             running_end = this_end
+
+    sys.stderr.write("SUCCESSFULLY CALLED CONSENSUS SEQUENCE" + "\n")
 
     return running_sequence
 

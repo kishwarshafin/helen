@@ -107,9 +107,10 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
     if gpu_mode:
         transducer_model = torch.nn.DataParallel(transducer_model).cuda()
 
-    class_weights = torch.Tensor(CLASS_WEIGHTS)
+    # class_weights = torch.Tensor(CLASS_WEIGHTS)
+    # not using class weights for the first pass
     # Loss
-    criterion = nn.CrossEntropyLoss(class_weights)
+    criterion = nn.CrossEntropyLoss()
 
     if gpu_mode is True:
         criterion = criterion.cuda()

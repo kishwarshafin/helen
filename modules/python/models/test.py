@@ -18,8 +18,26 @@ Input:
 Returns:
 - Loss value
 """
-CLASS_WEIGHTS = [0.3, 1.0, 1.0, 1.0, 1.0]
-label_decoder = {0: '*', 1: 'A', 2: 'C', 3: 'G', 4: 'T', 5: '#'}
+# CLASS_WEIGHTS = [0.3, 1.0, 1.0, 1.0, 1.0]
+
+
+def precision(label, confusion_matrix):
+    col = confusion_matrix[:, label]
+    return round(confusion_matrix[label, label] / max(1, col.sum()) , 3)
+
+
+def label_to_literal(label):
+    label_decoder = {'A': 0, 'C': 20, 'G': 40, 'T': 60, '_': 0}
+    if label == 0:
+        return '-', 0
+    if label <= 20:
+        return 'A', label
+    if label <= 40:
+        return 'C', label - 20
+    if label <= 60:
+        return 'G', label - 40
+
+    return 'T', label - 60
 
 
 def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size,
@@ -38,9 +56,9 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     # set the evaluation mode of the model
     transducer_model.eval()
 
-    class_weights = torch.Tensor(CLASS_WEIGHTS)
-    # Loss
-    criterion = nn.CrossEntropyLoss(class_weights)
+    # class_weights = torch.Tensor(CLASS_WEIGHTS)
+    # Loss not doing class weights for the first pass
+    criterion = nn.CrossEntropyLoss()
 
     if gpu_mode is True:
         criterion = criterion.cuda()
@@ -84,13 +102,20 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
                 pbar.update(1)
                 cm_value = confusion_matrix.value()
-                denom = (cm_value.sum() - cm_value[0][0]) if (cm_value.sum() - cm_value[0][0]) > 0 else 1.0
-                accuracy = 100.0 * (cm_value[1][1] + cm_value[2][2] + cm_value[3][3] + cm_value[4][4]) / denom
-                pbar.set_description("Accuracy: " + str(round(accuracy,5)))
+                denom = cm_value.sum()
+                corrects = 0
+                for label in range(0, ImageSizeOptions.TOTAL_LABELS):
+                    corrects = corrects + cm_value[label][label]
+                accuracy = 100.0 * (corrects / max(1.0, denom))
+                pbar.set_description("Accuracy: " + str(round(accuracy, 5)))
 
     avg_loss = total_loss / total_images if total_images else 0
+    np.set_printoptions(threshold=np.inf)
 
     sys.stderr.write(TextColor.YELLOW+'\nTest Loss: ' + str(avg_loss) + "\n"+TextColor.END)
-    sys.stderr.write("Confusion Matrix: \n" + str(confusion_matrix.conf) + "\n" + TextColor.END)
+    # sys.stderr.write("Confusion Matrix: \n" + str(class_error_meter.value()) + "\n" + TextColor.END)
+    sys.stderr.write("label\t\tprecision\n")
+    for label in range(0, ImageSizeOptions.TOTAL_LABELS):
+        sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")
 
     return {'loss': avg_loss, 'accuracy': accuracy, 'confusion_matrix': str(confusion_matrix.conf)}

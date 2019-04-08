@@ -34,9 +34,6 @@ Output:
 """
 
 
-label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
-
-
 def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu_mode):
     """
     Create a prediction table/dictionary of an images set using a trained model.

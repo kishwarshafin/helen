@@ -6,6 +6,9 @@ from os.path import isfile, join
 from os import listdir
 import concurrent.futures
 from modules.python.DataStore import DataStore
+from collections import defaultdict
+import numpy as np
+import operator
 
 
 def get_file_paths_from_directory(directory_path):
@@ -26,27 +29,36 @@ def chunks(file_names, threads):
     return chunks
 
 
+def decode_label(base, run_length):
+    label_decoder = {'A': 0, 'C': 20, 'G': 40, 'T': 60, '_': 0}
+    label = label_decoder[base]
+    if base != '_':
+        if int(run_length) == 0:
+            print("LABELING ERROR: RUN LEGTH >1 WHEN BASE IS NOT GAP")
+        label = label + int(run_length)
+
+    return label
+
+
 def file_reader_worker(file_names):
     gathered_values = []
+    total_counts = defaultdict(int)
     for hdf5_filename in file_names:
         hdf5_file = h5py.File(hdf5_filename, 'r')
-        label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
 
         chromosome_name = hdf5_filename.split('.')[-3].split("-")[0]
 
-        image_dataset = hdf5_file['simpleWeight']
+        image_dataset = hdf5_file['rleWeight']
         position_dataset = hdf5_file['position']
 
-        image = []
-        for image_line in image_dataset:
-            a_fwd, a_rev, c_fwd, c_rev, g_fwd, g_rev, t_fwd, t_rev, gap_fwd, gap_rev = list(image_line)
-            image.append([a_fwd, c_fwd, g_fwd, t_fwd, a_rev, c_rev, g_rev, t_rev, gap_fwd, gap_rev])
+        image = np.array(image_dataset, dtype=np.float)
 
         label = []
         if 'label' in hdf5_file.keys():
             label_dataset = hdf5_file['label']
-            for l in label_dataset:
-                label.append(label_decoder[chr(l[0])])
+            for base, run_length in label_dataset:
+                total_counts[decode_label(chr(base), run_length)] += 1
+                label.append(decode_label(chr(base), run_length))
 
         position = []
         index = []
@@ -54,22 +66,54 @@ def file_reader_worker(file_names):
             position.append(pos)
             index.append(indx)
         gathered_values.append((chromosome_name, image, position, index, label, hdf5_filename.split('/')[-1]))
-    return gathered_values
+    return gathered_values, total_counts
+
+
+def merge_dicts(d, d1):
+    '''
+    https://stackoverflow.com/questions/31216001/how-to-concatenate-or-combine-two-defaultdicts-of-defaultdicts-that-have-overlap
+    :param d:
+    :param d1:
+    :return:
+    '''
+    for k, v in d1.items():
+        if k in d:
+            d[k].update(d1[k])
+        else:
+            d[k] = d1[k]
+    return d
 
 
 def write_to_file_parallel(input_files, hdf5_output_file_name, threads):
+    label_count = defaultdict(int)
+
     with DataStore(hdf5_output_file_name, 'w') as ds:
         with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
             file_chunks = chunks(input_files, min(64, int(len(input_files) / threads) + 1))
             futures = [executor.submit(file_reader_worker, file_chunk) for file_chunk in file_chunks]
             for fut in concurrent.futures.as_completed(futures):
                 if fut.exception() is None:
-                    gathered_values = fut.result()
+                    gathered_values, label_dict = fut.result()
+                    label_count.update(label_dict)
+
                     for chromosome_name, image, position, index, label, summary_name in gathered_values:
                         ds.write_train_summary(chromosome_name, image, position, index, label, summary_name)
                 else:
-                    sys.stderr.write(fut.exception())
+                    sys.stderr.write(str(fut.exception()))
                 fut._result = None  # python issue 27144
+
+    print("THE LOSS-FUNCTION WEIGHTS SHOULD BE: ")
+    print("[", end='')
+    max_label, max_value = max(label_count.items(), key=operator.itemgetter(1))
+    for i in range(0, 81):
+        if i not in label_count.keys():
+            print(float(max_value), end='')
+        else:
+            print(float(max_value) / float(label_count[i]), end='')
+
+        if i < 80:
+            print(', ', end='')
+    print("]")
 
 
 def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_mode, threads):
