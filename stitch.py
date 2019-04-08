@@ -10,7 +10,7 @@ import numpy as np
 from collections import  defaultdict
 import operator
 
-BASE_ERROR_RATE = 0.1
+BASE_ERROR_RATE = 0.2
 
 
 def label_to_sequence(label):
@@ -120,6 +120,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
                 sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
             fut._result = None  # python issue 27144
 
+    print("DONE GENERATING THE CHUNK SEQUENCES")
     # but you cant do this part in parallel, this has to be linear
     chunk_names = sorted(sequence_chunk_keys)
     running_sequence = chunk_name_to_sequence[chunk_names[0]]
@@ -153,6 +154,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
             running_sequence = left_sequence + right_sequence
             running_end = this_end
+        else:
+            print("NO OVERLAP: POSSIBLE ERROR", chunk_names[i])
 
     sys.stderr.write("SUCCESSFULLY CALLED CONSENSUS SEQUENCE" + "\n")
 
