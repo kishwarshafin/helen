@@ -141,9 +141,9 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             overlap_bases = running_end - this_start
             overlap_bases = overlap_bases + int(overlap_bases * BASE_ERROR_RATE)
 
-            if overlap_bases < len(running_sequence):
+            if overlap_bases > len(running_sequence):
                 print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", overlap_bases, len(running_sequence))
-            if overlap_bases < len(this_sequence):
+            if overlap_bases > len(this_sequence):
                 print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", overlap_bases, len(this_sequence))
 
             sequence_suffix = running_sequence[-overlap_bases:]
