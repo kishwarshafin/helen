@@ -114,7 +114,7 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
     # not using class weights for the first pass
     # Loss
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.CrossEntropyLoss()
+    criterion_rle = nn.MultiMarginLoss()
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()
@@ -129,6 +129,8 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
     stats['accuracy_epoch'] = []
     sys.stderr.write(TextColor.BLUE + 'Start: ' + str(start_epoch + 1) + ' End: ' + str(epoch_limit) + "\n")
     for epoch in range(start_epoch, epoch_limit, 1):
+        total_loss_base = 0
+        total_loss_rle = 0
         total_loss = 0
         total_images = 0
         sys.stderr.write(TextColor.BLUE + 'Train epoch: ' + str(epoch + 1) + "\n")
@@ -168,21 +170,25 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
 
                     loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
                                                label_base_chunk.contiguous().view(-1))
-                    loss_rle = criterion_base(output_rle.contiguous().view(-1, num_rle_classes),
-                                              label_rle_chunk.contiguous().view(-1))
+                    loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
+                                             label_rle_chunk.contiguous().view(-1))
 
                     loss = loss_base + loss_rle
                     loss.backward()
                     model_optimizer.step()
 
                     total_loss += loss.item()
+                    total_loss_base += loss_base.item()
+                    total_loss_rle += loss_rle.item()
                     total_images += image_chunk.size(0)
 
                     hidden = hidden.detach()
 
                 # update the progress bar
                 avg_loss = (total_loss / total_images) if total_images else 0
-                progress_bar.set_description("Loss: " + str(avg_loss))
+                progress_bar.set_description("Base: " + str(round(total_loss_base, 4)) +
+                                             ", RLE: " + str(round(total_loss_rle, 4)) +
+                                             ", TOTAL: " + str(round(total_loss, 4)))
 
                 if train_mode is True:
                     train_loss_logger.write(str(epoch + 1) + "," + str(batch_no) + "," + str(avg_loss) + "\n")

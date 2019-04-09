@@ -59,7 +59,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     # class_weights = torch.Tensor(CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.CrossEntropyLoss()
+    criterion_rle = nn.MultiMarginLoss()
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()
@@ -71,6 +71,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     rle_confusion_matrix = meter.ConfusionMeter(num_rle_classes)
 
     total_loss = 0
+    total_loss_rle = 0
     total_images = 0
     accuracy = 0
 
@@ -100,8 +101,8 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
                     loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
                                                label_base_chunk.contiguous().view(-1))
-                    loss_rle = criterion_base(output_rle.contiguous().view(-1, num_rle_classes),
-                                              label_rle_chunk.contiguous().view(-1))
+                    loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
+                                             label_rle_chunk.contiguous().view(-1))
 
                     loss = loss_base + loss_rle
 
@@ -112,6 +113,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
                     total_loss += loss.item()
                     total_images += images.size(0)
+                    total_loss_rle += loss_rle.item()
 
                 pbar.update(1)
                 base_cm_value = base_confusion_matrix.value()
@@ -129,7 +131,9 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
                 base_accuracy = 100.0 * (base_corrects / max(1.0, base_denom))
                 rle_accuracy = 100.0 * (rle_corrects / max(1.0, rle_denom))
-                pbar.set_description("Base acc: " + str(round(base_accuracy, 4)) + ", RLE acc: " + str(round(rle_accuracy, 4)))
+                pbar.set_description("Base acc: " + str(round(base_accuracy, 4)) +
+                                     ", RLE acc: " + str(round(rle_accuracy, 4)) +
+                                     ", RLE loss: " + str(round(total_loss_rle, 4)))
 
     avg_loss = total_loss / total_images if total_images else 0
     np.set_printoptions(threshold=np.inf)

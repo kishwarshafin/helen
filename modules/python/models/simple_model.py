@@ -29,11 +29,11 @@ class TransducerGRU(nn.Module):
     def forward(self, x, hidden):
         hidden = hidden.transpose(0, 1).contiguous()
         # self.gru.flatten_parameters()
-        x_out, hidden_out = self.gru_encoder(x, hidden)
-        x_out, hidden_final = self.gru_decoder(x_out, hidden_out)
+        x_out_layer1, hidden_out_layer1 = self.gru_encoder(x, hidden)
+        x_out_final, hidden_final = self.gru_decoder(x_out_layer1, hidden_out_layer1)
 
-        base_out = self.dense1_base(x_out)
-        rle_out = self.dense2_rle(x_out)
+        base_out = self.dense1_base(x_out_final)
+        rle_out = self.dense2_rle(x_out_final)
         # x = self.dense2(x)
         # if self.bidirectional:
         #     output_rnn = output_rnn.contiguous()

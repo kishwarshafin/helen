@@ -45,7 +45,8 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_deta
                                                     input_channels=ImageSizeOptions.IMAGE_CHANNELS,
                                                     image_features=ImageSizeOptions.IMAGE_HEIGHT,
                                                     seq_len=ImageSizeOptions.SEQ_LENGTH,
-                                                    num_classes=ImageSizeOptions.TOTAL_LABELS)
+                                                    num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
+                                                    num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS)
 
     sys.stderr.write(TextColor.GREEN + "INFO: MODEL LOADED\n" + TextColor.END)
 
@@ -53,7 +54,8 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_deta
         transducer_model = torch.nn.DataParallel(transducer_model).cuda()
 
     stats_dictioanry = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
-                            gru_layers, hidden_size, num_classes=ImageSizeOptions.TOTAL_LABELS,
+                            gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
+                            num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS,
                             print_details=print_details)
 
     sys.stderr.write(TextColor.PURPLE + 'DONE\n' + TextColor.END)
