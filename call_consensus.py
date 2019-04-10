@@ -68,7 +68,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
     sys.stderr.write(TextColor.CYAN + 'MODEL LOADED\n')
 
     with torch.no_grad():
-        for images, position, index, chromosome_name, chunk_name in tqdm(test_loader, ncols=50):
+        for contig, contig_start, contig_end, chunk_id, images, position in tqdm(test_loader, ncols=50):
             if gpu_mode:
                 # encoder_hidden = encoder_hidden.cuda()
                 images = images.cuda()
@@ -127,10 +127,8 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
             predicted_rle_labels = np.argmax(np.array(prediction_rle_dict), axis=2)
 
             for i in range(images.size(0)):
-                chunk_prefix = '.'.join(chunk_name[i].split('.')[:-2])
-                chunk_suffix = '.'.join(chunk_name[i].split('.')[-2])
-                prediction_data_file.write_prediction(chromosome_name[i], chunk_prefix, chunk_suffix, position[i],
-                                                      index[i], predicted_base_labels[i], predicted_rle_labels[i])
+                prediction_data_file.write_prediction(contig[i], contig_start[i], contig_end[i], chunk_id[i],
+                                                      position[i], predicted_base_labels[i], predicted_rle_labels[i])
 
 
 def polish_genome(csv_file, model_path, batch_size, num_workers, output_dir, gpu_mode):

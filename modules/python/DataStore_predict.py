@@ -52,14 +52,15 @@ class DataStore(object):
         self._meta = self.meta
         self._meta.update(meta)
 
-    def write_prediction(self, chromosome_name, chunk_name_prefix, chunk_name_suffix, position, index, bases, rles):
-        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
+    def write_prediction(self, contig, contig_start, contig_end, chunk_id, position, predicted_bases, predicted_rles):
+        chunk_name_prefix = str(contig) + "-" + str(contig_start.item()) + "-" + str(contig_end.item())
+        chunk_name_suffix = str(chunk_id.item())
+
+        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
                                                   chunk_name_suffix, 'position')] = position
-        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
-                                                  chunk_name_suffix, 'index')] = index
-        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
-                                                  chunk_name_suffix, 'bases')] = bases
-        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, chromosome_name, chunk_name_prefix,
-                                                  chunk_name_suffix, 'rles')] = rles
+        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
+                                                  chunk_name_suffix, 'bases')] = predicted_bases
+        self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
+                                                  chunk_name_suffix, 'rles')] = predicted_rles
 
 

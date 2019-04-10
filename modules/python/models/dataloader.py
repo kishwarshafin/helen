@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
+import pandas as pd
 import torch
 
 
@@ -12,32 +13,39 @@ class SequenceDataset(Dataset):
         A CSV file path
     """
 
-    def __init__(self, hdf5_path, transform=None):
+    def __init__(self, csv_path, transform=None):
         self.transform = transforms.Compose([transforms.ToTensor()])
-        self.hdf_filepath = hdf5_path
-        hdf5_file = h5py.File(hdf5_path, 'r')
-        self.total_summary_keys = len(list(hdf5_file['summaries'].keys()))
-        hdf5_file.close()
+        data_frame = pd.read_csv(csv_path, header=None, dtype=str)
+        # assert data_frame[0].apply(lambda x: os.path.isfile(x.split(' ')[0])).all(), \
+        #     "Some images referenced in the CSV file were not found"
+        self.transform = transforms.Compose([transforms.ToTensor()])
+        self.file_info = list(data_frame[0])
 
     def __getitem__(self, index):
         # load the image
-        hdf5_file_ref = h5py.File(self.hdf_filepath, 'r')
-        key = list(hdf5_file_ref['summaries'].keys())[index]
-        hdf5_file = hdf5_file_ref['summaries'][key]
-
+        hdf5_file = h5py.File(self.file_info[index], 'r')
         image = hdf5_file['image']
         label_base = hdf5_file['label_base']
-        label_rle = hdf5_file['label_rle']
+        label_run_length = hdf5_file['label_run_length']
         # chromosome_name = hdf5_file['chromosome_name']
 
         image = torch.Tensor(image)
         # label = torch.(image).type(torch.DoubleStorage)
         label_base = np.array(label_base, dtype=np.int)
-        label_rle = np.array(label_rle, dtype=np.int)
+        label_run_length = np.array(label_run_length, dtype=np.int)
         # label = torch.from_numpy(label).type(torch.LongStorage)
-        hdf5_file_ref.close()
+        # A
+        label_base = np.where(label_base == 65, 1, label_base)
+        # C
+        label_base = np.where(label_base == 67, 2, label_base)
+        # G
+        label_base = np.where(label_base == 71, 3, label_base)
+        # T
+        label_base = np.where(label_base == 84, 4, label_base)
+        # GAP
+        label_base = np.where(label_base == 95, 0, label_base)
 
-        return image, label_base, label_rle
+        return image, label_base, label_run_length
 
     def __len__(self):
-        return self.total_summary_keys
+        return len(self.file_info)

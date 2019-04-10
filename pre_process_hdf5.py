@@ -1,14 +1,7 @@
-import h5py
 import argparse
 import sys
-from tqdm import tqdm
 from os.path import isfile, join
 from os import listdir
-import concurrent.futures
-from modules.python.DataStore import DataStore
-from collections import defaultdict
-import numpy as np
-import operator
 
 
 def get_file_paths_from_directory(directory_path):
@@ -21,107 +14,7 @@ def get_file_paths_from_directory(directory_path):
     return file_paths
 
 
-def chunks(file_names, threads):
-    """Yield successive n-sized chunks from l."""
-    chunks = []
-    for i in range(0, len(file_names), threads):
-        chunks.append(file_names[i:i + threads])
-    return chunks
-
-
-def decode_label(base, run_length):
-    label_decoder = {'A': 0, 'C': 20, 'G': 40, 'T': 60, '_': 0}
-    label = label_decoder[base]
-    if base != '_':
-        if int(run_length) == 0:
-            print("LABELING ERROR: RUN LEGTH >1 WHEN BASE IS NOT GAP")
-        label = label + int(run_length)
-
-    return label
-
-
-def file_reader_worker(file_names):
-    gathered_values = []
-    total_counts = defaultdict(int)
-    label_decoder = {'A': 1, 'C': 2, 'G': 3, 'T': 4, '_': 0}
-
-    for hdf5_filename in file_names:
-        hdf5_file = h5py.File(hdf5_filename, 'r')
-
-        chromosome_name = hdf5_filename.split('.')[-3].split("-")[0]
-
-        image_dataset = hdf5_file['rleWeight']
-        position_dataset = hdf5_file['position']
-
-        image = np.array(image_dataset, dtype=np.float)
-
-        label_base = []
-        label_rle = []
-        if 'label' in hdf5_file.keys():
-            label_dataset = hdf5_file['label']
-            for base, run_length in label_dataset:
-                total_counts[decode_label(chr(base), run_length)] += 1
-                label_base.append(label_decoder[chr(base)])
-                label_rle.append(run_length)
-
-        position = []
-        index = []
-        for pos, indx in position_dataset:
-            position.append(pos)
-            index.append(indx)
-        gathered_values.append((chromosome_name, image, position, index, label_base, label_rle, hdf5_filename.split('/')[-1]))
-    return gathered_values, total_counts
-
-
-def merge_dicts(d, d1):
-    '''
-    https://stackoverflow.com/questions/31216001/how-to-concatenate-or-combine-two-defaultdicts-of-defaultdicts-that-have-overlap
-    :param d:
-    :param d1:
-    :return:
-    '''
-    for k, v in d1.items():
-        if k in d:
-            d[k].update(d1[k])
-        else:
-            d[k] = d1[k]
-    return d
-
-
-def write_to_file_parallel(input_files, hdf5_output_file_name, threads, train_mode):
-    label_count = defaultdict(int)
-
-    with DataStore(hdf5_output_file_name, 'w') as ds:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
-            file_chunks = chunks(input_files, min(64, int(len(input_files) / threads) + 1))
-            futures = [executor.submit(file_reader_worker, file_chunk) for file_chunk in file_chunks]
-            for fut in concurrent.futures.as_completed(futures):
-                if fut.exception() is None:
-                    gathered_values, label_dict = fut.result()
-                    label_count.update(label_dict)
-
-                    for chromosome_name, image, position, index, label_base, label_rle, summary_name in gathered_values:
-                        ds.write_train_summary(chromosome_name, image, position, index, label_base, label_rle, summary_name)
-                else:
-                    sys.stderr.write(str(fut.exception()))
-                fut._result = None  # python issue 27144
-
-    if train_mode:
-        print("THE LOSS-FUNCTION WEIGHTS SHOULD BE: ")
-        print("[", end='')
-        max_label, max_value = max(label_count.items(), key=operator.itemgetter(1))
-        for i in range(0, 81):
-            if i not in label_count.keys():
-                print(float(max_value), end='')
-            else:
-                print(float(max_value) / float(label_count[i]), end='')
-
-            if i < 80:
-                print(', ', end='')
-        print("]")
-
-
-def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_mode, threads):
+def create_csv_file(marginpolish_output_directory, output_path, train_mode):
     all_hdf5_file_paths = sorted(get_file_paths_from_directory(marginpolish_output_directory))
 
     if train_mode:
@@ -131,19 +24,26 @@ def process_marginpolish_h5py(marginpolish_output_directory, output_path, train_
         training_samples = all_hdf5_file_paths[:selected_training_samples]
         testing_samples = all_hdf5_file_paths[selected_training_samples:]
 
-        train_data_file_name = output_path + "train" + "_images_marginpolish" + ".hdf"
-        sys.stderr.write("WRITING " + str(len(training_samples)) + " SAMPLES TO train_images_marginpolish.hdf\n")
+        train_data_file_name = output_path + "train" + "_images_marginpolish" + ".csv"
+        sys.stderr.write("WRITING " + str(len(training_samples)) + " SAMPLES TO train_images_marginpolish.csv\n")
 
-        write_to_file_parallel(training_samples, train_data_file_name, threads, train_mode)
+        train_data_file = open(train_data_file_name, mode='w')
+        output_str = '\n'.join(training_samples)
+        train_data_file.write(output_str)
 
-        test_data_file_name = output_path + "test" + "_images_marginpolish" + ".hdf"
-        sys.stderr.write("WRITING " + str(len(testing_samples)) + " SAMPLES TO test_images_marginpolish.hdf\n")
+        test_data_file_name = output_path + "test" + "_images_marginpolish" + ".csv"
+        sys.stderr.write("WRITING " + str(len(testing_samples)) + " SAMPLES TO test_images_marginpolish.csv\n")
 
-        write_to_file_parallel(testing_samples, test_data_file_name, threads, train_mode)
+        test_data_file = open(test_data_file_name, mode='w')
+        output_str = '\n'.join(testing_samples)
+        test_data_file.write(output_str)
     else:
-        train_data_file_name = output_path + "images_marginpolish" + ".hdf"
-        sys.stderr.write("WRITING " + str(len(all_hdf5_file_paths)) + " SAMPLES TO images_marginpolish.hdf\n")
-        write_to_file_parallel(all_hdf5_file_paths, train_data_file_name, threads, train_mode)
+        test_data_file_name = output_path + "images_marginpolish" + ".csv"
+        sys.stderr.write("WRITING " + str(len(all_hdf5_file_paths)) + " SAMPLES TO images_marginpolish.csv\n")
+
+        test_data_file = open(test_data_file_name, mode='w')
+        output_str = '\n'.join(all_hdf5_file_paths)
+        test_data_file.write(output_str)
 
 
 if __name__ == '__main__':
@@ -152,22 +52,16 @@ if __name__ == '__main__':
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--marginpolish_h5py_dir",
+        "--h5py_dir",
         type=str,
         required=True,
         help="H5PY file generated by HELEN."
     )
     parser.add_argument(
-        "--output_h5py_dir",
+        "--output_dir",
         type=str,
         required=True,
         help="H5PY file generated by MEDAKA."
-    )
-    parser.add_argument(
-        "--threads",
-        type=int,
-        default=5,
-        help="Number of maximum threads for this region."
     )
     parser.add_argument(
         "--train_mode",
@@ -177,5 +71,4 @@ if __name__ == '__main__':
     )
 
     FLAGS, unparsed = parser.parse_known_args()
-    process_marginpolish_h5py(FLAGS.marginpolish_h5py_dir, FLAGS.output_h5py_dir, FLAGS.train_mode, FLAGS.threads)
-    # read_marginpolish_h5py(FLAGS.marginpolish_h5py_dir, FLAGS.output_h5py_dir, FLAGS.train_mode, FLAGS.threads)
+    create_csv_file(FLAGS.h5py_dir, FLAGS.output_dir, FLAGS.train_mode)

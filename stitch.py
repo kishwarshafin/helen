@@ -40,26 +40,27 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
     for chunk_name in small_chunk_keys:
         smaller_chunks = list(hdf5_file['predictions'][contig][chunk_name].keys())
 
-        positions = set()
+        all_positions = set()
         base_prediction_dict = defaultdict()
         rle_prediction_dict = defaultdict()
         for chunk in smaller_chunks:
             bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases']
             rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles']
-            index = hdf5_file['predictions'][contig][chunk_name][chunk]['index']
-            position = hdf5_file['predictions'][contig][chunk_name][chunk]['position']
-            position = np.array(position, dtype=np.int64)
-            index = np.array(index, dtype=np.int)
+
+            positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position']
+            positions = np.array(positions, dtype=np.int64)
             base_predictions = np.array(bases, dtype=np.int)
             rle_predictions = np.array(rles, dtype=np.int)
 
-            for pos, indx, base_pred, rle_pred in zip(position, index, base_predictions, rle_predictions):
+            for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
+                indx = position[1]
+                pos = position[0]
                 if (pos, indx) not in base_prediction_dict:
                     base_prediction_dict[(pos, indx)] = base_pred
                     rle_prediction_dict[(pos, indx)] = rle_pred
-                    positions.add((pos, indx))
+                    all_positions.add((pos, indx))
 
-        pos_list = sorted(list(positions), key=lambda element: (element[0], element[1]))
+        pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1]))
         dict_fetch = operator.itemgetter(*pos_list)
         predicted_base_labels = list(dict_fetch(base_prediction_dict))
         predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
@@ -114,7 +115,10 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
     print("DONE GENERATING THE CHUNK SEQUENCES")
     # but you cant do this part in parallel, this has to be linear
-    chunk_names = sorted(chunk_name_to_sequence.keys())
+    chunk_names = [(str(x.split('-')[0]), int(x.split('-')[1]), int(x.split('-')[2])) for x in sequence_chunk_keys]
+    chunk_names = sorted(chunk_names, key=lambda element: (element[1], element[2]))
+    chunk_names = ['-'.join([x, str(y), str(z)]) for x, y, z in chunk_names]
+
     running_sequence = chunk_name_to_sequence[chunk_names[0]]
     running_start = int(chunk_names[0].split('-')[-2])
     running_end = int(chunk_names[0].split('-')[-1])
