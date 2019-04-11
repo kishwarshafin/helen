@@ -144,5 +144,5 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     # for label in range(0, ImageSizeOptions.TOTAL_LABELS):
     #     sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")
 
-    return {'loss': avg_loss, 'accuracy': accuracy, 'base_confusion_matrix': str(base_confusion_matrix.conf),
-            'rle_confusion_matrix': str(rle_confusion_matrix.conf)}
+    return {'loss': avg_loss, 'accuracy': accuracy, 'base_confusion_matrix': base_confusion_matrix.conf,
+            'rle_confusion_matrix': rle_confusion_matrix.conf}

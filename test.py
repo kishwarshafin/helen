@@ -1,6 +1,9 @@
 import argparse
 import os
 import sys
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 import torch
 import torch.nn.parallel
@@ -19,6 +22,72 @@ Input:
 Output:
 - A trained model
 """
+
+
+def save_rle_confusion_matrix(stats_dictionary):
+    # plot confusion matrix
+    fig, ax = plt.subplots(figsize=(20, 20))
+    cf = np.array(stats_dictionary['rle_confusion_matrix'], dtype=np.int)
+    im = ax.imshow(cf)
+    rle_labels = [str(i) for i in range(0, ImageSizeOptions.TOTAL_RLE_LABELS)]
+
+    # We want to show all ticks...
+    ax.set_xticks(np.arange(len(rle_labels)))
+    ax.set_yticks(np.arange(len(rle_labels)))
+    # ... and label them with the respective list entries
+    ax.set_xticklabels(rle_labels)
+    ax.set_yticklabels(rle_labels)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(len(rle_labels)):
+        for j in range(len(rle_labels)):
+            if cf[i, j] > 0:
+                if i == j:
+                    text = ax.text(j, i, cf[i, j], ha="center", va="center", color="g")
+                else:
+                    text = ax.text(j, i, cf[i, j], ha="center", va="center", color="r")
+
+    ax.set_title("RLE Confusion Matrix")
+    fig.tight_layout()
+    # plt.show()
+    plt.savefig("RLE_CONFUSION_MATRIX.png", dpi=100)
+
+
+def save_base_confusion_matrix(stats_dictionary):
+    # plot confusion matrix
+    fig, ax = plt.subplots(figsize=(5, 5))
+    cf = np.array(stats_dictionary['base_confusion_matrix'], dtype=np.int)
+    im = ax.imshow(cf)
+    base_labels = [str(i) for i in ['-', 'A', 'C', 'T', 'G']]
+
+    # We want to show all ticks...
+    ax.set_xticks(np.arange(len(base_labels)))
+    ax.set_yticks(np.arange(len(base_labels)))
+    # ... and label them with the respective list entries
+    ax.set_xticklabels(base_labels)
+    ax.set_yticklabels(base_labels)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(len(base_labels)):
+        for j in range(len(base_labels)):
+            if cf[i, j] > 0:
+                if i == j:
+                    text = ax.text(j, i, cf[i, j], ha="center", va="center", color="g")
+                else:
+                    text = ax.text(j, i, cf[i, j], ha="center", va="center", color="r")
+
+    ax.set_title("BASE Confusion Matrix")
+    fig.tight_layout()
+    # plt.show()
+    plt.savefig("BASE_CONFUSION_MATRIX.png", dpi=100)
 
 
 def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_details):
@@ -53,12 +122,13 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_deta
     if gpu_mode:
         transducer_model = torch.nn.DataParallel(transducer_model).cuda()
 
-    stats_dictioanry = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
+    stats_dictionary = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
                             gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
                             num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS,
                             print_details=print_details)
 
-    print(stats_dictioanry['rle_confusion_matrix'])
+    save_rle_confusion_matrix(stats_dictionary)
+    save_base_confusion_matrix(stats_dictionary)
 
     sys.stderr.write(TextColor.PURPLE + 'DONE\n' + TextColor.END)
 
