@@ -58,6 +58,8 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_deta
                             num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS,
                             print_details=print_details)
 
+    print(stats_dictioanry['rle_confusion_matrix'])
+
     sys.stderr.write(TextColor.PURPLE + 'DONE\n' + TextColor.END)
 
 
