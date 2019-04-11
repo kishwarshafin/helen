@@ -217,7 +217,7 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                             hidden_size, gru_layers, epoch, model_dir + "_epoch_" + str(epoch + 1) + '_checkpoint.pkl')
 
             test_loss_logger.write(str(epoch + 1) + "," + str(stats['loss']) + "," + str(stats['accuracy']) + "\n")
-            confusion_matrix_logger.write(str(epoch + 1) + "\n" + str(stats_dictionary['confusion_matrix']) + "\n")
+            confusion_matrix_logger.write(str(epoch + 1) + "\n" + str(stats_dictionary['base_confusion_matrix']) + "\n")
             train_loss_logger.flush()
             test_loss_logger.flush()
             confusion_matrix_logger.flush()
