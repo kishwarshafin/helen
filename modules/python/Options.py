@@ -22,7 +22,7 @@ class ImageSizeOptions(object):
     LABEL_LENGTH = SEQ_LENGTH
 
     TOTAL_BASE_LABELS = 5
-    TOTAL_RLE_LABELS = 20
+    TOTAL_RLE_LABELS = 50
 
 
 class TrainOptions(object):
