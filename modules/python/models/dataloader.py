@@ -47,11 +47,6 @@ class SequenceDataset(Dataset):
         # Ns, need to fix the Bed2Fastq to not give sequences that have Ns in it.
         label_base = np.where(label_base == 78, 0, label_base)
 
-        for l in label_run_length:
-            if l[0] >= 50:
-                raise ValueError("ERROR: INVALID LABEL: " + str(l[0]) +
-                                 "ENCOUNTERED IN: " + str(self.file_info[index]) + "\n")
-
         return image, label_base, label_run_length
 
     def __len__(self):
