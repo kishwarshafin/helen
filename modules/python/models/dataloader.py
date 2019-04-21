@@ -44,6 +44,8 @@ class SequenceDataset(Dataset):
         label_base = np.where(label_base == 84, 4, label_base)
         # GAP
         label_base = np.where(label_base == 95, 0, label_base)
+        # Ns, need to fix the Bed2Fastq to not give sequences that have Ns in it.
+        label_base = np.where(label_base == 78, 0, label_base)
 
         return image, label_base, label_run_length
 

@@ -33,7 +33,8 @@ def get_file_paths_from_directory(directory_path):
     :param directory_path: Path to the directory
     :return: A list of paths of files
     """
-    file_paths = [join(directory_path, file) for file in listdir(directory_path) if isfile(join(directory_path, file)) and file[-2:] == 'h5']
+    file_paths = [join(directory_path, file) for file in listdir(directory_path) if isfile(join(directory_path, file))
+                  and file[-2:] == 'h5']
     return file_paths
 
 
@@ -52,29 +53,6 @@ def process_marginpolish_data(marginpolish_output_directory, csv_output_dir):
     test_file_csv = open(csv_output_dir + "test.csv", 'w')
     for sample in testing_samples:
         test_file_csv.write(sample + "\n")
-
-
-def create_consensus():
-    for chromosome in chromosome_list:
-        pos_list = list(position_dict[chromosome])
-        pos_list = sorted(list(pos_list), key=lambda element: (element[0], element[1], element[2]))
-
-        chr_prev, pos_prev, indx_prev = pos_list[0]
-        for i in range(1, len(pos_list)):
-            chr, pos, indx = pos_list[i]
-            if indx > 0:
-                continue
-            else:
-                if pos - pos_prev != 1:
-                    print(pos_prev, pos)
-                    exit()
-                chr_prev, pos_prev, indx_prev = pos_list[i]
-        dict_fetch = operator.itemgetter(*pos_list)
-        predicted_labels = list(dict_fetch(prediction_dict))
-        predicted_labels = np.argmax(np.array(predicted_labels), axis=1).tolist()
-        sequence = ''.join([label_decoder[x] for x in predicted_labels])
-        print(sequence)
-        exit()
 
 
 if __name__ == '__main__':
