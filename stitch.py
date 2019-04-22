@@ -123,9 +123,9 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
     running_start = int(chunk_names[0].split('-')[-2])
     running_end = int(chunk_names[0].split('-')[-1])
 
-    if len(running_sequence) < 500:
-        sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
-        exit()
+    # if len(running_sequence) < 500:
+    #     sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
+    #     exit()
 
     for i in range(1, len(chunk_names)):
         this_sequence = chunk_name_to_sequence[chunk_names[i]]
