@@ -157,7 +157,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             running_sequence = left_sequence + right_sequence
             running_end = this_end
         else:
-            print("NO OVERLAP: POSSIBLE ERROR", chunk_names[i])
+            print("NO OVERLAP: POSSIBLE ERROR", chunk_names[i], this_start, running_end)
+            exit()
 
     sys.stderr.write("SUCCESSFULLY CALLED CONSENSUS SEQUENCE" + "\n")
 
