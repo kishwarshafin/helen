@@ -12,7 +12,7 @@ def fix_vcf(input_vcf, output_vcf):
 
     for record in records:
         for sample in record.samples:
-            input_ps = record.samples[sample]['PS']
+            input_ps = str(record.samples[sample]['PS'])
 
             if input_ps not in PS_dictionary:
                 PS_dictionary = PS_value
