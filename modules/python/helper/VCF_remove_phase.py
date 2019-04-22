@@ -7,7 +7,7 @@ def fix_vcf(input_vcf, output_vcf):
     vcf_in = pysam.VariantFile(input_vcf)
     vcf_out = pysam.VariantFile(output_vcf, 'w', header=vcf_in.header)
     records = vcf_in.fetch()
-    PS_dictionary = defaultdict(int)
+    PS_dictionary = defaultdict(str)
     PS_value = 100
 
     for record in records:
@@ -15,7 +15,7 @@ def fix_vcf(input_vcf, output_vcf):
             input_ps = str(record.samples[sample]['PS'])
 
             if input_ps not in PS_dictionary:
-                PS_dictionary = PS_value
+                PS_dictionary = str(PS_value)
                 PS_value += 50
 
             record.samples[sample]['PS'] = str(PS_value)
