@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import torch
+from modules.python.Options import ImageSizeOptions
 
 
 class SequenceDataset(Dataset):
@@ -41,10 +42,15 @@ class SequenceDataset(Dataset):
         normalization = torch.Tensor(normalization)
         image = torch.cat((rle_predictions, normalization, image), 1)
 
-        if image.size()[0] != 1000 or image.size()[1] != 404:
-            raise ValueError("INVALID IMAGE SIZE: " + str(image.size()) + " " + str(self.file_info[index]) + "\n")
-
         position = np.array(position, dtype=np.int)
+
+        if image.size(0) < 1000:
+            total_empty_needed = 1000 - image.size(0)
+            empty_image_columns = torch.Tensor(np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed))
+            image = torch.cat((image, empty_image_columns), 0)
+
+            empty_positions = np.array([[-1, -1]] * total_empty_needed)
+            np.append(position, empty_positions, 0)
 
         return contig, contig_start, contig_end, chunk_id, image, position
 

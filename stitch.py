@@ -55,6 +55,8 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
             for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
                 indx = position[1]
                 pos = position[0]
+                if indx < 0 or pos < 0:
+                    continue
                 if (pos, indx) not in base_prediction_dict:
                     base_prediction_dict[(pos, indx)] = base_pred
                     rle_prediction_dict[(pos, indx)] = rle_pred
