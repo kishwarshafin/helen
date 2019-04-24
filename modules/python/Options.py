@@ -15,19 +15,19 @@ class CandidateFinderOptions(object):
 
 
 class ImageSizeOptions(object):
-    IMAGE_HEIGHT = 162
+    IMAGE_HEIGHT = 404
     IMAGE_CHANNELS = 1
     SEQ_LENGTH = 1000
     SEQ_OVERLAP = 200
     LABEL_LENGTH = SEQ_LENGTH
 
     TOTAL_BASE_LABELS = 5
-    TOTAL_RLE_LABELS = 101
+    TOTAL_RLE_LABELS = 50
 
 
 class TrainOptions(object):
-    TRAIN_WINDOW = 100
-    WINDOW_JUMP = 50
+    TRAIN_WINDOW = 200
+    WINDOW_JUMP = 100
     GRU_LAYERS = 1
     HIDDEN_SIZE = 256
 

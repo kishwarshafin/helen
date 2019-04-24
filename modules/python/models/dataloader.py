@@ -27,9 +27,14 @@ class SequenceDataset(Dataset):
         image = hdf5_file['image']
         label_base = hdf5_file['label_base']
         label_run_length = hdf5_file['label_run_length']
+        rle_predictions = hdf5_file['bayesian_run_length_prediction']
+        normalization = hdf5_file['normalization']
         # chromosome_name = hdf5_file['chromosome_name']
-
+        rle_predictions = torch.Tensor(rle_predictions).view(-1, 1)
         image = torch.Tensor(image)
+        normalization = torch.Tensor(normalization)
+        # cat the features
+        image = torch.cat((rle_predictions, normalization, image), 1)
         # label = torch.(image).type(torch.DoubleStorage)
         label_base = np.array(label_base, dtype=np.int)
         label_run_length = np.array(label_run_length, dtype=np.int)
