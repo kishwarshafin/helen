@@ -43,8 +43,6 @@ class SequenceDataset(Dataset):
         image = torch.cat((rle_predictions, normalization, image), 1)
 
         position = np.array(position, dtype=np.int)
-        print(image.size())
-        exit()
 
         if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.size(0)
@@ -52,7 +50,7 @@ class SequenceDataset(Dataset):
             image = torch.cat((image, empty_image_columns), 0)
 
             empty_positions = np.array([[-1, -1]] * total_empty_needed)
-            np.append(position, empty_positions, 0)
+            position = np.append(position, empty_positions, 0)
 
         if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
             raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.size()))
