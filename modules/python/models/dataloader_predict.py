@@ -28,13 +28,22 @@ class SequenceDataset(Dataset):
         # this needs to change
         contig = file_name.split('.')[-3].split('-')[0]
 
-        contig_start = hdf5_file['contig_start'][0]
-        contig_end = hdf5_file['contig_end'][0]
-        chunk_id = hdf5_file['feature_chunk_idx'][0]
+        contig_start = hdf5_file['contig_start'][0].astype(np.int)
+        contig_end = hdf5_file['contig_end'][0].astype(np.int)
+        chunk_id = hdf5_file['feature_chunk_idx'][0].astype(np.int)
         image = hdf5_file['image']
+        rle_predictions = hdf5_file['bayesian_run_length_prediction']
+        normalization = hdf5_file['normalization']
         position = hdf5_file['position']
 
+        rle_predictions = torch.Tensor(rle_predictions).view(-1, 1)
         image = torch.Tensor(image)
+        normalization = torch.Tensor(normalization)
+        image = torch.cat((rle_predictions, normalization, image), 1)
+
+        if image.size()[0] != 1000 or image.size()[1] != 404:
+            raise ValueError("INVALID IMAGE SIZE: " + str(image.size()) + " " + str(self.file_info[index]) + "\n")
+
         position = np.array(position, dtype=np.int)
 
         return contig, contig_start, contig_end, chunk_id, image, position
