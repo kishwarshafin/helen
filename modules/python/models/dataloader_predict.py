@@ -44,13 +44,18 @@ class SequenceDataset(Dataset):
 
         position = np.array(position, dtype=np.int)
 
-        if image.size(0) < 1000:
-            total_empty_needed = 1000 - image.size(0)
+        if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
+            total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.size(0)
             empty_image_columns = torch.Tensor(np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed))
             image = torch.cat((image, empty_image_columns), 0)
 
             empty_positions = np.array([[-1, -1]] * total_empty_needed)
             np.append(position, empty_positions, 0)
+
+        if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
+            print()
+            raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.size()))
+
 
         return contig, contig_start, contig_end, chunk_id, image, position
 
