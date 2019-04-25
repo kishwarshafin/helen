@@ -33,14 +33,9 @@ class SequenceDataset(Dataset):
         contig_end = hdf5_file['contig_end'][0].astype(np.int)
         chunk_id = hdf5_file['feature_chunk_idx'][0].astype(np.int)
         image = hdf5_file['image']
-        rle_predictions = hdf5_file['bayesian_run_length_prediction']
-        normalization = hdf5_file['normalization']
         position = hdf5_file['position']
 
-        rle_predictions = torch.Tensor(rle_predictions).view(-1, 1)
         image = torch.Tensor(image)
-        normalization = torch.Tensor(normalization)
-        image = torch.cat((rle_predictions, normalization, image), 1)
 
         position = np.array(position, dtype=np.int)
 
