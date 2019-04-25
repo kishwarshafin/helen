@@ -15,7 +15,7 @@ class CandidateFinderOptions(object):
 
 
 class ImageSizeOptions(object):
-    IMAGE_HEIGHT = 404
+    IMAGE_HEIGHT = 114
     IMAGE_CHANNELS = 1
     SEQ_LENGTH = 1000
     SEQ_OVERLAP = 200
