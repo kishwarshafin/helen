@@ -78,6 +78,10 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     with torch.no_grad():
         with tqdm(total=len(test_loader), desc='Accuracy: ', leave=True, ncols=100) as pbar:
             for ii, (images, label_base, label_rle) in enumerate(test_loader):
+                images = images.type(torch.FloatTensor)
+                label_base = label_base.type(torch.LongTensor)
+                label_rle = label_rle.type(torch.LongTensor)
+
                 if gpu_mode:
                     # encoder_hidden = encoder_hidden.cuda()
                     images = images.cuda()
@@ -141,7 +145,8 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     np.set_printoptions(threshold=np.inf)
 
     sys.stderr.write(TextColor.YELLOW+'\nTest Loss: ' + str(avg_loss) + "\n"+TextColor.END)
-    # sys.stderr.write("Confusion Matrix: \n" + str(rle_confusion_matrix.value()) + "\n" + TextColor.END)
+    sys.stderr.write(TextColor.BLUE + "Base Confusion Matrix: \n" + str(base_confusion_matrix.value()) + "\n" + TextColor.END)
+    sys.stderr.write(TextColor.RED + "RLE Confusion Matrix: \n" + str(rle_confusion_matrix.value()) + "\n" + TextColor.END)
     # sys.stderr.write("label\t\tprecision\n")
     # for label in range(0, ImageSizeOptions.TOTAL_LABELS):
     #     sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")

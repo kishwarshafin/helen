@@ -145,6 +145,9 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
                 #     print(label.item(), end='')
                 # print()
                 # analyze_tensor(images[0])
+                images = images.type(torch.FloatTensor)
+                label_base = label_base.type(torch.LongTensor)
+                label_rle = label_rle.type(torch.LongTensor)
 
                 if gpu_mode:
                     # encoder_hidden = encoder_hidden.cuda()
