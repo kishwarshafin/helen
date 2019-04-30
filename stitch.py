@@ -9,6 +9,7 @@ import concurrent.futures
 import numpy as np
 from collections import  defaultdict
 import operator
+from modules.python.TextColor import TextColor
 
 BASE_ERROR_RATE = 0.2
 label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
@@ -123,7 +124,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
     # but you cant do this part in parallel, this has to be linear
     sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
-
+    sys.stderr.write(TextColor.GREEN + "INFO: CONTIG " + str(contig) + " POLISHING COMPLETE, STITCHING SEQUENCES\n"
+                     + TextColor.END)
     _, running_start, running_end = sequence_chunks[0]
     running_sequence = chunk_name_to_sequence[(contig, running_start, running_end)]
     # if len(running_sequence) < 500:
@@ -133,17 +135,17 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
     for i in range(1, len(sequence_chunks)):
         _, this_start, this_end = sequence_chunks[i]
         this_sequence = chunk_name_to_sequence[(contig, this_start, this_end)]
-        print(this_start, this_end)
-
         if this_start < running_end:
             # overlap
             overlap_bases = running_end - this_start
             overlap_bases = overlap_bases + int(overlap_bases * BASE_ERROR_RATE)
 
-            if overlap_bases > len(running_sequence):
-                print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", sequence_chunks[i], running_end, this_end, overlap_bases, len(running_sequence))
-            if overlap_bases > len(this_sequence):
-                print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", sequence_chunks[i], running_end, this_end, overlap_bases, len(this_sequence))
+            # if overlap_bases > len(running_sequence):
+            #     print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", sequence_chunks[i],
+            # running_end, this_end, overlap_bases, len(running_sequence))
+            # if overlap_bases > len(this_sequence):
+            #     print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", sequence_chunks[i],
+            # running_end, this_end, overlap_bases, len(this_sequence))
 
             sequence_suffix = running_sequence[-overlap_bases:]
             sequence_prefix = this_sequence[:overlap_bases]
@@ -151,7 +153,8 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             pos_a, pos_b = get_confident_positions(alignments[0][0], alignments[0][1])
 
             if pos_a == -1 or pos_b == -1:
-                sys.stderr.write("ERROR: INVALID OVERLAPS: " + str(alignments[0]) + str(sequence_chunks[i])  + "\n")
+                sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAPS: " + str(alignments[0])
+                                 + str(sequence_chunks[i]) + "\n" + TextColor.END)
                 return None
 
             left_sequence = running_sequence[:-(overlap_bases-pos_a)]
@@ -160,10 +163,9 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             running_sequence = left_sequence + right_sequence
             running_end = this_end
         else:
-            print("NO OVERLAP: POSSIBLE ERROR", sequence_chunks[i], contig, this_start, running_end, sequence_chunks[i])
-            exit()
-
-    sys.stderr.write("SUCCESSFULLY CALLED CONSENSUS SEQUENCE" + "\n")
+            sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAP: POSSIBLE ERROR" + str(sequence_chunks[i])
+                             + " " + str(contig) + " " + str(this_start) + " " + str(running_end) + " "
+                             + str(sequence_chunks[i]))
 
     return running_sequence
 
@@ -174,10 +176,14 @@ def process_marginpolish_h5py(hdf_file_path, output_path, threads):
 
     consensus_fasta_file = open(output_path+'consensus.fa', 'w')
     for contig in contigs:
+        sys.stderr.write(TextColor.YELLOW + "INFO: PROCESSING CONTIG: " + contig + "\n")
+
         with h5py.File(hdf_file_path, 'r') as hdf5_file:
             chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
 
         consensus_sequence = create_consensus_sequence(hdf_file_path, contig, chunk_keys, threads)
+        sys.stderr.write(TextColor.BLUE + "INFO: FINISHED PROCESSING " + contig + ", POLISHED SEQUENCE LENGTH: "
+                         + str(len(consensus_sequence)) + ".\n" + TextColor.END)
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")
             consensus_fasta_file.write(consensus_sequence+"\n")
