@@ -38,9 +38,12 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
     name_sequence_tuples = list()
 
     for chunk_name in small_chunk_keys:
+        with h5py.File(file_name, 'r') as hdf5_file:
+            contig_start = hdf5_file['predictions'][contig][chunk_name]['contig_start'][()]
+            contig_end = hdf5_file['predictions'][contig][chunk_name]['contig_end'][()]
 
         with h5py.File(file_name, 'r') as hdf5_file:
-            smaller_chunks = list(hdf5_file['predictions'][contig][chunk_name].keys())
+            smaller_chunks = set(hdf5_file['predictions'][contig][chunk_name].keys()) - {'contig_start', 'contig_end'}
 
         all_positions = set()
         base_prediction_dict = defaultdict()
@@ -72,7 +75,7 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
         sequence = ''.join([label_decoder[base] * int(rle) for base, rle in zip(predicted_base_labels,
                                                                                 predicted_rle_labels)])
-        name_sequence_tuples.append((chunk_name, sequence))
+        name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
 
     return name_sequence_tuples
 
@@ -102,7 +105,7 @@ def get_confident_positions(alignment_a, alignment_b):
 
 def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threads):
     chunk_name_to_sequence = defaultdict()
-
+    sequence_chunks = list()
     # generate the dictionary in parallel
     with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
         file_chunks = chunks(sequence_chunk_keys, int(len(sequence_chunk_keys) / threads) + 1)
@@ -111,30 +114,26 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
         for fut in concurrent.futures.as_completed(futures):
             if fut.exception() is None:
                 name_sequence_tuples = fut.result()
-                for chunk_name, chunk_sequence in name_sequence_tuples:
-                    chunk_name_to_sequence[chunk_name] = chunk_sequence
+                for contig, contig_start, contig_end, sequence in name_sequence_tuples:
+                    chunk_name_to_sequence[(contig, contig_start, contig_end)] = sequence
+                    sequence_chunks.append((contig, contig_start, contig_end))
             else:
                 sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
             fut._result = None  # python issue 27144
 
-    print("DONE GENERATING THE CHUNK SEQUENCES")
     # but you cant do this part in parallel, this has to be linear
-    chunk_names = [(str(x.split('-')[0]), int(x.split('-')[1]), int(x.split('-')[2])) for x in sequence_chunk_keys]
-    chunk_names = sorted(chunk_names, key=lambda element: (element[1], element[2]))
-    chunk_names = ['-'.join([x, str(y), str(z)]) for x, y, z in chunk_names]
+    sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
 
-    running_sequence = chunk_name_to_sequence[chunk_names[0]]
-    running_start = int(chunk_names[0].split('-')[-2])
-    running_end = int(chunk_names[0].split('-')[-1])
-
+    _, running_start, running_end = sequence_chunks[0]
+    running_sequence = chunk_name_to_sequence[(contig, running_start, running_end)]
     # if len(running_sequence) < 500:
     #     sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
     #     exit()
 
-    for i in range(1, len(chunk_names)):
-        this_sequence = chunk_name_to_sequence[chunk_names[i]]
-        this_start = int(chunk_names[i].split('-')[-2])
-        this_end = int(chunk_names[i].split('-')[-1])
+    for i in range(1, len(sequence_chunks)):
+        _, this_start, this_end = sequence_chunks[i]
+        this_sequence = chunk_name_to_sequence[(contig, this_start, this_end)]
+        print(this_start, this_end)
 
         if this_start < running_end:
             # overlap
@@ -142,9 +141,9 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             overlap_bases = overlap_bases + int(overlap_bases * BASE_ERROR_RATE)
 
             if overlap_bases > len(running_sequence):
-                print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", chunk_names[i], running_end, this_end, overlap_bases, len(running_sequence))
+                print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", sequence_chunks[i], running_end, this_end, overlap_bases, len(running_sequence))
             if overlap_bases > len(this_sequence):
-                print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", chunk_names[i], running_end, this_end, overlap_bases, len(this_sequence))
+                print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", sequence_chunks[i], running_end, this_end, overlap_bases, len(this_sequence))
 
             sequence_suffix = running_sequence[-overlap_bases:]
             sequence_prefix = this_sequence[:overlap_bases]
@@ -152,7 +151,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             pos_a, pos_b = get_confident_positions(alignments[0][0], alignments[0][1])
 
             if pos_a == -1 or pos_b == -1:
-                sys.stderr.write("ERROR: INVALID OVERLAPS: " + str(alignments[0]) + str(chunk_names[i])  + "\n")
+                sys.stderr.write("ERROR: INVALID OVERLAPS: " + str(alignments[0]) + str(sequence_chunks[i])  + "\n")
                 return None
 
             left_sequence = running_sequence[:-(overlap_bases-pos_a)]
@@ -161,7 +160,7 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             running_sequence = left_sequence + right_sequence
             running_end = this_end
         else:
-            print("NO OVERLAP: POSSIBLE ERROR", chunk_names[i], contig, this_start, running_end, chunk_names[i-1])
+            print("NO OVERLAP: POSSIBLE ERROR", sequence_chunks[i], contig, this_start, running_end, sequence_chunks[i])
             exit()
 
     sys.stderr.write("SUCCESSFULLY CALLED CONSENSUS SEQUENCE" + "\n")
@@ -177,7 +176,7 @@ def process_marginpolish_h5py(hdf_file_path, output_path, threads):
     for contig in contigs:
         with h5py.File(hdf_file_path, 'r') as hdf5_file:
             chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
-        print(chunk_keys)
+
         consensus_sequence = create_consensus_sequence(hdf_file_path, contig, chunk_keys, threads)
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")

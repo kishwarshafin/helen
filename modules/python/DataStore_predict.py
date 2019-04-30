@@ -57,8 +57,18 @@ class DataStore(object):
         chunk_name_suffix = str(chunk_id.item())
 
         name = contig + chunk_name_prefix + chunk_name_suffix
+
         if 'predictions' not in self.meta:
             self.meta['predictions'] = set()
+        if 'predictions_contig' not in self.meta:
+            self.meta['predictions_contig'] = set()
+
+        if chunk_name_prefix not in self.meta['predictions_contig']:
+            self.meta['predictions_contig'].add(chunk_name_prefix)
+            self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_start')] \
+                = contig_start.item()
+            self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_end')] \
+                = contig_end.item()
 
         if name not in self.meta['predictions']:
             self.meta['predictions'].add(name)
