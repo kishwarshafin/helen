@@ -52,7 +52,8 @@ class DataStore(object):
         self._meta = self.meta
         self._meta.update(meta)
 
-    def write_prediction(self, contig, contig_start, contig_end, chunk_id, position, predicted_bases, predicted_rles):
+    def write_prediction(self, contig, contig_start, contig_end, chunk_id, position,
+                         predicted_bases, predicted_rles, filename):
         chunk_name_prefix = str(contig) + "-" + str(contig_start.item()) + "-" + str(contig_end.item())
         chunk_name_suffix = str(chunk_id.item())
 
@@ -78,5 +79,7 @@ class DataStore(object):
                                                       chunk_name_suffix, 'bases')] = predicted_bases
             self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
                                                       chunk_name_suffix, 'rles')] = predicted_rles
+        else:
+            print(name, " ALREADY IN DICTIONARY: ", filename)
 
 

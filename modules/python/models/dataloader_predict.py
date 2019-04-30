@@ -46,9 +46,7 @@ class SequenceDataset(Dataset):
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.shape))
 
-
-
-        return contig, contig_start, contig_end, chunk_id, image, position
+        return contig, contig_start, contig_end, chunk_id, image, position, self.file_info[index]
 
     def __len__(self):
         return len(self.file_info)
