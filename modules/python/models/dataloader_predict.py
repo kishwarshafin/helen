@@ -30,11 +30,8 @@ class SequenceDataset(Dataset):
             contig_start = hdf5_file['contig_start'][()][0].astype(np.int)
             contig_end = hdf5_file['contig_end'][()][0].astype(np.int)
             chunk_id = hdf5_file['feature_chunk_idx'][()][0].astype(np.int)
-            image = hdf5_file['image'][()]
+            image = hdf5_file['image'][()].astype(np.uint8)
             position = hdf5_file['position'][()].astype(np.int)
-
-        if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
-            raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.shape))
 
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.shape[0]
@@ -43,6 +40,9 @@ class SequenceDataset(Dataset):
 
             empty_positions = np.array([[-1, -1, -1]] * total_empty_needed)
             position = np.append(position, empty_positions, 0)
+
+        if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
+            raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.shape))
 
 
 
