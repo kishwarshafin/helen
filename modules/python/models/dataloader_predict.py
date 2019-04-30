@@ -23,10 +23,8 @@ class SequenceDataset(Dataset):
         self.file_info = list(data_frame[0])
 
     def __getitem__(self, index):
-
-        contig = self.file_info[index].split('.')[0].split('_')[4]
         with h5py.File(self.file_info[index], 'r') as hdf5_file:
-            # contig = np.array2string(hdf5_file['contig'][()][0].astype(np.str))
+            contig = np.array2string(hdf5_file['contig'][()][0].astype(np.str)).replace("'", '')
             contig_start = hdf5_file['contig_start'][()][0].astype(np.int)
             contig_end = hdf5_file['contig_end'][()][0].astype(np.int)
             chunk_id = hdf5_file['feature_chunk_idx'][()][0].astype(np.int)
