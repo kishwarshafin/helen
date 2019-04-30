@@ -70,7 +70,7 @@ class DataStore(object):
                 = contig_start.item()
             self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_end')] \
                 = contig_end.item()
-            if contig_end.item() - contig_start.tem() < 1000:
+            if contig_end.item() - contig_start.item() < 1000:
                 print("CONTIG LENGTH <1000", filename, chunk_name_prefix, chunk_name_suffix)
 
         if name not in self.meta['predictions']:
