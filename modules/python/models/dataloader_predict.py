@@ -34,7 +34,7 @@ class SequenceDataset(Dataset):
             position = hdf5_file['position'][()].astype(np.int)
 
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
-            raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.size()))
+            raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.shape))
 
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.shape[0]
