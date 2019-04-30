@@ -34,7 +34,7 @@ class SequenceDataset(Dataset):
             position = hdf5_file['position'][()].astype(np.int)
 
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH:
-            total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.size(0)
+            total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.shape[0]
             empty_image_columns = np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed)
             image = np.append(image, empty_image_columns, 0)
 
