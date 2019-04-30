@@ -23,31 +23,25 @@ class SequenceDataset(Dataset):
         self.file_info = list(data_frame[0])
 
     def __getitem__(self, index):
-        file_name = self.file_info[index].split('/')[-1]
-        # load the image
-        hdf5_file = h5py.File(self.file_info[index], 'r')
-        # this needs to change
-        contig = file_name.split('.')[-3].split('-')[0]
 
-        contig_start = hdf5_file['contig_start'][0].astype(np.int)
-        contig_end = hdf5_file['contig_end'][0].astype(np.int)
-        chunk_id = hdf5_file['feature_chunk_idx'][0].astype(np.int)
-        image = hdf5_file['image']
-        position = hdf5_file['position']
+        contig = self.file_info[index].split('.')[0].split('_')[4]
+        with h5py.File(self.file_info[index], 'r') as hdf5_file:
+            # contig = np.array2string(hdf5_file['contig'][()][0].astype(np.str))
+            contig_start = hdf5_file['contig_start'][()][0].astype(np.int)
+            contig_end = hdf5_file['contig_end'][()][0].astype(np.int)
+            chunk_id = hdf5_file['feature_chunk_idx'][()][0].astype(np.int)
+            image = hdf5_file['image'][()]
+            position = hdf5_file['position'][()].astype(np.int)
 
-        image = torch.Tensor(image)
-
-        position = np.array(position, dtype=np.int)
-
-        if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
+        if image.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.size(0)
-            empty_image_columns = torch.Tensor(np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed))
-            image = torch.cat((image, empty_image_columns), 0)
+            empty_image_columns = np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed)
+            image = np.append(image, empty_image_columns, 0)
 
-            empty_positions = np.array([[-1, -1]] * total_empty_needed)
+            empty_positions = np.array([[-1, -1, -1]] * total_empty_needed)
             position = np.append(position, empty_positions, 0)
 
-        if image.size(0) < ImageSizeOptions.SEQ_LENGTH:
+        if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             raise ValueError("IMAGE SIZE ERROR: " + str(self.file_info[index]) + " " + str(image.size()))
 
         return contig, contig_start, contig_end, chunk_id, image, position

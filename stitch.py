@@ -34,20 +34,24 @@ def chunks(file_names, threads):
 
 def small_chunk_stitch(file_name, contig, small_chunk_keys):
     # for chunk_key in small_chunk_keys:
-    hdf5_file = h5py.File(file_name, 'r')
+
     name_sequence_tuples = list()
 
     for chunk_name in small_chunk_keys:
-        smaller_chunks = list(hdf5_file['predictions'][contig][chunk_name].keys())
+
+        with h5py.File(file_name, 'r') as hdf5_file:
+            smaller_chunks = list(hdf5_file['predictions'][contig][chunk_name].keys())
 
         all_positions = set()
         base_prediction_dict = defaultdict()
         rle_prediction_dict = defaultdict()
         for chunk in smaller_chunks:
-            bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases']
-            rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles']
 
-            positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position']
+            with h5py.File(file_name, 'r') as hdf5_file:
+                bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases'][()]
+                rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles'][()]
+                positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position'][()]
+
             positions = np.array(positions, dtype=np.int64)
             base_predictions = np.array(bases, dtype=np.int)
             rle_predictions = np.array(rles, dtype=np.int)
@@ -69,8 +73,6 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         sequence = ''.join([label_decoder[base] * int(rle) for base, rle in zip(predicted_base_labels,
                                                                                 predicted_rle_labels)])
         name_sequence_tuples.append((chunk_name, sequence))
-
-    hdf5_file.close()
 
     return name_sequence_tuples
 
@@ -168,12 +170,14 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
 
 
 def process_marginpolish_h5py(hdf_file_path, output_path, threads):
-    hdf5_file = h5py.File(hdf_file_path, 'r')
-    contigs = list(hdf5_file['predictions'].keys())
+    with h5py.File(hdf_file_path, 'r') as hdf5_file:
+        contigs = list(hdf5_file['predictions'].keys())
 
     consensus_fasta_file = open(output_path+'consensus.fa', 'w')
     for contig in contigs:
-        chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
+        with h5py.File(hdf_file_path, 'r') as hdf5_file:
+            chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
+        print(chunk_keys)
         consensus_sequence = create_consensus_sequence(hdf_file_path, contig, chunk_keys, threads)
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")
