@@ -18,7 +18,6 @@ Input:
 Returns:
 - Loss value
 """
-# CLASS_WEIGHTS = [0.3, 1.0, 1.0, 1.0, 1.0]
 
 
 def precision(label, confusion_matrix):
@@ -56,10 +55,10 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     # set the evaluation mode of the model
     transducer_model.eval()
 
-    # class_weights = torch.Tensor(CLASS_WEIGHTS)
+    class_weights = torch.Tensor(TrainOptions.CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.CrossEntropyLoss(ignore_index=0)
+    criterion_rle = nn.CrossEntropyLoss(ignore_index=0, weight=class_weights)
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()
