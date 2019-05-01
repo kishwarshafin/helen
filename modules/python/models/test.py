@@ -59,7 +59,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     # class_weights = torch.Tensor(CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.MultiMarginLoss()
+    criterion_rle = nn.CrossEntropyLoss(ignore_index=0)
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()
