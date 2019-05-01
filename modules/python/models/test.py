@@ -124,16 +124,16 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 rle_cm_value = rle_confusion_matrix.value()
                 base_denom = base_cm_value.sum()
                 # rle_denom = rle_cm_value.sum() - rle_cm_value[0][0]
-                rle_denom = rle_cm_value.sum()
+                rle_denom = rle_cm_value.sum() - rle_cm_value[0][0]
 
                 base_corrects = 0
                 for label in range(0, ImageSizeOptions.TOTAL_BASE_LABELS):
                     base_corrects = base_corrects + base_cm_value[label][label]
 
                 rle_corrects = 0
-                for label in range(0, ImageSizeOptions.TOTAL_RLE_LABELS):
+                for label in range(1, ImageSizeOptions.TOTAL_RLE_LABELS):
                     rle_corrects = rle_corrects + rle_cm_value[label][label]
-                    # rle_denom = rle_denom - rle_cm_value[0][label]
+                    rle_denom = rle_denom - rle_cm_value[0][label]
 
                 base_accuracy = 100.0 * (base_corrects / max(1.0, base_denom))
                 rle_accuracy = 100.0 * (rle_corrects / max(1.0, rle_denom))
@@ -146,7 +146,12 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
     sys.stderr.write(TextColor.YELLOW+'\nTest Loss: ' + str(avg_loss) + "\n"+TextColor.END)
     sys.stderr.write(TextColor.BLUE + "Base Confusion Matrix: \n" + str(base_confusion_matrix.value()) + "\n" + TextColor.END)
-    sys.stderr.write(TextColor.RED + "RLE Confusion Matrix: \n" + str(rle_confusion_matrix.value()) + "\n" + TextColor.END)
+    sys.stderr.write(TextColor.RED + "RLE Confusion Matrix: \n" + TextColor.END)
+    for row in rle_confusion_matrix.value():
+        row = row.tolist()
+        for elem in row:
+            sys.stderr.write("{:9d} ".format(elem))
+        sys.stderr.write("\n")
     # sys.stderr.write("label\t\tprecision\n")
     # for label in range(0, ImageSizeOptions.TOTAL_LABELS):
     #     sys.stderr.write(str(label_to_literal(label)) + '\t' + str(precision(label, confusion_matrix.conf)) + "\n")
