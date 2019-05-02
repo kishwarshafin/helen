@@ -30,7 +30,7 @@ class TrainOptions(object):
     WINDOW_JUMP = 100
     GRU_LAYERS = 1
     HIDDEN_SIZE = 256
-    CLASS_WEIGHTS = [0.0, 0.01, 0.1, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    CLASS_WEIGHTS = [0.2, 0.5, 0.5, 0.5, 0.5, 0.8, 0.9, 1.0, 1.0, 1.0, 0.9]
 
 
 class AlingerOptions(object):

@@ -113,7 +113,7 @@ def train(train_file, test_file, batch_size, epoch_limit, gpu_mode, num_workers,
     # not using class weights for the first pass
     # Loss
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.CrossEntropyLoss(ignore_index=0, weight=class_weights)
+    criterion_rle = nn.CrossEntropyLoss(weight=class_weights)
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()

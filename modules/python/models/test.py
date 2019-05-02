@@ -58,7 +58,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     class_weights = torch.Tensor(TrainOptions.CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
     criterion_base = nn.CrossEntropyLoss()
-    criterion_rle = nn.CrossEntropyLoss(ignore_index=0, weight=class_weights)
+    criterion_rle = nn.CrossEntropyLoss(weight=class_weights)
 
     if gpu_mode is True:
         criterion_base = criterion_base.cuda()
@@ -123,14 +123,14 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 rle_cm_value = rle_confusion_matrix.value()
                 base_denom = base_cm_value.sum()
                 # rle_denom = rle_cm_value.sum() - rle_cm_value[0][0]
-                rle_denom = rle_cm_value.sum() - rle_cm_value[0][0]
+                rle_denom = rle_cm_value.sum()
 
                 base_corrects = 0
                 for label in range(0, ImageSizeOptions.TOTAL_BASE_LABELS):
                     base_corrects = base_corrects + base_cm_value[label][label]
 
                 rle_corrects = 0
-                for label in range(1, ImageSizeOptions.TOTAL_RLE_LABELS):
+                for label in range(0, ImageSizeOptions.TOTAL_RLE_LABELS):
                     rle_corrects = rle_corrects + rle_cm_value[label][label]
                     rle_denom = rle_denom - rle_cm_value[0][label]
 
