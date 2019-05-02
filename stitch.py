@@ -63,14 +63,15 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
             for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
                 indx = position[1]
                 pos = position[0]
+                split_indx = position[2]
                 if indx < 0 or pos < 0:
                     continue
                 if (pos, indx) not in base_prediction_dict:
-                    base_prediction_dict[(pos, indx)] = base_pred
-                    rle_prediction_dict[(pos, indx)] = rle_pred
-                    all_positions.add((pos, indx))
+                    base_prediction_dict[(pos, indx, split_indx)] = base_pred
+                    rle_prediction_dict[(pos, indx, split_indx)] = rle_pred
+                    all_positions.add((pos, indx, split_indx))
 
-        pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1]))
+        pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1], element[2]))
         dict_fetch = operator.itemgetter(*pos_list)
         predicted_base_labels = list(dict_fetch(base_prediction_dict))
         predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
