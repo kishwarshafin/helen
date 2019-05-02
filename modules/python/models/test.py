@@ -132,7 +132,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 rle_corrects = 0
                 for label in range(0, ImageSizeOptions.TOTAL_RLE_LABELS):
                     rle_corrects = rle_corrects + rle_cm_value[label][label]
-                    rle_denom = rle_denom - rle_cm_value[0][label]
+                    # rle_denom = rle_denom - rle_cm_value[0][label]
 
                 base_accuracy = 100.0 * (base_corrects / max(1.0, base_denom))
                 rle_accuracy = 100.0 * (rle_corrects / max(1.0, rle_denom))
