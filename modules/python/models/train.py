@@ -3,11 +3,9 @@ import torch
 import torch.nn as nn
 import os
 from tqdm import tqdm
-import numpy as np
 
 # Custom generator for our dataset
 from torch.utils.data import DataLoader
-from modules.python.models.data_sampler import BalancedSampler
 from modules.python.models.dataloader import SequenceDataset
 from modules.python.TextColor import TextColor
 from modules.python.models.ModelHander import ModelHandler
