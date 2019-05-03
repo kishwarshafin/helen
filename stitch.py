@@ -94,6 +94,8 @@ def get_confident_positions(alignment):
 
 
 def alignment_stitch(sequence_chunks):
+    sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
+
     contig, running_start, running_end, running_sequence = sequence_chunks[0]
     # if len(running_sequence) < 500:
     #     sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
@@ -130,9 +132,8 @@ def alignment_stitch(sequence_chunks):
             running_sequence = left_sequence + right_sequence
             running_end = this_end
         else:
-            sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAP: POSSIBLE ERROR" + str(sequence_chunks[i])
-                             + " " + str(contig) + " " + str(this_start) + " " + str(running_end) + " "
-                             + str(sequence_chunks[i]))
+            sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAP: POSSIBLE ERROR"
+                             + " " + str(contig) + " " + str(this_start) + " " + str(running_end) + "\n")
 
     return contig, running_start, running_end, running_sequence
 
@@ -141,7 +142,9 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
     # for chunk_key in small_chunk_keys:
     name_sequence_tuples = list()
 
-    for chunk_name in small_chunk_keys:
+    for contig_name, _st, _end in small_chunk_keys:
+        chunk_name = contig_name + '-' + str(_st) + '-' + str(_end)
+
         with h5py.File(file_name, 'r') as hdf5_file:
             contig_start = hdf5_file['predictions'][contig][chunk_name]['contig_start'][()]
             contig_end = hdf5_file['predictions'][contig][chunk_name]['contig_end'][()]
@@ -176,17 +179,25 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         sequence = ''.join([label_decoder[base] for base in predicted_base_labels])
         name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
 
-    contig, running_start, running_end, running_sequence = list(alignment_stitch(name_sequence_tuples))
+    name_sequence_tuples = sorted(name_sequence_tuples, key=lambda element: (element[1], element[2]))
+    contig, running_start, running_end, running_sequence = alignment_stitch(name_sequence_tuples)
     return contig, running_start, running_end, running_sequence
 
 
 def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threads):
     sequence_chunk_keys = sorted(sequence_chunk_keys)
+    sequence_chunk_key_list = list()
+    for sequence_chunk_key in sequence_chunk_keys:
+        contig, st, end = sequence_chunk_key.split('-')
+        sequence_chunk_key_list.append((contig, int(st), int(end)))
+
+    sequence_chunk_key_list = sorted(sequence_chunk_key_list, key=lambda element: (element[1], element[2]))
+
     sequence_chunks = list()
     # generate the dictionary in parallel
     with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
-        file_chunks = chunks(sequence_chunk_keys, max(MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING,
-                                                      int(len(sequence_chunk_keys) / threads) + 1))
+        file_chunks = chunks(sequence_chunk_key_list, max(MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING,
+                                                      int(len(sequence_chunk_key_list) / threads) + 1))
         futures = [executor.submit(small_chunk_stitch, hdf5_file_path, contig, file_chunk) for file_chunk in file_chunks]
         for fut in concurrent.futures.as_completed(futures):
             if fut.exception() is None:
@@ -197,8 +208,6 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
             fut._result = None  # python issue 27144
 
     sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
-
-    sys.stderr.write(TextColor.GREEN + "INFO: DICTIONARY GENERATION COMPLETE" + "\n" + TextColor.END)
     contig, contig_start, contig_end, sequence = alignment_stitch(sequence_chunks)
 
     return sequence
@@ -221,6 +230,7 @@ def process_marginpolish_h5py(hdf_file_path, output_path, threads):
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")
             consensus_fasta_file.write(consensus_sequence+"\n")
+        exit()
 
     hdf5_file.close()
 
