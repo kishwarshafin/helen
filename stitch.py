@@ -1,18 +1,24 @@
 import h5py
 import argparse
 import sys
-from Bio import pairwise2
-from Bio.pairwise2 import format_alignment
 from os.path import isfile, join
 from os import listdir
 import concurrent.futures
 import numpy as np
-from collections import  defaultdict
+from collections import defaultdict
 import operator
 from modules.python.TextColor import TextColor
+from build import HELEN
+import re
 
-BASE_ERROR_RATE = 0.2
+
+BASE_ERROR_RATE = 1.0
 label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
+MATCH_PENALTY = 4
+MISMATCH_PENALTY = 6
+GAP_PENALTY = 8
+GAP_EXTEND_PENALTY = 2
+MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING = 2
 
 
 def get_file_paths_from_directory(directory_path):
@@ -33,131 +39,91 @@ def chunks(file_names, threads):
     return chunks
 
 
-def small_chunk_stitch(file_name, contig, small_chunk_keys):
-    # for chunk_key in small_chunk_keys:
-
-    name_sequence_tuples = list()
-
-    for chunk_name in small_chunk_keys:
-        with h5py.File(file_name, 'r') as hdf5_file:
-            contig_start = hdf5_file['predictions'][contig][chunk_name]['contig_start'][()]
-            contig_end = hdf5_file['predictions'][contig][chunk_name]['contig_end'][()]
-
-        with h5py.File(file_name, 'r') as hdf5_file:
-            smaller_chunks = set(hdf5_file['predictions'][contig][chunk_name].keys()) - {'contig_start', 'contig_end'}
-
-        all_positions = set()
-        base_prediction_dict = defaultdict()
-        rle_prediction_dict = defaultdict()
-        for chunk in smaller_chunks:
-
-            with h5py.File(file_name, 'r') as hdf5_file:
-                bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases'][()]
-                rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles'][()]
-                positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position'][()]
-
-            positions = np.array(positions, dtype=np.int64)
-            base_predictions = np.array(bases, dtype=np.int)
-            rle_predictions = np.array(rles, dtype=np.int)
-
-            for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
-                indx = position[1]
-                pos = position[0]
-                split_indx = position[2]
-                if indx < 0 or pos < 0:
-                    continue
-                if (pos, indx) not in base_prediction_dict:
-                    base_prediction_dict[(pos, indx, split_indx)] = base_pred
-                    rle_prediction_dict[(pos, indx, split_indx)] = rle_pred
-                    all_positions.add((pos, indx, split_indx))
-
-        pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1], element[2]))
-        dict_fetch = operator.itemgetter(*pos_list)
-        predicted_base_labels = list(dict_fetch(base_prediction_dict))
-        predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
-        sequence = ''.join([label_decoder[base] * int(rle) for base, rle in zip(predicted_base_labels,
-                                                                                predicted_rle_labels)])
-        name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
-
-    return name_sequence_tuples
+def chunks_alignment_sequence(alignment_sequence_pairs, min_length):
+    """Yield successive n-sized chunks from l."""
+    chunks = []
+    for i in range(0, len(alignment_sequence_pairs), min_length):
+        chunks.append(alignment_sequence_pairs[i:i + min_length])
+    return chunks
 
 
-def get_confident_positions(alignment_a, alignment_b):
-    match_counter = 0
-    a_index = 0
-    b_index = 0
+def get_confident_positions(alignment):
+    cigar_string = alignment.cigar_string.replace('=', 'M').replace('X', 'M')
 
-    for base_a, base_b in zip(alignment_a, alignment_b):
-        if base_a != '-':
-            a_index += 1
+    cigar_tuples = re.findall(r'(\d+)(\w)', cigar_string)
 
-        if base_b != '-':
-            b_index += 1
-
-        if base_a == base_b:
-            match_counter += 1
+    grouped_tuples = list()
+    prev_len = 0
+    prev_op = None
+    # group the matches together
+    for cigar_len, cigar_op in cigar_tuples:
+        if prev_op is None:
+            prev_op = cigar_op
+            prev_len = int(cigar_len)
+        elif prev_op == cigar_op:
+            # simply extend the operation
+            prev_len += int(cigar_len)
         else:
-            match_counter = 0
+            grouped_tuples.append((prev_op, prev_len))
+            prev_op = cigar_op
+            prev_len = int(cigar_len)
+    if prev_op is not None:
+        grouped_tuples.append((prev_op, prev_len))
 
-        if match_counter >= 3:
-            return a_index, b_index
+    ref_index = alignment.reference_begin
+    read_index = 0
+
+    for cigar_op, cigar_len in grouped_tuples:
+        if cigar_op == 'M' and cigar_len >= 9:
+            return ref_index, read_index
+
+        if cigar_op == 'S':
+            read_index += cigar_len
+        elif cigar_op == 'I':
+            read_index += cigar_len
+        elif cigar_op == 'D':
+            ref_index += cigar_len
+        elif cigar_op == 'M':
+            ref_index += cigar_len
+            read_index += cigar_len
+        else:
+            raise ValueError(TextColor.RED + "ERROR: INVALID CIGAR OPERATION ENCOUNTERED WHILTE STITCHING: "
+                             + str(cigar_op) + "\n")
 
     return -1, -1
 
 
-def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threads):
-    chunk_name_to_sequence = defaultdict()
-    sequence_chunks = list()
-    # generate the dictionary in parallel
-    with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
-        file_chunks = chunks(sequence_chunk_keys, int(len(sequence_chunk_keys) / threads) + 1)
-
-        futures = [executor.submit(small_chunk_stitch, hdf5_file_path, contig, file_chunk) for file_chunk in file_chunks]
-        for fut in concurrent.futures.as_completed(futures):
-            if fut.exception() is None:
-                name_sequence_tuples = fut.result()
-                for contig, contig_start, contig_end, sequence in name_sequence_tuples:
-                    chunk_name_to_sequence[(contig, contig_start, contig_end)] = sequence
-                    sequence_chunks.append((contig, contig_start, contig_end))
-            else:
-                sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
-            fut._result = None  # python issue 27144
-
-    # but you cant do this part in parallel, this has to be linear
-    sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
-    sys.stderr.write(TextColor.GREEN + "INFO: CONTIG " + str(contig) + " POLISHING COMPLETE, STITCHING SEQUENCES\n"
-                     + TextColor.END)
-    _, running_start, running_end = sequence_chunks[0]
-    running_sequence = chunk_name_to_sequence[(contig, running_start, running_end)]
+def alignment_stitch(sequence_chunks):
+    contig, running_start, running_end, running_sequence = sequence_chunks[0]
     # if len(running_sequence) < 500:
     #     sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
     #     exit()
 
+    aligner = HELEN.Aligner(MATCH_PENALTY, MISMATCH_PENALTY, GAP_PENALTY, GAP_EXTEND_PENALTY)
+    filter = HELEN.Filter()
+    # for i in tqdm(range(1, len(sequence_chunks)), ncols=50):
     for i in range(1, len(sequence_chunks)):
-        _, this_start, this_end = sequence_chunks[i]
-        this_sequence = chunk_name_to_sequence[(contig, this_start, this_end)]
+        _, this_start, this_end, this_sequence = sequence_chunks[i]
         if this_start < running_end:
             # overlap
             overlap_bases = running_end - this_start
             overlap_bases = overlap_bases + int(overlap_bases * BASE_ERROR_RATE)
 
-            # if overlap_bases > len(running_sequence):
-            #     print("OVERLAP BASES ERROR WITH RUNNING SEQUENCE: ", sequence_chunks[i],
-            # running_end, this_end, overlap_bases, len(running_sequence))
-            # if overlap_bases > len(this_sequence):
-            #     print("OVERLAP BASES ERROR WITH CURRENT SEQUENCE: ", sequence_chunks[i],
-            # running_end, this_end, overlap_bases, len(this_sequence))
+            reference_sequence = running_sequence[-overlap_bases:]
+            read_sequence = this_sequence[:overlap_bases]
+            alignment = HELEN.Alignment()
+            aligner.SetReferenceSequence(reference_sequence, len(reference_sequence))
+            aligner.Align_cpp(read_sequence, filter, alignment, 0)
+            if alignment.best_score == 0:
+                sys.stderr.write("ERROR: NO ALIGNMENTS FOUND")
+                exit()
+                continue
 
-            sequence_suffix = running_sequence[-overlap_bases:]
-            sequence_prefix = this_sequence[:overlap_bases]
-            alignments = pairwise2.align.globalxx(sequence_suffix, sequence_prefix)
-            pos_a, pos_b = get_confident_positions(alignments[0][0], alignments[0][1])
+            pos_a, pos_b = get_confident_positions(alignment)
 
             if pos_a == -1 or pos_b == -1:
-                sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAPS: " + str(alignments[0])
-                                 + str(sequence_chunks[i]) + "\n" + TextColor.END)
+                sys.stderr.write(TextColor.RED + "ERROR: NO OVERLAPS: " + str(sequence_chunks[i]) + "\n" + TextColor.END)
                 return None
-
             left_sequence = running_sequence[:-(overlap_bases-pos_a)]
             right_sequence = this_sequence[pos_b:]
 
@@ -168,7 +134,74 @@ def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threa
                              + " " + str(contig) + " " + str(this_start) + " " + str(running_end) + " "
                              + str(sequence_chunks[i]))
 
-    return running_sequence
+    return contig, running_start, running_end, running_sequence
+
+
+def small_chunk_stitch(file_name, contig, small_chunk_keys):
+    # for chunk_key in small_chunk_keys:
+    name_sequence_tuples = list()
+
+    for chunk_name in small_chunk_keys:
+        with h5py.File(file_name, 'r') as hdf5_file:
+            contig_start = hdf5_file['predictions'][contig][chunk_name]['contig_start'][()]
+            contig_end = hdf5_file['predictions'][contig][chunk_name]['contig_end'][()]
+
+        with h5py.File(file_name, 'r') as hdf5_file:
+            smaller_chunks = set(hdf5_file['predictions'][contig][chunk_name].keys()) - {'contig_start', 'contig_end'}
+
+        smaller_chunks = sorted(smaller_chunks)
+        all_positions = set()
+        base_prediction_dict = defaultdict()
+        for chunk in smaller_chunks:
+            with h5py.File(file_name, 'r') as hdf5_file:
+                bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases'][()]
+                positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position'][()]
+
+            positions = np.array(positions, dtype=np.int64)
+            base_predictions = np.array(bases, dtype=np.int)
+
+            for position, base_pred in zip(positions, base_predictions):
+                pos = position[0]
+                indx = position[1]
+                split_indx = position[2]
+                if indx < 0 or pos < 0 or split_indx < 0:
+                    continue
+                if (pos, indx, split_indx) not in base_prediction_dict:
+                    base_prediction_dict[(pos, indx, split_indx)] = base_pred
+                    all_positions.add((pos, indx, split_indx))
+
+        pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1], element[2]))
+        dict_fetch = operator.itemgetter(*pos_list)
+        predicted_base_labels = list(dict_fetch(base_prediction_dict))
+        sequence = ''.join([label_decoder[base] for base in predicted_base_labels])
+        name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
+
+    contig, running_start, running_end, running_sequence = list(alignment_stitch(name_sequence_tuples))
+    return contig, running_start, running_end, running_sequence
+
+
+def create_consensus_sequence(hdf5_file_path, contig, sequence_chunk_keys, threads):
+    sequence_chunk_keys = sorted(sequence_chunk_keys)
+    sequence_chunks = list()
+    # generate the dictionary in parallel
+    with concurrent.futures.ProcessPoolExecutor(max_workers=threads) as executor:
+        file_chunks = chunks(sequence_chunk_keys, max(MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING,
+                                                      int(len(sequence_chunk_keys) / threads) + 1))
+        futures = [executor.submit(small_chunk_stitch, hdf5_file_path, contig, file_chunk) for file_chunk in file_chunks]
+        for fut in concurrent.futures.as_completed(futures):
+            if fut.exception() is None:
+                contig, contig_start, contig_end, sequence = fut.result()
+                sequence_chunks.append((contig, contig_start, contig_end, sequence))
+            else:
+                sys.stderr.write("ERROR: " + str(fut.exception()) + "\n")
+            fut._result = None  # python issue 27144
+
+    sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
+
+    sys.stderr.write(TextColor.GREEN + "INFO: DICTIONARY GENERATION COMPLETE" + "\n" + TextColor.END)
+    contig, contig_start, contig_end, sequence = alignment_stitch(sequence_chunks)
+
+    return sequence
 
 
 def process_marginpolish_h5py(hdf_file_path, output_path, threads):
@@ -177,7 +210,7 @@ def process_marginpolish_h5py(hdf_file_path, output_path, threads):
 
     consensus_fasta_file = open(output_path+'consensus.fa', 'w')
     for contig in contigs:
-        sys.stderr.write(TextColor.YELLOW + "INFO: PROCESSING CONTIG: " + contig + "\n")
+        sys.stderr.write(TextColor.YELLOW + "INFO: PROCESSING CONTIG: " + contig + "\n" + TextColor.END)
 
         with h5py.File(hdf_file_path, 'r') as hdf5_file:
             chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
@@ -218,4 +251,3 @@ if __name__ == '__main__':
 
     FLAGS, unparsed = parser.parse_known_args()
     process_marginpolish_h5py(FLAGS.sequence_hdf, FLAGS.output_dir, FLAGS.threads)
-    # read_marginpolish_h5py(FLAGS.marginpolish_h5py_dir, FLAGS.output_h5py_dir, FLAGS.train_mode, FLAGS.threads)
