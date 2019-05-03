@@ -95,7 +95,6 @@ def get_confident_positions(alignment):
 
 def alignment_stitch(sequence_chunks):
     sequence_chunks = sorted(sequence_chunks, key=lambda element: (element[1], element[2]))
-
     contig, running_start, running_end, running_sequence = sequence_chunks[0]
     # if len(running_sequence) < 500:
     #     sys.stderr.write("ERROR: CURRENT SEQUENCE LENGTH TOO SHORT: " + sequence_chunk_keys[0] + "\n")
@@ -103,7 +102,6 @@ def alignment_stitch(sequence_chunks):
 
     aligner = HELEN.Aligner(MATCH_PENALTY, MISMATCH_PENALTY, GAP_PENALTY, GAP_EXTEND_PENALTY)
     filter = HELEN.Filter()
-    # for i in tqdm(range(1, len(sequence_chunks)), ncols=50):
     for i in range(1, len(sequence_chunks)):
         _, this_start, this_end, this_sequence = sequence_chunks[i]
         if this_start < running_end:
@@ -155,28 +153,34 @@ def small_chunk_stitch(file_name, contig, small_chunk_keys):
         smaller_chunks = sorted(smaller_chunks)
         all_positions = set()
         base_prediction_dict = defaultdict()
+        rle_prediction_dict = defaultdict()
         for chunk in smaller_chunks:
             with h5py.File(file_name, 'r') as hdf5_file:
                 bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases'][()]
+                rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles'][()]
                 positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position'][()]
 
             positions = np.array(positions, dtype=np.int64)
             base_predictions = np.array(bases, dtype=np.int)
+            rle_predictions = np.array(rles, dtype=np.int)
 
-            for position, base_pred in zip(positions, base_predictions):
-                pos = position[0]
+            for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
                 indx = position[1]
+                pos = position[0]
                 split_indx = position[2]
-                if indx < 0 or pos < 0 or split_indx < 0:
+                if indx < 0 or pos < 0:
                     continue
                 if (pos, indx, split_indx) not in base_prediction_dict:
                     base_prediction_dict[(pos, indx, split_indx)] = base_pred
+                    rle_prediction_dict[(pos, indx, split_indx)] = rle_pred
                     all_positions.add((pos, indx, split_indx))
 
         pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1], element[2]))
         dict_fetch = operator.itemgetter(*pos_list)
         predicted_base_labels = list(dict_fetch(base_prediction_dict))
-        sequence = ''.join([label_decoder[base] for base in predicted_base_labels])
+        predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
+        sequence = ''.join([label_decoder[base] * int(rle) for base, rle in zip(predicted_base_labels,
+                                                                                predicted_rle_labels)])
         name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
 
     name_sequence_tuples = sorted(name_sequence_tuples, key=lambda element: (element[1], element[2]))
