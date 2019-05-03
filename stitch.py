@@ -230,7 +230,6 @@ def process_marginpolish_h5py(hdf_file_path, output_path, threads):
         if consensus_sequence is not None:
             consensus_fasta_file.write('>' + contig + "\n")
             consensus_fasta_file.write(consensus_sequence+"\n")
-        exit()
 
     hdf5_file.close()
 
