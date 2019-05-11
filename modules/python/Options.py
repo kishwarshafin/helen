@@ -28,9 +28,9 @@ class ImageSizeOptions(object):
 class TrainOptions(object):
     TRAIN_WINDOW = 100
     WINDOW_JUMP = 50
-    GRU_LAYERS = 2
-    HIDDEN_SIZE = 256
-    CLASS_WEIGHTS = [0.2, 0.5, 0.5, 0.5, 0.5, 0.8, 0.9, 1.0, 1.0, 1.0, 0.9]
+    GRU_LAYERS = 1
+    HIDDEN_SIZE = 128
+    CLASS_WEIGHTS = [0.3, 0.5, 0.5, 0.5, 0.5, 0.8, 0.9, 1.0, 1.0, 1.0, 0.9]
 
 
 class AlingerOptions(object):
