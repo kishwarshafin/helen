@@ -9,14 +9,7 @@ from modules.python.models.dataloader_debug import SequenceDataset
 from modules.python.TextColor import TextColor
 from modules.python.Options import ImageSizeOptions, TrainOptions
 """
-This script will evaluate a model and return the loss value.
-
-Input:
-- A trained model
-- A test CSV file to evaluate
-
-Returns:
-- Loss value
+WARNING: THIS IS A DEBUGGING TOOL INTENDED TO BE USED BY THE DEVELOPERS ONLY.
 """
 # CLASS_WEIGHTS = [0.3, 1.0, 1.0, 1.0, 1.0]
 

@@ -22,20 +22,19 @@ option(INSTALL_DEPENDENCIES
         "Install project dependencies"
         ON)
 
-INCLUDE(modules/htslib.cmake)
 INCLUDE(modules/pybind11.cmake)
 
 # pybind11 to interface
 pybind11_add_module(HELEN ${CMAKE_CURRENT_SOURCE_DIR}/modules/src/pybind_api.cpp)
 
-add_dependencies(HELEN htslib)
+# add_dependencies(HELEN htslib)
 
 # add all the external libraries
-target_link_libraries(HELEN PRIVATE z)
-target_link_libraries(HELEN PRIVATE bz2)
-target_link_libraries(HELEN PRIVATE curl)
-target_link_libraries(HELEN PRIVATE lzma)
-target_link_libraries(HELEN PRIVATE ${HTSLIB_SRC_DIR}/libhts.a)
+# target_link_libraries(HELEN PRIVATE z)
+# target_link_libraries(HELEN PRIVATE bz2)
+# target_link_libraries(HELEN PRIVATE curl)
+# target_link_libraries(HELEN PRIVATE lzma)
+# target_link_libraries(HELEN PRIVATE ${HTSLIB_SRC_DIR}/libhts.a)
 
 #-------------------
 # Test

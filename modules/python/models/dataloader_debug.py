@@ -6,6 +6,10 @@ import h5py
 import pandas as pd
 import torch
 
+"""
+WARNING: THIS IS A DEBUGGING TOOL INTENDED TO BE USED BY THE DEVELOPERS ONLY.
+"""
+
 
 class SequenceDataset(Dataset):
     """

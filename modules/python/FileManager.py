@@ -1,72 +1,60 @@
-import shutil
-import pickle
-from os import listdir, remove
-from os.path import isfile, join
-"""
-EXAMPLE USAGE:
-bed_directory_path = "/Users/saureous/data/bed_alleles_copy"
-output_file_path = "output/bed_output/concatenated.bed"
-
-file_manager = FileManager()
-file_paths = file_manager.get_file_paths_from_directory(directory_path=bed_directory_path)
-file_manager.concatenate_files(file_paths=file_paths, output_file_path=output_file_path)
-file_manager.delete_files(file_paths=file_paths)
-"""
+import os
+import time
 
 
 class FileManager:
     """
-    Does simple file operations like concatenation, fetching a list of paths for files in a directory, deleting files
+    Performs simple OS operations like creating directory for output or path to all the files.
     """
     @staticmethod
-    def concatenate_files(file_paths, output_file_path):
+    def handle_output_directory(output_dir):
         """
-        Concatenate files given in list of file paths to a single file
-        :param file_paths: List of file path
-        :param output_file_path: Output file path name
+        Process the output directory and return a valid directory where we save the output
+        :param output_dir: Output directory path
         :return:
         """
-        with open(output_file_path, 'wb') as out_file:
-            for file_path in file_paths:
-                with open(file_path, 'rb') as in_file:
-                    # 100MB per writing chunk to avoid reading big file into memory.
-                    shutil.copyfileobj(in_file, out_file, 1024*1024*100)
+        # process the output directory
+        if output_dir[-1] != "/":
+            output_dir += "/"
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        return output_dir
 
     @staticmethod
-    def merge_dictionaries(file_paths, output_file_path):
+    def handle_train_output_directory(output_dir):
         """
-        Concatenate dictionaries given in list of file paths to a single dictionary
-        :param file_paths: List of file path
-        :param output_file_path: Output file path name
+        Process the output directory and return a valid directory where we save the output
+        :param output_dir: Output directory path
         :return:
         """
-        merged_dict = {}
+        timestr = time.strftime("%m%d%Y_%H%M%S")
+        # process the output directory
+        if output_dir[-1] != "/":
+            output_dir += "/"
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
 
-        for file_path in file_paths:
-            dictionary = pickle.load(open(file_path, "rb"))
-            z = {**merged_dict, **dictionary}
-            merged_dict = z
+        # create an internal directory so we don't overwrite previous runs
+        model_save_dir = output_dir + "trained_models_" + timestr + "/"
+        if not os.path.exists(model_save_dir):
+            os.mkdir(model_save_dir)
 
-        # save the merged file
-        pickle.dump(merged_dict, open(output_file_path, "wb"))
+        stats_directory = model_save_dir + "stats_" + timestr + "/"
+
+        if not os.path.exists(stats_directory):
+            os.mkdir(stats_directory)
+
+        return model_save_dir, stats_directory
 
     @staticmethod
     def get_file_paths_from_directory(directory_path):
         """
-        Returns all paths of files given a directory path
+        Returns all paths of .h5 files given a directory path
         :param directory_path: Path to the directory
         :return: A list of paths of files
         """
-        file_paths = [join(directory_path, file) for file in listdir(directory_path) if isfile(join(directory_path, file))]
+        file_paths = [os.path.join(directory_path, file) for file in os.listdir(directory_path)
+                      if os.path.isfile(os.path.join(directory_path, file)) and file[-2:] == 'h5']
         return file_paths
-
-    @staticmethod
-    def delete_files(file_paths):
-        """
-        Deletes files given in file paths
-        :param file_paths: List of file paths
-        :return:
-        """
-        for file_path in file_paths:
-            remove(file_path)
 

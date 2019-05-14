@@ -1,23 +1,19 @@
 import argparse
-import os
-import time
 
 # Custom generator for our dataset
 from modules.python.models.train import train
 from modules.python.Options import TrainOptions
+from modules.python.FileManager import FileManager
 """
-Input:
-- A train CSV file
-- A test CSV file
-
-Output:
-- A model with tuned hyper-parameters
+The train module of HELEN trains a deep neural network to perform a multi-task classification. It takes a set of
+labeled images from MarginPolish and trains the model to predict a base and the run-length of the base using a 
+gated recurrent unit (GRU) based model. This script is the interface to the training module. 
 """
 
 
 class TrainModule:
     """
-    Train module
+    Train module that provides an interface to the train method of HELEN.
     """
     def __init__(self, train_file, test_file, gpu_mode, max_epochs, batch_size, num_workers,
                  retrain_model, retrain_model_path, model_dir, stats_dir):
@@ -53,35 +49,9 @@ class TrainModule:
                                                    self.weight_decay,
                                                    self.model_dir,
                                                    self.stats_dir,
-                                                   train_mode=True)
+                                                   not_hyperband=True)
 
         return model, optimizer, stats_dictionary
-
-
-def handle_output_directory(output_dir):
-    """
-    Process the output directory and return a valid directory where we save the output
-    :param output_dir: Output directory path
-    :return:
-    """
-    timestr = time.strftime("%m%d%Y_%H%M%S")
-    # process the output directory
-    if output_dir[-1] != "/":
-        output_dir += "/"
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-
-    # create an internal directory so we don't overwrite previous runs
-    model_save_dir = output_dir + "trained_models_" + timestr + "/"
-    if not os.path.exists(model_save_dir):
-        os.mkdir(model_save_dir)
-
-    stats_directory = model_save_dir + "stats_" + timestr + "/"
-
-    if not os.path.exists(stats_directory):
-        os.mkdir(stats_directory)
-
-    return model_save_dir, stats_directory
 
 
 if __name__ == '__main__':
@@ -148,7 +118,7 @@ if __name__ == '__main__':
         help="Epoch size for training iteration."
     )
     FLAGS, unparsed = parser.parse_known_args()
-    model_out_dir, log_dir = handle_output_directory(FLAGS.model_out)
+    model_out_dir, log_dir = FileManager.handle_train_output_directory(FLAGS.model_out)
     tm = TrainModule(FLAGS.train_file, FLAGS.test_file, FLAGS.gpu_mode, FLAGS.epoch_size, FLAGS.batch_size,
                      FLAGS.num_workers, FLAGS.retrain_model, FLAGS.retrain_model_path, model_out_dir, log_dir)
     tm.train_model()

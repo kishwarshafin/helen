@@ -6,15 +6,15 @@ from modules.python.Options import ImageSizeOptions
 
 class DataStore(object):
     """Class to read/write to a FRIDAY's file"""
-    _summary_path_ = 'summaries'
-    _groups_ = ('chromosome_name', 'image', 'position', 'index', 'label')
+    _prediction_path_ = 'predictions'
+    _groups_ = ('position', 'index', 'bases', 'rles')
 
     def __init__(self, filename, mode='r'):
         self.filename = filename
         self.mode = mode
 
         self._sample_keys = set()
-        self.file_handler = None
+        self.file_handler = h5py.File(self.filename, self.mode)
 
         self._meta = None
 
@@ -52,16 +52,32 @@ class DataStore(object):
         self._meta = self.meta
         self._meta.update(meta)
 
-    def write_train_summary(self, chromosome_name, image, position, index, label_base, label_rle, summary_name):
-        # if 'summary' not in self.meta:
-        #     self.meta['summary'] = set()
+    def write_prediction(self, contig, contig_start, contig_end, chunk_id, position,
+                         predicted_bases, predicted_rles, filename):
+        chunk_name_prefix = str(contig) + "-" + str(contig_start.item()) + "-" + str(contig_end.item())
+        chunk_name_suffix = str(chunk_id.item())
 
-        # img_dset = self.file_handler.create_dataset('{}/{}/{}'.format(self._summary_path_, summary_name, 'image'),
-        #                                             (1000, 10), np.double)
-        # img_dset[...] = image
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'image')] = image
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'chromosome_name')] = chromosome_name
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'position')] = position
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'index')] = index
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'label_base')] = label_base
-        self.file_handler['{}/{}/{}'.format(self._summary_path_, summary_name, 'label_rle')] = label_rle
+        name = contig + chunk_name_prefix + chunk_name_suffix
+
+        if 'predictions' not in self.meta:
+            self.meta['predictions'] = set()
+        if 'predictions_contig' not in self.meta:
+            self.meta['predictions_contig'] = set()
+
+        if chunk_name_prefix not in self.meta['predictions_contig']:
+            self.meta['predictions_contig'].add(chunk_name_prefix)
+            self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_start')] \
+                = contig_start.item()
+            self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_end')] \
+                = contig_end.item()
+
+        if name not in self.meta['predictions']:
+            self.meta['predictions'].add(name)
+            self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
+                                                      chunk_name_suffix, 'position')] = position
+            self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
+                                                      chunk_name_suffix, 'bases')] = predicted_bases
+            self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
+                                                      chunk_name_suffix, 'rles')] = predicted_rles
+
+
