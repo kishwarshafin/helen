@@ -1,17 +1,12 @@
-class ActiveRegionOptions(object):
-    MIN_REGION_SIZE = 80
-    MAX_REGION_SIZE = 1000
-    REGION_EXPANSION = 25
-    MIN_MAPPING_QUALITY = 20
-    MIN_BASE_QUALITY = 20
-    # the linear regression model is used inside C++ code
-
-
-class CandidateFinderOptions(object):
-    # base and map quality
-    MIN_BASE_QUALITY = 10
-    MIN_MAP_QUALITY = 10
-    SAFE_BASES = 50
+class StitchOptions(object):
+    BASE_ERROR_RATE = 1.0
+    label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
+    MATCH_PENALTY = 4
+    MISMATCH_PENALTY = 6
+    GAP_PENALTY = 8
+    GAP_EXTEND_PENALTY = 2
+    MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING = 2
+    OVERLAP_THRESHOLD = 5
 
 
 class ImageSizeOptions(object):
@@ -31,25 +26,4 @@ class TrainOptions(object):
     GRU_LAYERS = 1
     HIDDEN_SIZE = 128
     CLASS_WEIGHTS = [0.3, 0.5, 0.5, 0.5, 0.5, 0.8, 0.9, 1.0, 1.0, 1.0, 0.9]
-
-
-class AlingerOptions(object):
-    # base and map quality
-    ALIGNMENT_SAFE_BASES = 20
-    MIN_MAP_QUALITY = 20
-
-    MAX_READS_IN_REGION = 1500
-    RANDOM_SEED = 2719747673
-
-
-class DeBruijnGraphOptions(object):
-    MIN_K = 10
-    MAX_K = 100
-    STEP_K = 1
-    MIN_EDGE_SUPPORT = 2
-    MAX_ALLOWED_PATHS = 256
-
-    # base and map quality
-    MIN_BASE_QUALITY = 15
-    MIN_MAP_QUALITY = 20
 

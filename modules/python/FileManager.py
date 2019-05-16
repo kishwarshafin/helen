@@ -58,3 +58,14 @@ class FileManager:
                       if os.path.isfile(os.path.join(directory_path, file)) and file[-2:] == 'h5']
         return file_paths
 
+    @staticmethod
+    def chunks(file_names, threads):
+        """
+        Given a list of file names a number of threads, this method returns a list containing file names.
+        The len(chunks) == threads so we can use each item in the list for a single process.
+        """
+        chunks = []
+        for i in range(0, len(file_names), threads):
+            chunks.append(file_names[i:i + threads])
+        return chunks
+

@@ -1,6 +1,8 @@
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
+import sys
+from modules.python.TextColor import TextColor
 from modules.python.FileManager import FileManager
 
 
@@ -28,11 +30,16 @@ class SequenceDataset(Dataset):
         for hdf5_file_path in hdf_files:
             # for each of the files get all the images
             with h5py.File(hdf5_file_path, 'r') as hdf5_file:
-                image_names = list(hdf5_file['images'].keys())
+                # check if marginpolish somehow generated an empty file
+                if 'images' in hdf5_file:
+                    image_names = list(hdf5_file['images'].keys())
 
-            # save the file-image pair to the list
-            for image_name in image_names:
-                file_image_pair.append((hdf5_file_path, image_name))
+                    # save the file-image pair to the list
+                    for image_name in image_names:
+                        file_image_pair.append((hdf5_file_path, image_name))
+                else:
+                    sys.stderr.write(TextColor.YELLOW + "WARN: NO IMAGES FOUND IN FILE: "
+                                     + hdf5_file_path + "\n" + TextColor.END)
 
         # save the list to all_images so we can access the list inside other methods
         self.all_images = file_image_pair
