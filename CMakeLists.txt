@@ -27,9 +27,3 @@ INCLUDE(modules/pybind11.cmake)
 # pybind11 to interface
 pybind11_add_module(HELEN ${CMAKE_CURRENT_SOURCE_DIR}/modules/src/pybind_api.cpp)
 
-#-------------------
-# Test
-#-------------------
-#ENABLE_TESTING()
-#ADD_SUBDIRECTORY(modules/unit_tests)
-
