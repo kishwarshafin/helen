@@ -6,7 +6,7 @@ import numpy as np
 
 import torch
 import torch.nn.parallel
-from modules.python.models.test_debug import test
+from modules.python.models.test import test
 from modules.python.models.ModelHander import ModelHandler
 from modules.python.TextColor import TextColor
 from modules.python.Options import ImageSizeOptions
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--print_details",
         type=bool,
-        default=True,
+        default=False,
         help="If true then cuda is on."
     )
     parser.add_argument(
