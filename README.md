@@ -48,108 +48,95 @@ To ensure robustness of `HELEN` we have tested it on two cloud computing platfor
 #### Google Cloud Platform runtime
 GCP allows to customize an instance between different runs. Users can stop an instance, scale it and start the next step. We ran `HELEN` on four samples in such way that is most cost-effective. We estimated the costs from the [Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/).
 <center>
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-t7yf{font-family:serif !important;;border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-7t3h{font-weight:bold;font-size:100%;font-family:serif !important;;border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-mn30{font-size:100%;font-family:serif !important;;border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-gioa{font-weight:bold;font-family:serif !important;;border-color:inherit;text-align:center;vertical-align:top}
-</style>
-<table class="tg" style="undefined;table-layout: fixed; width: 1056px">
+<table style="undefined;table-layout: fixed; width: 873px">
 <colgroup>
-<col style="width: 86px">
-<col style="width: 101px">
-<col style="width: 63px">
-<col style="width: 65px">
-<col style="width: 116px">
-<col style="width: 167px">
-<col style="width: 66px">
-<col style="width: 69px">
-<col style="width: 120px">
-<col style="width: 66px">
 <col style="width: 73px">
-<col style="width: 74px">
+<col style="width: 99px">
+<col style="width: 46px">
+<col style="width: 44px">
+<col style="width: 106px">
+<col style="width: 154px">
+<col style="width: 42px">
+<col style="width: 54px">
+<col style="width: 106px">
+<col style="width: 44px">
+<col style="width: 48px">
+<col style="width: 57px">
 </colgroup>
   <tr>
-    <th class="tg-gioa" rowspan="2">Sample</th>
-    <th class="tg-7t3h">Download</th>
-    <th class="tg-7t3h"></th>
-    <th class="tg-7t3h"></th>
-    <th class="tg-gioa" colspan="4">call_consensus.py</th>
-    <th class="tg-gioa">stitch.py</th>
-    <th class="tg-t7yf"></th>
-    <th class="tg-t7yf"></th>
-    <th class="tg-gioa" rowspan="2">TOTAL COST</th>
+    <th rowspan="2">Sample</th>
+    <th colspan="3">Download</th>
+    <th colspan="4">call_consensus.py</th>
+    <th colspan="3">stitch.py</th>
+    <th rowspan="2">TOTAL COST</th>
   </tr>
   <tr>
-    <td class="tg-7t3h">Instance Type</td>
-    <td class="tg-7t3h">Time</td>
-    <td class="tg-7t3h">Cost</td>
-    <td class="tg-gioa">Instance type</td>
-    <td class="tg-gioa">GPU</td>
-    <td class="tg-gioa">Time</td>
-    <td class="tg-gioa">Cost</td>
-    <td class="tg-gioa">Instance Type</td>
-    <td class="tg-gioa">Time</td>
-    <td class="tg-gioa">Cost</td>
+    <td>Instance type</td>
+    <td>Time <br>Mins</td>
+    <td>Cost</td>
+    <td>Instance type</td>
+    <td>GPU</td>
+    <td>Time<br>Mins</td>
+    <td>Cost</td>
+    <td>Instance type</td>
+    <td>Time<br>Mins</td>
+    <td>Cost</td>
   </tr>
   <tr>
-    <td class="tg-t7yf">HG01109</td>
-    <td class="tg-mn30">n1-standard-1</td>
-    <td class="tg-mn30">1:06:26</td>
-    <td class="tg-mn30">1$</td>
-    <td class="tg-t7yf">n1-standard-32</td>
-    <td class="tg-t7yf">2 x NVIDIA Tesla P100</td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
+    <td>HG01109</td>
+    <td>n1-standard-1</td>
+    <td>67</td>
+    <td>1$</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-t7yf">HG02080</td>
-    <td class="tg-mn30">n1-standard-1</td>
-    <td class="tg-mn30">1:05:47</td>
-    <td class="tg-mn30">1$</td>
-    <td class="tg-t7yf">n1-standard-32</td>
-    <td class="tg-t7yf">2 x NVIDIA Tesla P100</td>
-    <td class="tg-t7yf">8:54:41</td>
-    <td class="tg-t7yf">39.96$</td>
-    <td class="tg-t7yf">n1-standard-96</td>
-    <td class="tg-t7yf">0:21:22</td>
-    <td class="tg-t7yf">2$</td>
-    <td class="tg-gioa">43$</td>
+    <td>HG02080</td>
+    <td>n1-standard-1</td>
+    <td>66</td>
+    <td>1$</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td>535</td>
+    <td>39.96$</td>
+    <td>n1-standard-96</td>
+    <td>22</td>
+    <td>2$</td>
+    <td>43$</td>
   </tr>
   <tr>
-    <td class="tg-t7yf">HG01243</td>
-    <td class="tg-mn30">n1-standard-1</td>
-    <td class="tg-mn30">1:09:11</td>
-    <td class="tg-mn30">1$</td>
-    <td class="tg-t7yf">n1-standard-32</td>
-    <td class="tg-t7yf">2 x NVIDIA Tesla P100</td>
-    <td class="tg-t7yf">9:00:54</td>
-    <td class="tg-t7yf">44.4$</td>
-    <td class="tg-t7yf">n1-standard-96</td>
-    <td class="tg-t7yf">0:20:21</td>
-    <td class="tg-t7yf">2$</td>
-    <td class="tg-gioa">48$</td>
+    <td>HG01243</td>
+    <td>n1-standard-1</td>
+    <td>70</td>
+    <td>1$</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td>541</td>
+    <td>44.4$</td>
+    <td>n1-standard-96</td>
+    <td>21</td>
+    <td>2$</td>
+    <td>48$</td>
   </tr>
   <tr>
-    <td class="tg-t7yf">GM24143</td>
-    <td class="tg-mn30">n1-standard-1</td>
-    <td class="tg-mn30">1:07:28</td>
-    <td class="tg-mn30">1$</td>
-    <td class="tg-t7yf">n1-standard-32</td>
-    <td class="tg-t7yf">2 x NVIDIA Tesla P100</td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
-    <td class="tg-t7yf"></td>
+    <td>GM24143</td>
+    <td>n1-standard-1</td>
+    <td>68</td>
+    <td>1$</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
 </table>
 </center>
