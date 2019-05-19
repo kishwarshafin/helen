@@ -49,7 +49,8 @@ To ensure robustness of `HELEN` we have tested it on two cloud computing platfor
 GCP allows to customize an instance between different runs. Users can stop an instance, scale it and start the next step. We ran `HELEN` on four samples in such way that is most cost-effective. We estimated the costs from the [Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/).
 
 <center>
-<table style="font-family:Arial;font-size:10px;text-align:center">
+<font size="-2">
+<table>
 <colgroup>
 <col style="width: 73px">
 <col style="width: 99px">
@@ -140,6 +141,7 @@ GCP allows to customize an instance between different runs. Users can stop an in
     <td class="tg-baqh"></td>
   </tr>
 </table>
+</font>
 </center>
 
 If you want to do all three steps without rescaling the instance after each step, we suggest you use this configuration:
