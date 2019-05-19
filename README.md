@@ -10,17 +10,22 @@ H.E.L.E.N. (Haplotype Embedded Long-read Error-corrector for Nanopore)
 Computational Genomics Lab (CGL), University of California, Santa Cruz.
 
 ## Why MarginPolish-HELEN ?
-* `MarginPolish-HELEN` outperforms other graph-based and Neural-Network based polishing pipelines (Racon-Medaka).
+* `MarginPolish-HELEN` outperforms other graph-based and Neural-Network based polishing pipelines.
 * Highly optimized pipeline that is faster than any other available tool.
 * We have sequenced-assembled-polished 12 samples to ensure robustness, runtime-consistency and cost-efficiency.
-* Using `HELEN` with GPU is simple. We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure robustness and scalability.
+* We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 * Open source (MIT License)
 
 ## Table of contents
 * [Workflow](#workflow)
 * [Results](#Results)
 * [Runtime](#Runtime)
-   * [Google Cloud Platform runtime](#Google-Cloud-Platform-runtime)
+* [Installation](#Installation)
+* [Model](#Model)
+   * [Released Models](#Released-Models)
+* [Usage](#Usage)
+* [Help](#Help)
+* [Acknowledgement](#Acknowledgement)
 
 ## Workflow
 
@@ -118,23 +123,25 @@ If you want to do all three steps without rescaling the instance after each step
 * Disk: 2TB SSD
 * TIP: Use `Deep Learning Image: PyTorch 1.1.0 and fastai m25 CUDA 10.0` as boot disk which has pre-installed `CUDA 10.0` and `PyTorch`.
 
-The estimated runtime with this instance type is 13 hours (including setup and download). The [estimated cost](https://cloud.google.com/products/calculator/#id=6aeafb9f-e28d-4f9e-9406-cf8282a12ecc) with this instance is <b>60.39$</b>.
+The estimated runtime with this instance type is 13 hours (including setup and download). <br>
+The [estimated cost](https://cloud.google.com/products/calculator/#id=6aeafb9f-e28d-4f9e-9406-cf8282a12ecc) with this instance is <b>60.39$</b>.
 
 ## Installation
 Although `HELEN` can be used in a `CPU` only machine, we highly recommend using a machine with `GPU`. This requires installing `CUDA` and the right `PyTorch` version compiled against the installed version of `CUDA`.
 
 ##### Install CUDA
-We optimized `HELEN` to run on GPUs and we highly recommend using GPU machines to run `call_consensus.py`. The supported `CUDA` version for `HELEN` is `10.0`. To download `CUDA` for `Ubuntu 18.04` follow these insructions:
-
+To download `CUDA` for `Ubuntu 18.04` follow these insructions:
 ```bash
 # download CUDA for ubuntu 18.04 x86_64 by running:
 wget https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda_10.0.130_410.48_linux
-# if you are using other systems please download the correct version from here: https://developer.nvidia.com/cuda-10.0-download-archive
+# if you are using other systems please download the correct version from here:
+# https://developer.nvidia.com/cuda-10.0-download-archive
 
 # install CUDA by running:
 sudo sh cuda_10.0.130_410.48_linux.run
 # 1) Read or scroll through the EULA (you can press 'z' to scroll down).
-# 2) Accept the EULA, put yes for OpenGL library, CUDA toolkit and all other softwares. Installing CUDA-samples is optional
+# 2) Accept the EULA, put yes for OpenGL library, CUDA toolkit.
+#    Installing CUDA-samples is optional
 
 # once installed, verify the right version by running:
 cat /usr/local/cuda/version.txt
@@ -152,10 +159,11 @@ Please follow the instructions from this [pytorch-installation-guide](https://py
 python3 -m pip install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 python3 -m pip install torchvision
 
-# otherwise install the right version by following the instructions from: https://pytorch.org/get-started/locally/
+# otherwise install the right version by following the instructions from:
+# https://pytorch.org/get-started/locally/
 ```
 
-`HELEN` uses `PyTorch` as the deep-neural-network library. We suggest a careful installation of `PyTorch` with the right `CUDA` version. We highly recommend using `HELEN` on a GPU machine, and we have made it easy to use on multiple GPUs. Install the right `PyTorch` package compiled against the right `CUDA` version and using `HELEN` is as simple as setting a flag `--gpu_mode 1`. We have tested these PyTorch versions against `HELEN` to ensure GPU accelerated inference:
+We have tested these PyTorch versions against `HELEN` to ensure GPU accelerated inference:
 * PyTorch 1.0 with CUDA 10.0
 * PyTorch 1.1 with CUDA 10.0
 
@@ -210,7 +218,7 @@ HELEN implements a Recurrent-Neural-Network (RNN) based Multi-task learning mode
 Full user documentation [Working on it]
 
 ## Help
-Email address of someone helpful.
+Please open a github issue if you face any difficulties.
 
 ## Acknowledgement
 We are thankful to the developers of these packages: </br>
