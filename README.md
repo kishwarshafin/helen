@@ -68,7 +68,7 @@ GCP allows to customize an instance between different runs. Users can stop an in
   <tr>
     <td>HG01109</td>
     <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
+    <td>2 x Tesla P100</td>
     <td>8:28:06</td>
     <td>41$</td>
     <td>n1-standard-32</td>
@@ -79,7 +79,7 @@ GCP allows to customize an instance between different runs. Users can stop an in
   <tr>
     <td>GM24143</td>
     <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
+    <td>2 x Tesla P100</td>
     <td>8:50:25</td>
     <td>41$</td>
     <td>n1-standard-32</td>
@@ -90,7 +90,7 @@ GCP allows to customize an instance between different runs. Users can stop an in
   <tr>
     <td>HG02080</td>
     <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
+    <td>2 x Tesla P100</td>
     <td>8:54:41</td>
     <td>41$</td>
     <td>n1-standard-96</td>
@@ -101,7 +101,7 @@ GCP allows to customize an instance between different runs. Users can stop an in
   <tr>
     <td>HG01243</td>
     <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
+    <td>2 x Tesla P100</td>
     <td>9:00:54</td>
     <td>45$</td>
     <td>n1-standard-96</td>
