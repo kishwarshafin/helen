@@ -141,8 +141,9 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
                 prediction_rle_tensor = torch.add(prediction_rle_tensor, rle_prediction)
 
             # all done now create a SEQ_LENGTH long prediction list
-            prediction_base_tensor = prediction_rle_tensor.cpu()
+            prediction_base_tensor = prediction_base_tensor.cpu()
             prediction_rle_tensor = prediction_rle_tensor.cpu()
+
             base_values, base_labels = torch.max(prediction_base_tensor, 2)
             rle_values, rle_labels = torch.max(prediction_rle_tensor, 2)
 
