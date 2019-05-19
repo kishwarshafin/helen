@@ -97,8 +97,12 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
             # to keep track of predictions.
             # these two dictionaries save predictions for each of the chunks and later we aggregate all the predictions
             # over the entire sequence to get a sequence prediction for the whole sequence.
-            prediction_base_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_BASE_LABELS))
-            prediction_rle_dict = np.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_RLE_LABELS))
+            prediction_base_tensor = torch.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_BASE_LABELS))
+            prediction_rle_tensor = torch.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_RLE_LABELS))
+
+            if gpu_mode:
+                prediction_base_tensor = prediction_base_tensor.cuda()
+                prediction_rle_tensor = prediction_rle_tensor.cuda()
 
             # now the images usually contain 1000 bases, we iterate on a sliding window basis where we process
             # the window size then jump to the next window
@@ -115,46 +119,35 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, gpu
                 # run inference
                 output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
 
-                # do softmax and get prediction
-                # this can be done on GPU, need to look into this
-                m = nn.Softmax(dim=2)
-                soft_probs = m(output_base)
-                output_preds = soft_probs.cpu()
-                # use the maximum probability value as prediction
-                base_max_value, predicted_base_label = torch.max(output_preds, dim=2)
+                # now calculate how much padding is on the top and bottom of this chunk so we can do a simple
+                # add operation
+                top_zeros = chunk_start
+                bottom_zeros = ImageSizeOptions.SEQ_LENGTH - chunk_end
 
-                # convert everything to list
-                base_max_value = base_max_value.numpy().tolist()
-                predicted_base_label = predicted_base_label.numpy().tolist()
+                # we run a softmax a padding to make the output tensor compatible for adding
+                inference_layers = nn.Sequential(
+                    nn.Softmax(dim=2),
+                    nn.ZeroPad2d((0, 0, top_zeros, bottom_zeros))
+                )
+                if gpu_mode:
+                    inference_layers = inference_layers.cuda()
 
-                # do softmax and get prediction for rle
-                m_rle = nn.Softmax(dim=2)
-                rle_soft_probs = m_rle(output_rle)
-                rle_output_preds = rle_soft_probs.cpu()
-                rle_max_value, predicted_rle_labels = torch.max(rle_output_preds, dim=2)
+                # run the softmax and padding layers
+                base_prediction = inference_layers(output_base)
+                rle_prediction = inference_layers(output_rle)
 
-                # convert everything to list
-                rle_max_value = rle_max_value.numpy().tolist()
-                predicted_rle_labels = predicted_rle_labels.numpy().tolist()
+                # now simply add the tensor to the global counter
+                prediction_base_tensor = torch.add(prediction_base_tensor, base_prediction)
+                prediction_rle_tensor = torch.add(prediction_rle_tensor, rle_prediction)
 
-                # make sure the lengths oof the multi-task predictions are the same
-                assert(len(base_max_value) == len(predicted_base_label) == len(predicted_rle_labels))
+            # all done now create a SEQ_LENGTH long prediction list
+            prediction_base_tensor = prediction_rle_tensor.cpu()
+            prediction_rle_tensor = prediction_rle_tensor.cpu()
+            base_values, base_labels = torch.max(prediction_base_tensor, 2)
+            rle_values, rle_labels = torch.max(prediction_rle_tensor, 2)
 
-                # iterate over the images and populate the prediction dictionaries for each chunk
-                for ii in range(0, len(predicted_base_label)):
-                    chunk_pos = chunk_start
-                    for p_base, p_rle, base, rle in zip(base_max_value[ii],
-                                                        rle_max_value[ii],
-                                                        predicted_base_label[ii],
-                                                        predicted_rle_labels[ii]):
-                        prediction_base_dict[ii][chunk_pos][base] += p_base
-                        prediction_rle_dict[ii][chunk_pos][rle] += p_rle
-                        chunk_pos += 1
-
-            # now that we have predictions for each chunk, we can aggregate all the predictions and have
-            # one sequence for the entire length of the image sequence.
-            predicted_base_labels = np.argmax(np.array(prediction_base_dict), axis=2)
-            predicted_rle_labels = np.argmax(np.array(prediction_rle_dict), axis=2)
+            predicted_base_labels = base_labels.cpu().numpy()
+            predicted_rle_labels = rle_labels.cpu().numpy()
 
             # go to each of the images and save the predictions to the file
             for i in range(images.size(0)):
