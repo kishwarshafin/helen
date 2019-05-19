@@ -47,34 +47,33 @@ To ensure robustness of `HELEN` we have tested it on two cloud computing platfor
 
 #### Google Cloud Platform runtime
 GCP allows to customize an instance between different runs. Users can stop an instance, scale it and start the next step. We ran `HELEN` on four samples in such way that is most cost-effective. We estimated the costs from the [Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/).
-
+<p>
 <center>
-<font size="1">
 <table>
   <tr>
-    <th rowspan="2">Sample</th>
-    <th>Download</th>
+    <th rowspan="2"><sub>Sample</sub></th>
+    <th><sub>Download</sub></th>
     <th></th>
-    <th colspan="4">call_consensus.py</th>
-    <th colspan="2">stitch.py</th>
-    <th rowspan="2">COST</th>
+    <th colspan="4"><sub>call_consensus.py</sub></th>
+    <th colspan="2"><sub>stitch.py</sub></th>
+    <th rowspan="2"><sub>COST</sub></th>
   </tr>
   <tr>
-    <th>Instance type</th>
-    <th>Time <br>Mins</th>
-    <th>Instance type</th>
-    <th>GPU</th>
-    <th>Time<br>Mins</th>
-    <th>Cost</th>
-    <th>Instance type</th>
-    <th>Time<br>Mins</th>
+    <th><sub>Instance type</sub></th>
+    <th><sub>Time <br>Mins</sub></th>
+    <th><sub>Instance type</sub></th>
+    <th><sub>GPU</sub></th>
+    <th><sub>Time<br>Mins</sub></th>
+    <th><sub>Cost</sub></th>
+    <th><sub>Instance type</sub></th>
+    <th><sub>Time<br>Mins</sub></th>
   </tr>
   <tr>
-    <td>HG01109</td>
-    <td>n1-standard-1</td>
-    <td>67</td>
-    <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
+    <td><sub>HG01109</sub></td>
+    <td><sub>n1-standard-1</sub></td>
+    <td><sub>67</sub></td>
+    <td><sub>n1-standard-32</sub></td>
+    <td><sub>2 x NVIDIA Tesla P100</sub></td>
     <td></td>
     <td></td>
     <td></td>
@@ -82,44 +81,45 @@ GCP allows to customize an instance between different runs. Users can stop an in
     <td></td>
   </tr>
   <tr>
-    <td>HG02080</td>
-    <td>n1-standard-1</td>
-    <td>66</td>
-    <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
-    <td>535</td>
-    <td>39.96$</td>
-    <td>n1-standard-96</td>
-    <td>22</td>
-    <td>43$</td>
+    <td><sub>HG02080</sub></td>
+    <td><sub>n1-standard-1</sub></td>
+    <td><sub>66</sub></td>
+    <td><sub>n1-standard-32</sub></td>
+    <td><sub>2 x NVIDIA Tesla P100</sub></td>
+    <td><sub>535</sub></td>
+    <td><sub>39.96$</sub></td>
+    <td><sub>n1-standard-96</sub></td>
+    <td><sub>22</sub></td>
+    <td><sub>43$</sub></td>
   </tr>
   <tr>
-    <td>HG01243</td>
-    <td>n1-standard-1</td>
-    <td>70</td>
-    <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
-    <td>541</td>
-    <td>44.4$</td>
-    <td>n1-standard-96</td>
-    <td>21</td>
-    <td>48$</td>
+    <td><sub>HG01243</sub></td>
+    <td><sub>n1-standard-1</sub></td>
+    <td><sub>70</sub></td>
+    <td><sub>n1-standard-32</sub></td>
+    <td><sub>2 x NVIDIA Tesla P100</sub></td>
+    <td><sub>541</sub></td>
+    <td><sub>44.4$</sub></td>
+    <td><sub>n1-standard-96</sub></td>
+    <td><sub>21</sub></td>
+    <td><sub>48$</sub></td>
   </tr>
   <tr>
-    <td>GM24143</td>
-    <td>n1-standard-1</td>
-    <td>68</td>
-    <td>n1-standard-32</td>
-    <td>2 x NVIDIA Tesla P100</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td><sub>GM24143</sub></td>
+    <td><sub>n1-standard-1</sub></td>
+    <td><sub>68</sub></td>
+    <td><sub>n1-standard-32</sub></td>
+    <td><sub>2 x NVIDIA Tesla P100</sub></td>
+    <td><sub></sub></td>
+    <td><sub></sub></td>
+    <td><sub></sub></td>
+    <td><sub></sub></td>
+    <td><sub></sub></td>
   </tr>
 </table>
 </font>
 </center>
+</p>
 
 If you want to do all three steps without rescaling the instance after each step, we suggest you use this configuration:
 * Instance type: n1-standard-32 (32 vCPUs, 120GB RAM)
