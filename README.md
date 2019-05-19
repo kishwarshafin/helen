@@ -54,27 +54,25 @@ GCP allows to customize an instance between different runs. Users can stop an in
     <th rowspan="2"><sub>Sample</sub></th>
     <th><sub>Download</sub></th>
     <th></th>
-    <th colspan="4"><sub>call_consensus.py</sub></th>
+    <th colspan="3"><sub>call_consensus.py</sub></th>
     <th colspan="2"><sub>stitch.py</sub></th>
     <th rowspan="2"><sub>COST</sub></th>
   </tr>
   <tr>
     <th><sub>Instance type</sub></th>
-    <th><sub>Time <br>Mins</sub></th>
+    <th><sub>Time</sub></th>
     <th><sub>Instance type</sub></th>
     <th><sub>GPU</sub></th>
     <th><sub>Time<br>Mins</sub></th>
-    <th><sub>Cost</sub></th>
     <th><sub>Instance type</sub></th>
-    <th><sub>Time<br>Mins</sub></th>
+    <th><sub>Time</sub></th>
   </tr>
   <tr>
     <td><sub>HG01109</sub></td>
     <td><sub>n1-standard-1</sub></td>
-    <td><sub>67</sub></td>
+    <td><sub>1:06:26</sub></td>
     <td><sub>n1-standard-32</sub></td>
     <td><sub>2 x NVIDIA Tesla P100</sub></td>
-    <td></td>
     <td></td>
     <td></td>
     <td></td>
@@ -83,34 +81,31 @@ GCP allows to customize an instance between different runs. Users can stop an in
   <tr>
     <td><sub>HG02080</sub></td>
     <td><sub>n1-standard-1</sub></td>
-    <td><sub>66</sub></td>
+    <td><sub>1:05:47</sub></td>
     <td><sub>n1-standard-32</sub></td>
     <td><sub>2 x NVIDIA Tesla P100</sub></td>
-    <td><sub>535</sub></td>
-    <td><sub>39.96$</sub></td>
+    <td><sub>8:54:41</sub></td>
     <td><sub>n1-standard-96</sub></td>
-    <td><sub>22</sub></td>
+    <td><sub>0:21:22</sub></td>
     <td><sub>43$</sub></td>
   </tr>
   <tr>
     <td><sub>HG01243</sub></td>
     <td><sub>n1-standard-1</sub></td>
-    <td><sub>70</sub></td>
+    <td><sub>1:09:11</sub></td>
     <td><sub>n1-standard-32</sub></td>
     <td><sub>2 x NVIDIA Tesla P100</sub></td>
-    <td><sub>541</sub></td>
-    <td><sub>44.4$</sub></td>
+    <td><sub>9:00:54</sub></td>
     <td><sub>n1-standard-96</sub></td>
-    <td><sub>21</sub></td>
+    <td><sub>0:20:21</sub></td>
     <td><sub>48$</sub></td>
   </tr>
   <tr>
     <td><sub>GM24143</sub></td>
     <td><sub>n1-standard-1</sub></td>
-    <td><sub>68</sub></td>
+    <td><sub>1:07:28</sub></td>
     <td><sub>n1-standard-32</sub></td>
     <td><sub>2 x NVIDIA Tesla P100</sub></td>
-    <td><sub></sub></td>
     <td><sub></sub></td>
     <td><sub></sub></td>
     <td><sub></sub></td>
