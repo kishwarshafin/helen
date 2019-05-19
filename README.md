@@ -49,96 +49,73 @@ To ensure robustness of `HELEN` we have tested it on two cloud computing platfor
 GCP allows to customize an instance between different runs. Users can stop an instance, scale it and start the next step. We ran `HELEN` on four samples in such way that is most cost-effective. We estimated the costs from the [Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/).
 
 <center>
-<font size="-2">
+<font size="1">
 <table>
-<colgroup>
-<col style="width: 73px">
-<col style="width: 99px">
-<col style="width: 46px">
-<col style="width: 44px">
-<col style="width: 106px">
-<col style="width: 154px">
-<col style="width: 42px">
-<col style="width: 54px">
-<col style="width: 106px">
-<col style="width: 44px">
-<col style="width: 48px">
-<col style="width: 57px">
-</colgroup>
   <tr>
-    <th class="tg-1wig" rowspan="2">Sample</th>
-    <th class="tg-amwm" colspan="3">Download</th>
-    <th class="tg-amwm" colspan="4">call_consensus.py</th>
-    <th class="tg-amwm" colspan="3">stitch.py</th>
-    <th class="tg-1wig" rowspan="2">TOTAL COST</th>
+    <th rowspan="2">Sample</th>
+    <th>Download</th>
+    <th></th>
+    <th colspan="4">call_consensus.py</th>
+    <th colspan="2">stitch.py</th>
+    <th rowspan="2">COST</th>
   </tr>
   <tr>
-    <td class="tg-amwm">Instance type</td>
-    <td class="tg-amwm">Time <br>Mins</td>
-    <td class="tg-amwm">Cost</td>
-    <td class="tg-amwm">Instance type</td>
-    <td class="tg-amwm">GPU</td>
-    <td class="tg-amwm">Time<br>Mins</td>
-    <td class="tg-amwm">Cost</td>
-    <td class="tg-amwm">Instance type</td>
-    <td class="tg-amwm">Time<br>Mins</td>
-    <td class="tg-amwm">Cost</td>
+    <th>Instance type</th>
+    <th>Time <br>Mins</th>
+    <th>Instance type</th>
+    <th>GPU</th>
+    <th>Time<br>Mins</th>
+    <th>Cost</th>
+    <th>Instance type</th>
+    <th>Time<br>Mins</th>
   </tr>
   <tr>
-    <td class="tg-baqh">HG01109</td>
-    <td class="tg-baqh">n1-standard-1</td>
-    <td class="tg-baqh">67</td>
-    <td class="tg-baqh">1$</td>
-    <td class="tg-baqh">n1-standard-32</td>
-    <td class="tg-baqh">2 x NVIDIA Tesla P100</td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
+    <td>HG01109</td>
+    <td>n1-standard-1</td>
+    <td>67</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td class="tg-baqh">HG02080</td>
-    <td class="tg-baqh">n1-standard-1</td>
-    <td class="tg-baqh">66</td>
-    <td class="tg-baqh">1$</td>
-    <td class="tg-baqh">n1-standard-32</td>
-    <td class="tg-baqh">2 x NVIDIA Tesla P100</td>
-    <td class="tg-baqh">535</td>
-    <td class="tg-baqh">39.96$</td>
-    <td class="tg-baqh">n1-standard-96</td>
-    <td class="tg-baqh">22</td>
-    <td class="tg-baqh">2$</td>
-    <td class="tg-baqh">43$</td>
+    <td>HG02080</td>
+    <td>n1-standard-1</td>
+    <td>66</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td>535</td>
+    <td>39.96$</td>
+    <td>n1-standard-96</td>
+    <td>22</td>
+    <td>43$</td>
   </tr>
   <tr>
-    <td class="tg-baqh">HG01243</td>
-    <td class="tg-baqh">n1-standard-1</td>
-    <td class="tg-baqh">70</td>
-    <td class="tg-baqh">1$</td>
-    <td class="tg-baqh">n1-standard-32</td>
-    <td class="tg-baqh">2 x NVIDIA Tesla P100</td>
-    <td class="tg-baqh">541</td>
-    <td class="tg-baqh">44.4$</td>
-    <td class="tg-baqh">n1-standard-96</td>
-    <td class="tg-baqh">21</td>
-    <td class="tg-baqh">2$</td>
-    <td class="tg-baqh">48$</td>
+    <td>HG01243</td>
+    <td>n1-standard-1</td>
+    <td>70</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td>541</td>
+    <td>44.4$</td>
+    <td>n1-standard-96</td>
+    <td>21</td>
+    <td>48$</td>
   </tr>
   <tr>
-    <td class="tg-baqh">GM24143</td>
-    <td class="tg-baqh">n1-standard-1</td>
-    <td class="tg-baqh">68</td>
-    <td class="tg-baqh">1$</td>
-    <td class="tg-baqh">n1-standard-32</td>
-    <td class="tg-baqh">2 x NVIDIA Tesla P100</td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
-    <td class="tg-baqh"></td>
+    <td>GM24143</td>
+    <td>n1-standard-1</td>
+    <td>68</td>
+    <td>n1-standard-32</td>
+    <td>2 x NVIDIA Tesla P100</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
 </table>
 </font>
