@@ -41,8 +41,6 @@ The workflow is as follows:
 <img src="img/pipeline.svg" alt="pipeline.svg" height="640p">
 </p>
 
-
-
 ## Results
 Put some dope results here
 
@@ -124,8 +122,8 @@ If you want to do all three steps without rescaling the instance after each step
 * Disk: 2TB SSD
 * Cost: 4.65$/hour
 
-The estimated runtime with this instance type is 5~6 hours. <br>
-The estimated cost with this instance is <b>24~28$</b>.
+The estimated runtime with this instance type is 6 hours. <br>
+The estimated cost with this instance is <b>28$</b>.
 
 #### Amazon Web Services
 `AWS` does not provide an option to customize resources between steps. Hence, we used `p2.8xlarge` instance type for `HELEN`. The configuration is as follows:
