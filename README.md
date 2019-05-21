@@ -16,7 +16,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 * Highly optimized pipeline that is faster than any other available polishing tool (~5 hours for `HELEN`).
 * We have <b>sequenced-assembled-polished 12 samples</b> to ensure robustness, runtime-consistency and cost-efficiency.
 * We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
-* Open source (MIT License)
+* Open source [(MIT License)](LICENSE).
 
 ## Table of contents
 * [Workflow](#workflow)
@@ -42,99 +42,337 @@ The workflow is as follows:
 </p>
 
 ## Results
-Put some dope results here
-
-## Runtime and Cost
-To ensure robustness of `HELEN` we have tested it on two cloud computing platforms `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)`. We report runtime on multiple samples and the instance-types we have used while running the pipeline. The two computations we do with `HELEN` are:
-* Run `call_consensus.py` (requires GPU).
-* Run `stitch.py` (Multi-threaded on CPU, no GPU required).
-
-#### Google Cloud Platform runtime
-GCP allows to customize an instance between different runs. Users can stop an instance, scale it and start the next step. We ran `HELEN` on four samples in such way that is most cost-effective. We estimated the costs from the [Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/).
-
+We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with `assess_assembly` module available from `Pomoxis`. The summary of the quality we produce is here:
 <center>
-<table>
+<table style="undefined;table-layout: fixed; width: 881px">
+<colgroup>
+<col style="width: 71px">
+<col style="width: 65px">
+<col style="width: 84px">
+<col style="width: 92px">
+<col style="width: 116px">
+<col style="width: 59px">
+<col style="width: 59px">
+<col style="width: 59px">
+<col style="width: 59px">
+<col style="width: 55px">
+<col style="width: 54px">
+<col style="width: 54px">
+<col style="width: 54px">
+</colgroup>
   <tr>
     <th rowspan="2">Sample</th>
-    <th colspan="4">call_consensus.py</th>
-    <th colspan="3">stitch.py</sub></th>
-    <th rowspan="2">Total<br>Cost</th>
+    <th rowspan="2">Region</th>
+    <th rowspan="2">Truth assembly</th>
+    <th colspan="2">Polisher</th>
+    <th colspan="4">Percentage Errors</th>
+    <th colspan="4">Q Scores</th>
   </tr>
   <tr>
-    <th>Instance type</th>
-    <th>GPU</th>
-    <th>Time</th>
-    <th>Cost</th>
-    <th>Instance type</th>
-    <th>Time</th>
-    <th>Cost</th>
+    <td>Method</td>
+    <td>Model</td>
+    <td>err_bal</td>
+    <td>iden</td>
+    <td>del</td>
+    <td>ins</td>
+    <td>err_bal</td>
+    <td>iden</td>
+    <td>del</td>
+    <td>ins</td>
   </tr>
   <tr>
-    <td>HG01109</td>
-    <td>n1-standard-32</td>
-    <td>2 x Tesla P100</td>
-    <td>3:24:19</td>
-    <td>19$</td>
-    <td>n1-standard-32</td>
-    <td>0:49:48</td>
-    <td>3$</td>
-    <td>22$</td>
+    <td rowspan="8">HG002</td>
+    <td rowspan="4">Chr 20</td>
+    <td rowspan="4">GIAB High Confidence regions GRCh38</td>
+    <td>Shasta</td>
+    <td>-</td>
+    <td>1.080%</td>
+    <td>0.062%</td>
+    <td>0.915%</td>
+    <td>0.104%</td>
+    <td>19.670</td>
+    <td>32.100</td>
+    <td>20.390</td>
+    <td>29.820</td>
   </tr>
   <tr>
-    <td>GM24143</td>
-    <td>n1-standard-32</td>
-    <td>2 x Tesla P100</td>
-    <td>3:46:19</td>
-    <td>19$</td>
-    <td>n1-standard-32</td>
-    <td>1:02:27</td>
-    <td>4$</td>
-    <td>23$</td>
+    <td>Medaka</td>
+    <td>r941_flip235</td>
+    <td>0.479%</td>
+    <td>0.062%</td>
+    <td>0.346%</td>
+    <td>0.071%</td>
+    <td>23.200</td>
+    <td>32.070</td>
+    <td>24.600</td>
+    <td>31.500</td>
   </tr>
   <tr>
-    <td>HG02080</td>
-    <td>n1-standard-32</td>
-    <td>2 x Tesla P100</td>
-    <td>3:32:19</td>
-    <td>19$</td>
-    <td>n1-standard-96</td>
-    <td>0:21:22</td>
-    <td>2$</td>
-    <td>21$</td>
+    <td>MarginPolish</td>
+    <td>guppy_ff235</td>
+    <td>0.450%</td>
+    <td>0.043%</td>
+    <td>0.298%</td>
+    <td>0.109%</td>
+    <td>23.470</td>
+    <td>33.660</td>
+    <td>25.260</td>
+    <td>31.100</td>
   </tr>
   <tr>
-    <td>HG01243</td>
-    <td>n1-standard-32</td>
-    <td>2 x Tesla P100</td>
-    <td>3:53:19</td>
-    <td>20$</td>
-    <td>n1-standard-96</td>
-    <td>0:20:21</td>
-    <td>2$</td>
-    <td>22$</td>
+    <td>H.E.L.E.N.</td>
+    <td>rl941_flip235</td>
+    <td>0.368%</td>
+    <td>0.041%</td>
+    <td>0.232%</td>
+    <td>0.095%</td>
+    <td>24.340</td>
+    <td>33.850</td>
+    <td>26.350</td>
+    <td>30.240</td>
+  </tr>
+  <tr>
+    <td rowspan="4">Whole genome</td>
+    <td rowspan="4">GRCh38</td>
+    <td>Shasta</td>
+    <td>-</td>
+    <td>1.525%</td>
+    <td>0.180%</td>
+    <td>1.067%</td>
+    <td>0.280%</td>
+    <td>18.170</td>
+    <td>27.460</td>
+    <td>19.720</td>
+    <td>25.530</td>
+  </tr>
+  <tr>
+    <td>Medaka</td>
+    <td>r941_flip235</td>
+    <td>0.801%</td>
+    <td>0.140%</td>
+    <td>0.451%</td>
+    <td>0.211%</td>
+    <td>20.960</td>
+    <td>28.550</td>
+    <td>23.460</td>
+    <td>26.750</td>
+  </tr>
+  <tr>
+    <td>MarginPolish</td>
+    <td>guppy_ff235</td>
+    <td>0.766%</td>
+    <td>0.128%</td>
+    <td>0.379%</td>
+    <td>0.259%</td>
+    <td>21.160</td>
+    <td>28.920</td>
+    <td>24.210</td>
+    <td>25.870</td>
+  </tr>
+  <tr>
+    <td>H.E.L.E.N.</td>
+    <td>rl941_flip235</td>
+    <td>0.753%</td>
+    <td>0.142%</td>
+    <td>0.358%</td>
+    <td>0.254%</td>
+    <td>21.230</td>
+    <td>28.490</td>
+    <td>24.460</td>
+    <td>25.960</td>
+  </tr>
+  <tr>
+    <td rowspan="8">HG00733</td>
+    <td rowspan="8">Whole Genome</td>
+    <td rowspan="4">PacBio assembly 003634875.1 for HG00733</td>
+    <td>Shasta</td>
+    <td>-</td>
+    <td>1.217%</td>
+    <td>0.084%</td>
+    <td>0.963%</td>
+    <td>0.170%</td>
+    <td>19.150</td>
+    <td>30.770</td>
+    <td>20.160</td>
+    <td>27.680</td>
+  </tr>
+  <tr>
+    <td>Medaka</td>
+    <td>r941_flip235</td>
+    <td>0.579%</td>
+    <td>0.082%</td>
+    <td>0.382%</td>
+    <td>0.116%</td>
+    <td>22.370</td>
+    <td>30.850</td>
+    <td>24.180</td>
+    <td>29.370</td>
+  </tr>
+  <tr>
+    <td>MarginPolish</td>
+    <td>guppy_ff235</td>
+    <td>0.586%</td>
+    <td>0.069%</td>
+    <td>0.340%</td>
+    <td>0.177%</td>
+    <td>22.320</td>
+    <td>31.600</td>
+    <td>24.680</td>
+    <td>27.510</td>
+  </tr>
+  <tr>
+    <td>H.E.L.E.N.</td>
+    <td>rl941_flip235</td>
+    <td>0.533%</td>
+    <td>0.069%</td>
+    <td>0.311%</td>
+    <td>0.153%</td>
+    <td>22.730</td>
+    <td>31.620</td>
+    <td>25.070</td>
+    <td>28.160</td>
+  </tr>
+  <tr>
+    <td rowspan="4">GRCh38</td>
+    <td>Shasta</td>
+    <td>-</td>
+    <td>1.457%</td>
+    <td>0.165%</td>
+    <td>1.005%</td>
+    <td>0.289%</td>
+    <td>18.360</td>
+    <td>27.820</td>
+    <td>19.980</td>
+    <td>25.390</td>
+  </tr>
+  <tr>
+    <td>Medaka</td>
+    <td>r941_flip235</td>
+    <td>0.778%</td>
+    <td>0.150%</td>
+    <td>0.416%</td>
+    <td>0.213%</td>
+    <td>21.090</td>
+    <td>28.240</td>
+    <td>23.810</td>
+    <td>26.710</td>
+  </tr>
+  <tr>
+    <td>MarginPolish</td>
+    <td>-</td>
+    <td>0.806%</td>
+    <td>0.142%</td>
+    <td>0.375%</td>
+    <td>0.289%</td>
+    <td>20.940</td>
+    <td>28.470</td>
+    <td>24.260</td>
+    <td>25.390</td>
+  </tr>
+  <tr>
+    <td>H.E.L.E.N.</td>
+    <td>rl941_flip235</td>
+    <td>0.736%</td>
+    <td>0.137%</td>
+    <td>0.337%</td>
+    <td>0.262%</td>
+    <td>21.330</td>
+    <td>28.620</td>
+    <td>24.730</td>
+    <td>25.820</td>
+  </tr>
+  <tr>
+    <td rowspan="4">CHM13</td>
+    <td rowspan="4">Chr X</td>
+    <td rowspan="4">v0.6 CHM13 assembly</td>
+    <td>Shasta</td>
+    <td>-</td>
+    <td>0.494%</td>
+    <td>0.015%</td>
+    <td>0.419%</td>
+    <td>0.060%</td>
+    <td>23.060</td>
+    <td>38.200</td>
+    <td>23.780</td>
+    <td>32.190</td>
+  </tr>
+  <tr>
+    <td>Medaka</td>
+    <td>r941_flip213</td>
+    <td>0.127%</td>
+    <td>0.013%</td>
+    <td>0.044%</td>
+    <td>0.070%</td>
+    <td>28.950</td>
+    <td>38.800</td>
+    <td>33.570</td>
+    <td>31.540</td>
+  </tr>
+  <tr>
+    <td>MarginPolish</td>
+    <td>guppy_ff233</td>
+    <td>0.269%</td>
+    <td>0.024%</td>
+    <td>0.067%</td>
+    <td>0.178%</td>
+    <td>25.700</td>
+    <td>36.170</td>
+    <td>31.720</td>
+    <td>27.500</td>
+  </tr>
+  <tr>
+    <td>H.E.L.E.N.</td>
+    <td>rl941_flip233_hap</td>
+    <td>0.119%</td>
+    <td>0.010%</td>
+    <td>0.087%</td>
+    <td>0.023%</td>
+    <td>29.240</td>
+    <td>40.200</td>
+    <td>30.610</td>
+    <td>36.430</td>
   </tr>
 </table>
 </center>
 
-If you want to do all three steps without rescaling the instance after each step, we suggest you use this configuration:
-* Instance type: n1-standard-32 (32 vCPUs, 120GB RAM)
-* GPUs: 2 x NVIDIA Tesla P100
-* Disk: 2TB SSD
-* Cost: 4.65$/hour
-
-The estimated runtime with this instance type is 6 hours. <br>
-The estimated cost with this instance is <b>28$</b>.
-
-#### Amazon Web Services
-`AWS` does not provide an option to customize resources between steps. Hence, we used `p2.8xlarge` instance type for `HELEN`. The configuration is as follows:
-* Instance type: p2.8xlarge (32 vCPUs, 488GB RAM)
-* GPUs: 8 x NVIDIA Tesla K80
-* Disk: 2TB SSD
-* Cost: 7.20$/hour
-
-The estimated runtime with this instance type: 5 hours <br>
-The estimated cost in `AWS` is: <b>36$</b>
+<b> NOTE: We will provide a detailed explanation of these assemblies and results soon. </b>
 ## Installation
+`MarginPolish` and `HELEN` can be used in Linux-based system. Users can install `MarginPolish` and `HELEN` on <b>`Ubuntu 18.04`</b> by following this document.
+
+### Step 1: Install MarginPolish
+
+To install MarginPolish in a Ubuntu/Linux bases system, follow these instructions:
+
+##### Install Dependencies
+```bash
+sudo apt-get -y install cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev
+sudo apt-get -y install libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev
+sudo apt-get -y install liblzma-dev libhdf5-dev
+```
+
+##### Install marginPolish
+```bash
+git clone https://github.com/UCSC-nanopore-cgl/marginPolish.git
+cd marginPolish
+git submodule update --init
+```
+Make a build directory:
+```bash
+mkdir build
+cd build
+```
+
+Generate makefile:
+```bash
+cmake ..
+make
+./marginPolish
+# to create a symlink
+ln -s marginPolish /usr/local/bin
+```
+
+### Step 2: Install HELEN with GPU
+
 Although `HELEN` can be used in a `CPU` only machine, we highly recommend using a machine with `GPU`.
 
 This requires installing `CUDA` and the right `PyTorch` version compiled against the installed version of `CUDA`.
@@ -206,15 +444,129 @@ These steps will install `HELEN` in your local system. `HELEN` also requires ins
 python3 -m pip install h5py tqdm numpy torchnet
 ```
 
+We also maintain an [Installation Guide](docs/installation.md) on how to install `MarginPolish` and `HELEN` for reference.
+
+## Usage
+`MarginPolish` requires a draft assembly and a mapping of reads to the draft assembly. We commend using `Shasta` as the initial assembler and `MiniMap2` for the mapping.
+
+#### Step 1: Generate an initial assembly
+Although any assembler can be used to generate the initial assembly, we highly recommend using [Shasta](https://github.com/chanzuckerberg/shasta).
+
+Please see the [quick start documentation](https://chanzuckerberg.github.io/shasta/QuickStart.html) to see how to use Shasta. Shasta requires memory intensive computing.
+> For a human size assembly, AWS instance type x1.32xlarge is recommended. It is usually available at a cost around $4/hour on the AWS spot market and should complete the human size assembly in a few hours, at coverage around 60x.
+
+An assembly can be generated by running:
+```bash
+# you may need to convert the fastq to a fasta file
+shasta/shasta-Linux-0.1.0 --input <reads.fa> --output <path_to_shasta_output>
+```
+
+#### Step 2: Create an alignment between reads and shasta assembly
+We recommend using `MiniMap2` to generate the mapping between the reads and the assembly.
+```bash
+# we recommend using FASTQ as marginPolish uses quality values
+# This command can run MiniMap2 with 32 threads, you can change the number as you like.
+minimap2/minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools sort -@ 32 | samtools view -hb -F 0x104 > reads_2_assembly.bam
+samtools index -@32 reads_2_assembly.bam
+```
+#### Step 3: Generate images using MarginPolish
+To generate images with MarginPolish run:
+```bash
+marginPolish \
+</path/to/reads_2_assembly.bam> \
+<path/to/shasta_assembly.fa> \
+<path/to/marginpolish/params/allParams.np.human.guppy-ff-235.json> \
+-t <number_of_threads> \
+-o </path/to/marginpolish_output/marginpolish_images> \
+-f 2>&1 | tee </path/to/marginpolish.log>
+```
+
+#### Step 4: Run HELEN
+
+##### Download Model
+Before running `call_consensus.py` please download the appropriate model suitable for your data. Please read our [model guideline](#Model) to understand which model to pick.
+
+##### Run call_consensus.py
+First we have to run `call_consensus.py` to generate all the predictions:
+```bash
+python3 call_consensus.py \
+--image_file </path/to/marginpolish_output/marginpolish_images> \
+--batch_size 512 \
+--model_path <path/to/helen_models/HELEN_v0_lc_r941_flip233_hap.pkl> \
+--output_dir <path/to/helen_out/consensus_sequence/> \
+--num_workers 32 \
+--gpu_mode 1
+
+# you can run CPU inference by removing --gpu_mode parameter
+```
+
+##### Run stitch.py
+Finally you can run `stitch.py` to get a consensus sequence:
+```bash
+time python3 stitch.py \
+--sequence_hdf <path/to/helen_out/consensus_sequence/helen_predictions.hdf> \
+--output_dir <path/to/helen_out/consensus_sequence/> \
+--threads 32
+```
+
+<b>NOTE: We are working on a documentation with instructions for running this pipeline end-to-end.  </b>
+
 ## Model
 #### Released models
 Change in the basecaller algorithm can directly affect the outcome of HELEN. We will release trained models with new basecallers as they come out.
 <center>
 
-|     Model Name     | Release Date | Intended base-caller |                                                                 Link                                                                |
-|:------------------:|:------------:|:--------------------:|:-----------------------------------------------------------------------------------------------------------------------------------:|
-| v0_lc_r941_flip235 |  16/05/2019  |      Guppy 2.3.5     | [Model_link](https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0_london_calling_2019/HELEN_v0_lc_r941_flip235.pkl) |
+<table>
+  <tr>
+    <th>Model Name</th>
+    <th>Release Date</th>
+    <th>Intended base-caller</th>
+    <th>Link</th>
+    <th>Comment</th>
+  </tr>
+  <tr>
+    <td>HELEN_v0_lc_r941_flip235.pkl</td>
+    <td>21/05/2019</td>
+    <td>Guppy 2.3.5</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0_london_calling_2019/HELEN_v0_lc_r941_flip235.pkl">Model_link</a></td>
+    <td>The model trained on autosomes of HG002 except chr 20 <br>with Guppy 2.3.5 base called data.</td>
+  </tr>
+  <tr>
+    <td>HELEN_v0_lc_r941_flip233.pkl</td>
+    <td>21/05/2019</td>
+    <td>Guppy 2.3.3</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0_london_calling_2019/HELEN_v0_lc_r941_flip233.pkl">Model_link</a></td>
+    <td>The model trained on autosomes of HG002 except <br>chr 20 with Guppy 2.3.3 base called data.</td>
+  </tr>
+  <tr>
+    <td>HELEN_v0_lc_r941_flip233_hap.pkl</td>
+    <td>21/05/2019</td>
+    <td>Guppy 2.3.3</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0_london_calling_2019/HELEN_v0_lc_r941_flip233_hap.pkl">Model_link</a></td>
+    <td>The model trained on haploid regions of HG002.</td>
+  </tr>
+</table>
 </center>
+
+We have seen significant difference in the homopolymer base-calls between different basecallers. It is important to pick the right version for the best polishing results.
+
+[Ryan Lorig-Roach](https://github.com/rlorigro) generated confusion matrix for each step of the assembly.
+We can see the difference in base caller versions to understand the imporantance of picking the right model.
+
+<p align="center">
+<img src="img/RL_confusion_guppy231.png" alt="guppy235" width="1080p">
+<center>
+Figure: Confusion matrix of Guppy 2.3.1 on CHM13 chromosome X
+<center>
+</p>
+
+<p align="center">
+<img src="img/RL_confusion_guppy235.png" alt="guppy235" width="1080p">
+<center>
+Figure: Confusion matrix of Guppy 2.3.5 on HG002 chromosome 1-10
+<center>
+</p>
+
 #### Model Schema
 
 HELEN implements a Recurrent-Neural-Network (RNN) based Multi-task learning model with hard parameter sharing. It implements a sliding window method where it slides through the input sequence in chunks. As each input sequence is evaluated independently, it allows HELEN to use mini-batch during training and testing.
@@ -223,15 +575,54 @@ HELEN implements a Recurrent-Neural-Network (RNN) based Multi-task learning mode
 <img src="img/model_schema.svg" alt="pipeline.svg" height="640p">
 </p>
 
+## Runtime and Cost
+`MarginPolish-HELEN` ensures runtime consistency and cost efficiency. We have tested our pipeline on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 
-## Usage
-Full user documentation [Working on it]
+We studied several samples of 50-60x coverage and created a suggestion framework for running the polishing pipeline. Please be advised that these are cost-optimized suggestions. For better run-time performance you can use more resources.
+#### Google Cloud Platform (GCP)
+For `MarginPolish` please use n1-standard-64 (64 vCPUs, 240GB RAM) instance. <br/>
+Our estimated run-time is: 12 hours
+Estimated cost for `MarginPolish`: <b>33$<b>
+
+For `HELEN`, our suggested instance type is:
+* Instance type: n1-standard-32 (32 vCPUs, 120GB RAM)
+* GPUs: 2 x NVIDIA Tesla P100
+* Disk: 2TB SSD
+* Cost: 4.65$/hour
+
+The estimated runtime with this instance type is 6 hours. <br>
+The estimated cost for `HELEN` is <b>28$</b>.
+
+Total estimated run-time for polishing: 18 hours. <br/>
+Total estimated cost for polishing: 61$
+
+#### Amazon Web Services (AWS)
+For `MarginPolish` we recommend c5.18xlarge (72 CPU, 144GiB RAM) instance. <br/>
+Our estimated run-time is: 10 hours
+Estimated cost for `MarginPolish`: <b>39$<b>
+
+We recommend using `p2.8xlarge` instance type for `HELEN`. The configuration is as follows:
+* Instance type: p2.8xlarge (32 vCPUs, 488GB RAM)
+* GPUs: 8 x NVIDIA Tesla K80
+* Disk: 2TB SSD
+* Cost: 7.20$/hour
+
+The estimated runtime with this instance type: 5 hours <br>
+The estimated cost for `HELEN` is: <b>36$</b>
+
+Total estimated run-time for polishing: 18 hours. <br/>
+Total estimated cost for polishing: 75$
+
+Please see our detailed [run-time case study](docs/runtime_cost.md) documentation for better insight.
 
 ## Help
 Please open a github issue if you face any difficulties.
 
 ## Acknowledgement
+We acknowledge the contribution of [Segey Koren](https://github.com/skoren) and Karen Miga for his help with `CHM13` data and evaluation. 
+
 We are thankful to the developers of these packages: </br>
+* [Shasta](https://github.com/chanzuckerberg/shasta/commits?author=paoloczi)
 * [pytorch](https://pytorch.org/)
 * [ssw library](https://github.com/mengyao/Complete-Striped-Smith-Waterman-Library)
 * [hdf5 python (h5py)](https://www.h5py.org/)
