@@ -21,6 +21,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 ## Table of contents
 * [Workflow](#workflow)
 * [Results](#Results)
+* [Twelve high-quality assemblies](#Twelve-high-quality-assemblies)
 * [Installation](#Installation)
 * [Usage](#Usage)
 * [Model](#Model)
@@ -194,7 +195,7 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
 
 <b> NOTE: We will provide a detailed explanation and full set of results of these assemblies soon. </b>
 
-## Twelve high-quality assemblies to download
+## Twelve high-quality assemblies
 We have sequenced-assembled-polished 12 human genome assemblies at University of California, Santa Cruz with our pipeline. They can be downloaded from our [google bucket](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/london_calling_2019/).
 
 For quick links, please copy a link from this table and you can run `wget` to download the files:
