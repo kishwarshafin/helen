@@ -582,7 +582,7 @@ We studied several samples of 50-60x coverage and created a suggestion framework
 #### Google Cloud Platform (GCP)
 For `MarginPolish` please use n1-standard-64 (64 vCPUs, 240GB RAM) instance. <br/>
 Our estimated run-time is: 12 hours
-Estimated cost for `MarginPolish`: <b>33$<b>
+Estimated cost for `MarginPolish`: <b>33$</b>
 
 For `HELEN`, our suggested instance type is:
 * Instance type: n1-standard-32 (32 vCPUs, 120GB RAM)
