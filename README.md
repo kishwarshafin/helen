@@ -202,6 +202,8 @@ For quick links, please copy a link from this table and you can run `wget` to do
 ```bash
 wget <link>
 ```
+The twele assemblies with their download links:
+
 <center>
 <table>
   <tr>
@@ -210,35 +212,35 @@ wget <link>
   </tr>
   <tr>
     <td>CHM13</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a></td>
   </tr>
   <tr>
     <td>GM24143</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24143_shasta_marginpolish_helen_consensus.fa">GM24143_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24143_shasta_marginpolish_helen_consensus.fa">GM24143_download_link</a></td>
   </tr>
   <tr>
     <td>GM24149</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24149_shasta_marginpolish_helen_consensus.fa">GM24149_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24149_shasta_marginpolish_helen_consensus.fa">GM24149_download_link</a></td>
   </tr>
   <tr>
     <td>GM24385/HG002</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24385_shasta_marginpolish_helen_consensus.fa">GM24385_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24385_shasta_marginpolish_helen_consensus.fa">GM24385_download_link</a></td>
   </tr>
   <tr>
     <td>HG00733</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG00733_shasta_marginpolish_helen_consensus.fa">HG00733_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG00733_shasta_marginpolish_helen_consensus.fa">HG00733_download_link</a></td>
   </tr>
   <tr>
     <td>HG01109</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01109_shasta_marginpolish_helen_consensus.fa">HG01109_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01109_shasta_marginpolish_helen_consensus.fa">HG01109_download_link</a></td>
   </tr>
   <tr>
     <td>HG01243</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01243_shasta_marginpolish_helen_consensus.fa">HG01243_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01243_shasta_marginpolish_helen_consensus.fa">HG01243_download_link</a></td>
   </tr>
   <tr>
     <td>HG02080</td>
-    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02080_shasta_marginpolish_helen_consensus.fa">HG02080_download_link</a></td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02080_shasta_marginpolish_helen_consensus.fa">HG02080_download_link</a></td>
   </tr>
 </table>
 </center>
