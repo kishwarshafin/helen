@@ -44,41 +44,18 @@ The workflow is as follows:
 ## Results
 We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with `assess_assembly` module available from `Pomoxis`. The summary of the quality we produce is here:
 <center>
-<table style="undefined;table-layout: fixed; width: 881px">
-<colgroup>
-<col style="width: 71px">
-<col style="width: 65px">
-<col style="width: 84px">
-<col style="width: 92px">
-<col style="width: 116px">
-<col style="width: 59px">
-<col style="width: 59px">
-<col style="width: 59px">
-<col style="width: 59px">
-<col style="width: 55px">
-<col style="width: 54px">
-<col style="width: 54px">
-<col style="width: 54px">
-</colgroup>
+<table>
   <tr>
     <th rowspan="2">Sample</th>
     <th rowspan="2">Region</th>
     <th rowspan="2">Truth assembly</th>
     <th colspan="2">Polisher</th>
-    <th colspan="4">Percentage Errors</th>
-    <th colspan="4">Q Scores</th>
+    <th colspan="1" rowspan="2">Percentage Errors</th>
+    <th colspan="1" rowspan="2">Q Scores</th>
   </tr>
   <tr>
     <td>Method</td>
     <td>Model</td>
-    <td>err_bal</td>
-    <td>iden</td>
-    <td>del</td>
-    <td>ins</td>
-    <td>err_bal</td>
-    <td>iden</td>
-    <td>del</td>
-    <td>ins</td>
   </tr>
   <tr>
     <td rowspan="8">HG002</td>
@@ -87,49 +64,25 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>Shasta</td>
     <td>-</td>
     <td>1.080%</td>
-    <td>0.062%</td>
-    <td>0.915%</td>
-    <td>0.104%</td>
     <td>19.670</td>
-    <td>32.100</td>
-    <td>20.390</td>
-    <td>29.820</td>
   </tr>
   <tr>
-    <td>Medaka</td>
+    <td>Racon 4x -> Medaka</td>
     <td>r941_flip235</td>
     <td>0.479%</td>
-    <td>0.062%</td>
-    <td>0.346%</td>
-    <td>0.071%</td>
     <td>23.200</td>
-    <td>32.070</td>
-    <td>24.600</td>
-    <td>31.500</td>
   </tr>
   <tr>
     <td>MarginPolish</td>
     <td>guppy_ff235</td>
     <td>0.450%</td>
-    <td>0.043%</td>
-    <td>0.298%</td>
-    <td>0.109%</td>
     <td>23.470</td>
-    <td>33.660</td>
-    <td>25.260</td>
-    <td>31.100</td>
   </tr>
   <tr>
     <td>H.E.L.E.N.</td>
     <td>rl941_flip235</td>
     <td>0.368%</td>
-    <td>0.041%</td>
-    <td>0.232%</td>
-    <td>0.095%</td>
     <td>24.340</td>
-    <td>33.850</td>
-    <td>26.350</td>
-    <td>30.240</td>
   </tr>
   <tr>
     <td rowspan="4">Whole genome</td>
@@ -137,49 +90,25 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>Shasta</td>
     <td>-</td>
     <td>1.525%</td>
-    <td>0.180%</td>
-    <td>1.067%</td>
-    <td>0.280%</td>
     <td>18.170</td>
-    <td>27.460</td>
-    <td>19.720</td>
-    <td>25.530</td>
   </tr>
   <tr>
-    <td>Medaka</td>
+    <td>Racon 4x -> Medaka</td>
     <td>r941_flip235</td>
     <td>0.801%</td>
-    <td>0.140%</td>
-    <td>0.451%</td>
-    <td>0.211%</td>
     <td>20.960</td>
-    <td>28.550</td>
-    <td>23.460</td>
-    <td>26.750</td>
   </tr>
   <tr>
     <td>MarginPolish</td>
     <td>guppy_ff235</td>
     <td>0.766%</td>
-    <td>0.128%</td>
-    <td>0.379%</td>
-    <td>0.259%</td>
     <td>21.160</td>
-    <td>28.920</td>
-    <td>24.210</td>
-    <td>25.870</td>
   </tr>
   <tr>
     <td>H.E.L.E.N.</td>
     <td>rl941_flip235</td>
     <td>0.753%</td>
-    <td>0.142%</td>
-    <td>0.358%</td>
-    <td>0.254%</td>
     <td>21.230</td>
-    <td>28.490</td>
-    <td>24.460</td>
-    <td>25.960</td>
   </tr>
   <tr>
     <td rowspan="8">HG00733</td>
@@ -188,98 +117,50 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>Shasta</td>
     <td>-</td>
     <td>1.217%</td>
-    <td>0.084%</td>
-    <td>0.963%</td>
-    <td>0.170%</td>
     <td>19.150</td>
-    <td>30.770</td>
-    <td>20.160</td>
-    <td>27.680</td>
   </tr>
   <tr>
-    <td>Medaka</td>
+    <td>Racon 4x -> Medaka</td>
     <td>r941_flip235</td>
     <td>0.579%</td>
-    <td>0.082%</td>
-    <td>0.382%</td>
-    <td>0.116%</td>
     <td>22.370</td>
-    <td>30.850</td>
-    <td>24.180</td>
-    <td>29.370</td>
   </tr>
   <tr>
     <td>MarginPolish</td>
     <td>guppy_ff235</td>
     <td>0.586%</td>
-    <td>0.069%</td>
-    <td>0.340%</td>
-    <td>0.177%</td>
     <td>22.320</td>
-    <td>31.600</td>
-    <td>24.680</td>
-    <td>27.510</td>
   </tr>
   <tr>
     <td>H.E.L.E.N.</td>
     <td>rl941_flip235</td>
     <td>0.533%</td>
-    <td>0.069%</td>
-    <td>0.311%</td>
-    <td>0.153%</td>
     <td>22.730</td>
-    <td>31.620</td>
-    <td>25.070</td>
-    <td>28.160</td>
   </tr>
   <tr>
     <td rowspan="4">GRCh38</td>
     <td>Shasta</td>
     <td>-</td>
     <td>1.457%</td>
-    <td>0.165%</td>
-    <td>1.005%</td>
-    <td>0.289%</td>
     <td>18.360</td>
-    <td>27.820</td>
-    <td>19.980</td>
-    <td>25.390</td>
   </tr>
   <tr>
-    <td>Medaka</td>
+    <td>Racon 4x -> Medaka</td>
     <td>r941_flip235</td>
     <td>0.778%</td>
-    <td>0.150%</td>
-    <td>0.416%</td>
-    <td>0.213%</td>
     <td>21.090</td>
-    <td>28.240</td>
-    <td>23.810</td>
-    <td>26.710</td>
   </tr>
   <tr>
     <td>MarginPolish</td>
-    <td>-</td>
+    <td>guppy_ff235</td>
     <td>0.806%</td>
-    <td>0.142%</td>
-    <td>0.375%</td>
-    <td>0.289%</td>
     <td>20.940</td>
-    <td>28.470</td>
-    <td>24.260</td>
-    <td>25.390</td>
   </tr>
   <tr>
     <td>H.E.L.E.N.</td>
     <td>rl941_flip235</td>
     <td>0.736%</td>
-    <td>0.137%</td>
-    <td>0.337%</td>
-    <td>0.262%</td>
     <td>21.330</td>
-    <td>28.620</td>
-    <td>24.730</td>
-    <td>25.820</td>
   </tr>
   <tr>
     <td rowspan="4">CHM13</td>
@@ -288,54 +169,79 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>Shasta</td>
     <td>-</td>
     <td>0.494%</td>
-    <td>0.015%</td>
-    <td>0.419%</td>
-    <td>0.060%</td>
     <td>23.060</td>
-    <td>38.200</td>
-    <td>23.780</td>
-    <td>32.190</td>
   </tr>
   <tr>
-    <td>Medaka</td>
+    <td>Racon 4x -> Medaka</td>
     <td>r941_flip213</td>
     <td>0.127%</td>
-    <td>0.013%</td>
-    <td>0.044%</td>
-    <td>0.070%</td>
     <td>28.950</td>
-    <td>38.800</td>
-    <td>33.570</td>
-    <td>31.540</td>
   </tr>
   <tr>
     <td>MarginPolish</td>
     <td>guppy_ff233</td>
     <td>0.269%</td>
-    <td>0.024%</td>
-    <td>0.067%</td>
-    <td>0.178%</td>
     <td>25.700</td>
-    <td>36.170</td>
-    <td>31.720</td>
-    <td>27.500</td>
   </tr>
   <tr>
     <td>H.E.L.E.N.</td>
     <td>rl941_flip233_hap</td>
     <td>0.119%</td>
-    <td>0.010%</td>
-    <td>0.087%</td>
-    <td>0.023%</td>
     <td>29.240</td>
-    <td>40.200</td>
-    <td>30.610</td>
-    <td>36.430</td>
   </tr>
 </table>
 </center>
 
-<b> NOTE: We will provide a detailed explanation of these assemblies and results soon. </b>
+<b> NOTE: We will provide a detailed explanation and full set of results of these assemblies soon. </b>
+
+## Twelve high-quality assemblies to download
+We have sequenced-assembled-polished 12 human genome assemblies at University of California, Santa Cruz with our pipeline. They can be downloaded from our [google bucket](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/london_calling_2019/).
+
+For quick links, please copy a link from this table and you can run `wget` to download the files:
+```bash
+wget <link>
+```
+<center>
+<table>
+  <tr>
+    <th>Sample name</th>
+    <th>Download link</th>
+  </tr>
+  <tr>
+    <td>CHM13</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a></td>
+  </tr>
+  <tr>
+    <td>GM24143</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24143_shasta_marginpolish_helen_consensus.fa">GM24143_download_link</a></td>
+  </tr>
+  <tr>
+    <td>GM24149</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24149_shasta_marginpolish_helen_consensus.fa">GM24149_download_link</a></td>
+  </tr>
+  <tr>
+    <td>GM24385/HG002</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24385_shasta_marginpolish_helen_consensus.fa">GM24385_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG00733</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG00733_shasta_marginpolish_helen_consensus.fa">HG00733_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG01109</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01109_shasta_marginpolish_helen_consensus.fa">HG01109_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG01243</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01243_shasta_marginpolish_helen_consensus.fa">HG01243_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG02080</td>
+    <td><a ref="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02080_shasta_marginpolish_helen_consensus.fa">HG02080_download_link</a></td>
+  </tr>
+</table>
+</center>
+
 ## Installation
 `MarginPolish` and `HELEN` can be used in Linux-based system. Users can install `MarginPolish` and `HELEN` on <b>`Ubuntu 18.04`</b> by following this document.
 
