@@ -24,7 +24,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 * [Twelve high-quality assemblies](#Twelve-high-quality-assemblies)
 * [Installation](#Installation)
 * [Usage](#Usage)
-* [Model](#Model)
+* [Models](#Models)
    * [Released Models](#Released-Models)
 * [Runtime and Cost](#Runtime-and-Cost)
 * [Help](#Help)
@@ -49,7 +49,7 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
   <tr>
     <th rowspan="2">Sample</th>
     <th rowspan="2">Region</th>
-    <th rowspan="2">Truth assembly</th>
+    <th rowspan="2">Reference</th>
     <th colspan="2">Polisher</th>
     <th colspan="1" rowspan="2">Percentage Errors</th>
     <th colspan="1" rowspan="2">Q Scores</th>
@@ -61,7 +61,7 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
   <tr>
     <td rowspan="8">HG002</td>
     <td rowspan="4">Chr 20</td>
-    <td rowspan="4">GIAB High Confidence regions GRCh38</td>
+    <td rowspan="4">GIAB GRCh38</br>haplotype 1</br>confident regions</td>
     <td>Shasta</td>
     <td>-</td>
     <td>1.080%</td>
@@ -87,7 +87,7 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
   </tr>
   <tr>
     <td rowspan="4">Whole genome</td>
-    <td rowspan="4">GRCh38</td>
+    <td rowspan="4">GIAB GRCh38</br>haplotype 1</br>confident regions</td>
     <td>Shasta</td>
     <td>-</td>
     <td>1.525%</td>
@@ -112,9 +112,9 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>21.230</td>
   </tr>
   <tr>
-    <td rowspan="8">HG00733</td>
-    <td rowspan="8">Whole Genome</td>
-    <td rowspan="4">PacBio assembly 003634875.1 for HG00733</td>
+    <td rowspan="4">HG00733</td>
+    <td rowspan="4">Whole Genome</td>
+    <td rowspan="4">PacBio Assembly</br>003634875.1</td>
     <td>Shasta</td>
     <td>-</td>
     <td>1.217%</td>
@@ -137,36 +137,11 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
     <td>rl941_flip235</td>
     <td>0.533%</td>
     <td>22.730</td>
-  </tr>
-  <tr>
-    <td rowspan="4">GRCh38</td>
-    <td>Shasta</td>
-    <td>-</td>
-    <td>1.457%</td>
-    <td>18.360</td>
-  </tr>
-  <tr>
-    <td>Racon 4x -> Medaka</td>
-    <td>r941_flip235</td>
-    <td>0.778%</td>
-    <td>21.090</td>
-  </tr>
-  <tr>
-    <td>MarginPolish</td>
-    <td>guppy_ff235</td>
-    <td>0.806%</td>
-    <td>20.940</td>
-  </tr>
-  <tr>
-    <td>H.E.L.E.N.</td>
-    <td>rl941_flip235</td>
-    <td>0.736%</td>
-    <td>21.330</td>
-  </tr>
+  </tr
   <tr>
     <td rowspan="4">CHM13</td>
     <td rowspan="4">Chr X</td>
-    <td rowspan="4">v0.6 CHM13 assembly</td>
+    <td rowspan="4">CHM13 v0.6 </br >WGS-Consortium</td>
     <td>Shasta</td>
     <td>-</td>
     <td>0.494%</td>
@@ -202,7 +177,7 @@ For quick links, please copy a link from this table and you can run `wget` to do
 ```bash
 wget <link>
 ```
-The twele assemblies with their download links:
+The twelve assemblies with their download links:
 
 <center>
 <table>
@@ -420,7 +395,7 @@ time python3 stitch.py \
 
 <b>NOTE: We are working on a documentation with instructions for running this pipeline end-to-end.  </b>
 
-## Model
+## Models
 #### Released models
 Change in the basecaller algorithm can directly affect the outcome of HELEN. We will release trained models with new basecallers as they come out.
 <center>
@@ -463,17 +438,15 @@ We have seen significant difference in the homopolymer base-calls between differ
 We can see the difference in base caller versions to understand the imporantance of picking the right model.
 
 <p align="center">
-<img src="img/RL_confusion_guppy231.png" alt="guppy235" width="1080p">
-<center>
+<img src="img/RL_confusion_guppy231.png" alt="guppy235" width="1080p"> <br/>
+
 Figure: Confusion matrix of Guppy 2.3.1 on CHM13 chromosome X
-<center>
 </p>
 
 <p align="center">
-<img src="img/RL_confusion_guppy235.png" alt="guppy235" width="1080p">
-<center>
+<img src="img/RL_confusion_guppy235.png" alt="guppy235" width="1080p"> <br/>
+
 Figure: Confusion matrix of Guppy 2.3.5 on HG002 chromosome 1-10
-<center>
 </p>
 
 #### Model Schema
@@ -529,6 +502,8 @@ Please open a github issue if you face any difficulties.
 
 ## Acknowledgement
 We are thankful to [Segey Koren](https://github.com/skoren) and Karen Miga for their help with `CHM13` data and evaluation.
+
+We downloaded our data from [Telomere-to-telomere consortium](https://github.com/nanopore-wgs-consortium/CHM13) to evaluate our pipeline against `CHM13`.
 
 We acknowledge the work of the developers of these packages: </br>
 * [Shasta](https://github.com/chanzuckerberg/shasta/commits?author=paoloczi)
