@@ -37,136 +37,17 @@ The workflow is as follows:
 * Create a mapping between reads and the assembly using [Minimap2](https://github.com/lh3/minimap2).
 * Use [MarginPolish](https://github.com/UCSC-nanopore-cgl/marginPolish) to generate the images.
 * Use HELEN to generate a polished consensus sequence.
-
 <p align="center">
 <img src="img/pipeline.svg" alt="pipeline.svg" height="640p">
 </p>
 
+
 ## Results
 We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with `assess_assembly` module available from `Pomoxis`. The summary of the quality we produce is here:
-<center>
-<table>
-  <tr>
-    <th rowspan="2">Sample</th>
-    <th rowspan="2">Region</th>
-    <th rowspan="2">Reference</th>
-    <th colspan="2">Polisher</th>
-    <th colspan="1" rowspan="2">Percentage Errors</th>
-    <th colspan="1" rowspan="2">Q Scores</th>
-  </tr>
-  <tr>
-    <td>Method</td>
-    <td>Model</td>
-  </tr>
-  <tr>
-    <td rowspan="8">HG002</td>
-    <td rowspan="4">Chr 20</td>
-    <td rowspan="4">GIAB GRCh38</br>haplotype 1</br>confident regions</td>
-    <td>Shasta</td>
-    <td>-</td>
-    <td>1.080%</td>
-    <td>19.670</td>
-  </tr>
-  <tr>
-    <td>Racon 4x -> Medaka</td>
-    <td>r941_flip235</td>
-    <td>0.479%</td>
-    <td>23.200</td>
-  </tr>
-  <tr>
-    <td>MarginPolish</td>
-    <td>guppy_ff235</td>
-    <td>0.450%</td>
-    <td>23.470</td>
-  </tr>
-  <tr>
-    <td>H.E.L.E.N.</td>
-    <td>rl941_flip235</td>
-    <td>0.368%</td>
-    <td>24.340</td>
-  </tr>
-  <tr>
-    <td rowspan="4">Whole genome</td>
-    <td rowspan="4">GIAB GRCh38</br>haplotype 1</br>confident regions</td>
-    <td>Shasta</td>
-    <td>-</td>
-    <td>1.525%</td>
-    <td>18.170</td>
-  </tr>
-  <tr>
-    <td>Racon 4x -> Medaka</td>
-    <td>r941_flip235</td>
-    <td>0.801%</td>
-    <td>20.960</td>
-  </tr>
-  <tr>
-    <td>MarginPolish</td>
-    <td>guppy_ff235</td>
-    <td>0.766%</td>
-    <td>21.160</td>
-  </tr>
-  <tr>
-    <td>H.E.L.E.N.</td>
-    <td>rl941_flip235</td>
-    <td>0.753%</td>
-    <td>21.230</td>
-  </tr>
-  <tr>
-    <td rowspan="4">HG00733</td>
-    <td rowspan="4">Whole Genome</td>
-    <td rowspan="4">PacBio Assembly</br>003634875.1</td>
-    <td>Shasta</td>
-    <td>-</td>
-    <td>1.217%</td>
-    <td>19.150</td>
-  </tr>
-  <tr>
-    <td>Racon 4x -> Medaka</td>
-    <td>r941_flip235</td>
-    <td>0.579%</td>
-    <td>22.370</td>
-  </tr>
-  <tr>
-    <td>MarginPolish</td>
-    <td>guppy_ff235</td>
-    <td>0.586%</td>
-    <td>22.320</td>
-  </tr>
-  <tr>
-    <td>H.E.L.E.N.</td>
-    <td>rl941_flip235</td>
-    <td>0.533%</td>
-    <td>22.730</td>
-  </tr
-  <tr>
-    <td rowspan="4">CHM13</td>
-    <td rowspan="4">Chr X</td>
-    <td rowspan="4">CHM13 v0.6 </br >WGS-Consortium</td>
-    <td>Shasta</td>
-    <td>-</td>
-    <td>0.494%</td>
-    <td>23.060</td>
-  </tr>
-  <tr>
-    <td>Racon 4x -> Medaka</td>
-    <td>r941_flip213</td>
-    <td>0.127%</td>
-    <td>28.950</td>
-  </tr>
-  <tr>
-    <td>MarginPolish</td>
-    <td>guppy_ff233</td>
-    <td>0.269%</td>
-    <td>25.700</td>
-  </tr>
-  <tr>
-    <td>H.E.L.E.N.</td>
-    <td>rl941_flip233_hap</td>
-    <td>0.119%</td>
-    <td>29.240</td>
-  </tr>
-</table>
-</center>
+
+<p align="center">
+<img src="img/accuracy_plot.png" alt="accuracy_plot" height=420p>
+</p>
 
 <b> NOTE: We will provide a detailed explanation and full set of results of these assemblies soon. </b>
 
@@ -179,7 +60,6 @@ wget <link>
 ```
 The twelve assemblies with their download links:
 
-<center>
 <table>
   <tr>
     <th>Sample name</th>
@@ -188,6 +68,39 @@ The twelve assemblies with their download links:
   <tr>
     <td>CHM13</td>
     <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG00733</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG00733_shasta_marginpolish_helen_consensus.fa">HG00733_download_link</a></td>
+  </tr>
+
+  <tr>
+    <td>HG01109</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01109_shasta_marginpolish_helen_consensus.fa">HG01109_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG01243</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01243_shasta_marginpolish_helen_consensus.fa">HG01243_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG02055</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02055_shasta_marginpolish_helen_consensus.fa">HG02055_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG02080</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02080_shasta_marginpolish_helen_consensus.fa">HG02080_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG02723</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02723_shasta_marginpolish_helen_consensus.fa">HG02723_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG03098</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG03098_shasta_marginpolish_helen_consensus.fa">HG03098_download_link</a></td>
+  </tr>
+  <tr>
+    <td>HG03492</td>
+    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG03492_shasta_marginpolish_helen_consensus.fa">HG03492_download_link</a></td>
   </tr>
   <tr>
     <td>GM24143</td>
@@ -201,24 +114,7 @@ The twelve assemblies with their download links:
     <td>GM24385/HG002</td>
     <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24385_shasta_marginpolish_helen_consensus.fa">GM24385_download_link</a></td>
   </tr>
-  <tr>
-    <td>HG00733</td>
-    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG00733_shasta_marginpolish_helen_consensus.fa">HG00733_download_link</a></td>
-  </tr>
-  <tr>
-    <td>HG01109</td>
-    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01109_shasta_marginpolish_helen_consensus.fa">HG01109_download_link</a></td>
-  </tr>
-  <tr>
-    <td>HG01243</td>
-    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG01243_shasta_marginpolish_helen_consensus.fa">HG01243_download_link</a></td>
-  </tr>
-  <tr>
-    <td>HG02080</td>
-    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/HG02080_shasta_marginpolish_helen_consensus.fa">HG02080_download_link</a></td>
-  </tr>
 </table>
-</center>
 
 ## Installation
 `MarginPolish` and `HELEN` can be used in Linux-based system. Users can install `MarginPolish` and `HELEN` on <b>`Ubuntu 18.04`</b> by following this document.
@@ -350,8 +246,10 @@ We recommend using `MiniMap2` to generate the mapping between the reads and the 
 ```bash
 # we recommend using FASTQ as marginPolish uses quality values
 # This command can run MiniMap2 with 32 threads, you can change the number as you like.
-minimap2/minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools sort -@ 32 | samtools view -hb -F 0x104 > reads_2_assembly.bam
+minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools sort -@ 32 | samtools view -hb -F 0x104 > reads_2_assembly.bam
 samtools index -@32 reads_2_assembly.bam
+
+#  the -F 0x104 flag removes unaligned and secondary sequences
 ```
 #### Step 3: Generate images using MarginPolish
 To generate images with MarginPolish run:
@@ -387,7 +285,7 @@ python3 call_consensus.py \
 ##### Run stitch.py
 Finally you can run `stitch.py` to get a consensus sequence:
 ```bash
-time python3 stitch.py \
+python3 stitch.py \
 --sequence_hdf <path/to/helen_out/consensus_sequence/helen_predictions.hdf> \
 --output_dir <path/to/helen_out/consensus_sequence/> \
 --threads 32
@@ -437,17 +335,11 @@ We have seen significant difference in the homopolymer base-calls between differ
 [Ryan Lorig-Roach](https://github.com/rlorigro) generated confusion matrix for each step of the assembly.
 We can see the difference in base caller versions to understand the imporantance of picking the right model.
 
-<p align="center">
+Confusion matrix of Guppy 2.3.1 on CHM13 chromosome X:
 <img src="img/RL_confusion_guppy231.png" alt="guppy235" width="1080p"> <br/>
 
-Figure: Confusion matrix of Guppy 2.3.1 on CHM13 chromosome X
-</p>
-
-<p align="center">
+Confusion matrix of Guppy 2.3.5 on HG002 chromosome 1-10:
 <img src="img/RL_confusion_guppy235.png" alt="guppy235" width="1080p"> <br/>
-
-Figure: Confusion matrix of Guppy 2.3.5 on HG002 chromosome 1-10
-</p>
 
 #### Model Schema
 
@@ -501,7 +393,7 @@ Please see our detailed [run-time case study](docs/runtime_cost.md) documentatio
 Please open a github issue if you face any difficulties.
 
 ## Acknowledgement
-We are thankful to [Segey Koren](https://github.com/skoren) and Karen Miga for their help with `CHM13` data and evaluation.
+We are thankful to [Segey Koren](https://github.com/skoren) and [Karen Miga](https://github.com/khmiga) for their help with `CHM13` data and evaluation.
 
 We downloaded our data from [Telomere-to-telomere consortium](https://github.com/nanopore-wgs-consortium/CHM13) to evaluate our pipeline against `CHM13`.
 
