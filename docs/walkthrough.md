@@ -4,7 +4,7 @@
 This document provides a guideline on how to use the polishing pipeline.
 
 ## Installation
-Please make sure you have installed `MarginPolish` and `HELEN` using the [installation guide](installtion.md).
+Please make sure you have installed `MarginPolish` and `HELEN` using the [installation guide](installation.md).
 
 
 ## Download data

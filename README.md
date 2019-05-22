@@ -49,7 +49,7 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
 <img src="img/accuracy_plot.png" alt="accuracy_plot" height=420p>
 </p>
 
-<b> NOTE: We will provide a detailed explanation and full set of results of these assemblies soon. </b>
+<b> NOTE: A full set of results can be found [here](docs/results.md) </b>
 
 ## Twelve high-quality assemblies
 We have sequenced-assembled-polished 12 human genome assemblies at University of California, Santa Cruz with our pipeline. They can be downloaded from our [google bucket](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/london_calling_2019/).
