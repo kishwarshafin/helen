@@ -14,7 +14,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 ## Why MarginPolish-HELEN ?
 * `MarginPolish-HELEN` outperforms other graph-based and Neural-Network based polishing pipelines.
 * Highly optimized pipeline that is faster than any other available polishing tool (~4 hours for `HELEN`).
-* We have <b>sequenced-assembled-polished 12 samples</b> to ensure robustness, runtime-consistency and cost-efficiency.
+* We have <b>sequenced-assembled-polished 11 samples</b> to ensure robustness, runtime-consistency and cost-efficiency.
 * We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 * Open source [(MIT License)](LICENSE).
 
@@ -365,15 +365,15 @@ For `HELEN`, our suggested instance type is:
 * Disk: 2TB SSD
 * Cost: $4.65/hour
 
-The estimated runtime with this instance type is 6 hours. <br>
+The estimated runtime with this instance type is 4 hours. <br>
 The estimated cost for `HELEN` is <b>$28</b>.
 
 Total estimated run-time for polishing: 18 hours. <br/>
-Total estimated cost for polishing: $61
+Total estimated cost for polishing: <b>$61</b>
 
 #### Amazon Web Services (AWS)
 For `MarginPolish` we recommend c5.18xlarge (72 CPU, 144GiB RAM) instance. <br/>
-Our estimated run-time is: 10 hours
+Our estimated run-time is: 12 hours
 Estimated cost for `MarginPolish`: <b>$39</b>
 
 We recommend using `p2.8xlarge` instance type for `HELEN`. The configuration is as follows:
@@ -382,11 +382,11 @@ We recommend using `p2.8xlarge` instance type for `HELEN`. The configuration is 
 * Disk: 2TB SSD
 * Cost: $7.20/hour
 
-The estimated runtime with this instance type: 5 hours <br>
+The estimated runtime with this instance type: 4 hours <br>
 The estimated cost for `HELEN` is: <b>$36</b>
 
-Total estimated run-time for polishing: 18 hours. <br/>
-Total estimated cost for polishing: $75
+Total estimated run-time for polishing: 16 hours. <br/>
+Total estimated cost for polishing: <b>$75</b>
 
 Please see our detailed [run-time case study](docs/runtime_cost.md) documentation for better insight.
 
