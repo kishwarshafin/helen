@@ -13,7 +13,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 
 ## Why MarginPolish-HELEN ?
 * `MarginPolish-HELEN` outperforms other graph-based and Neural-Network based polishing pipelines.
-* Highly optimized pipeline that is faster than any other available polishing tool (~5 hours for `HELEN`).
+* Highly optimized pipeline that is faster than any other available polishing tool (~4 hours for `HELEN`).
 * We have <b>sequenced-assembled-polished 12 samples</b> to ensure robustness, runtime-consistency and cost-efficiency.
 * We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 * Open source [(MIT License)](LICENSE).
@@ -21,7 +21,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 ## Table of contents
 * [Workflow](#workflow)
 * [Results](#Results)
-* [Twelve high-quality assemblies](#Twelve-high-quality-assemblies)
+* [Eleven high-quality assemblies](#Eleven-high-quality-assemblies)
 * [Installation](#Installation)
 * [Usage](#Usage)
 * [Models](#Models)
@@ -51,8 +51,8 @@ We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with 
 
 <b> NOTE: A full set of results can be found [here](docs/results.md) </b>
 
-## Twelve high-quality assemblies
-We have sequenced-assembled-polished 12 human genome assemblies at University of California, Santa Cruz with our pipeline. They can be downloaded from our [google bucket](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/london_calling_2019/).
+## Eleven high-quality assemblies
+We have sequenced-assembled-polished 11 human genome assemblies at University of California, Santa Cruz with our pipeline. They can be downloaded from our [google bucket](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/london_calling_2019/).
 
 For quick links, please copy a link from this table and you can run `wget` to download the files:
 ```bash
@@ -64,10 +64,6 @@ The twelve assemblies with their download links:
   <tr>
     <th>Sample name</th>
     <th>Download link</th>
-  </tr>
-  <tr>
-    <td>CHM13</td>
-    <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a></td>
   </tr>
   <tr>
     <td>HG00733</td>
@@ -115,6 +111,11 @@ The twelve assemblies with their download links:
     <td><a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/GM24385_shasta_marginpolish_helen_consensus.fa">GM24385_download_link</a></td>
   </tr>
 </table>
+
+
+We also polished `CHM13` genome assembly available from the [Telomere-to-telomere consortium](https://github.com/nanopore-wgs-consortium/CHM13) project. <br/>
+`CHM13` polished assembly is available for download from here: <a href="https://storage.googleapis.com/kishwar-helen/polished_genomes/london_calling_2019/CHM13_shasta_marginpolish_helen_consensus.fa">CHM13_download_link</a>
+
 
 ## Installation
 `MarginPolish` and `HELEN` can be used in Linux-based system. Users can install `MarginPolish` and `HELEN` on <b>`Ubuntu 18.04`</b> by following this document.
@@ -356,36 +357,36 @@ We studied several samples of 50-60x coverage and created a suggestion framework
 #### Google Cloud Platform (GCP)
 For `MarginPolish` please use n1-standard-64 (64 vCPUs, 240GB RAM) instance. <br/>
 Our estimated run-time is: 12 hours
-Estimated cost for `MarginPolish`: <b>33$</b>
+Estimated cost for `MarginPolish`: <b>$33</b>
 
 For `HELEN`, our suggested instance type is:
 * Instance type: n1-standard-32 (32 vCPUs, 120GB RAM)
 * GPUs: 2 x NVIDIA Tesla P100
 * Disk: 2TB SSD
-* Cost: 4.65$/hour
+* Cost: $4.65/hour
 
 The estimated runtime with this instance type is 6 hours. <br>
-The estimated cost for `HELEN` is <b>28$</b>.
+The estimated cost for `HELEN` is <b>$28</b>.
 
 Total estimated run-time for polishing: 18 hours. <br/>
-Total estimated cost for polishing: 61$
+Total estimated cost for polishing: $61
 
 #### Amazon Web Services (AWS)
 For `MarginPolish` we recommend c5.18xlarge (72 CPU, 144GiB RAM) instance. <br/>
 Our estimated run-time is: 10 hours
-Estimated cost for `MarginPolish`: <b>39$</b>
+Estimated cost for `MarginPolish`: <b>$39</b>
 
 We recommend using `p2.8xlarge` instance type for `HELEN`. The configuration is as follows:
 * Instance type: p2.8xlarge (32 vCPUs, 488GB RAM)
 * GPUs: 8 x NVIDIA Tesla K80
 * Disk: 2TB SSD
-* Cost: 7.20$/hour
+* Cost: $7.20/hour
 
 The estimated runtime with this instance type: 5 hours <br>
-The estimated cost for `HELEN` is: <b>36$</b>
+The estimated cost for `HELEN` is: <b>$36</b>
 
 Total estimated run-time for polishing: 18 hours. <br/>
-Total estimated cost for polishing: 75$
+Total estimated cost for polishing: $75
 
 Please see our detailed [run-time case study](docs/runtime_cost.md) documentation for better insight.
 
