@@ -125,10 +125,25 @@ We also polished `CHM13` genome assembly available from the [Telomere-to-telomer
 To install MarginPolish in a Ubuntu/Linux bases system, follow these instructions:
 
 ##### Install Dependencies
+`MarginPolish` and `HELEN` is compiled with `cmake`. HELEN requires `3.11` or higher.<br/>
+Install the latest version of `cmake`.
 ```bash
-sudo apt-get -y install cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev
+cmake --version
+# if you have cmake <3.11 then please install the latest version:
+
+wget https://github.com/Kitware/CMake/releases/download/v3.14.4/cmake-3.14.4-Linux-x86_64.sh
+sudo mkdir /opt/cmake
+sudo sh cmake-3.14.4-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
+sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+cmake --version
+# Expected output: CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
+Install other dependencies:
+```bash
+sudo apt-get update
+sudo apt-get -y install git make gcc g++ autoconf bzip2
 sudo apt-get -y install libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev
-sudo apt-get -y install liblzma-dev libhdf5-dev
+sudo apt-get -y install liblzma-dev libhdf5-dev lzma-dev zlib1g zlib1g-dev
 ```
 
 ##### Install marginPolish
@@ -137,19 +152,18 @@ git clone https://github.com/UCSC-nanopore-cgl/marginPolish.git
 cd marginPolish
 git submodule update --init
 ```
-Make a build directory:
+
+Create build directory and generate makefile:
 ```bash
 mkdir build
 cd build
-```
-
-Generate makefile:
-```bash
 cmake ..
-make
+make -j 16
+# -j is the number of threads to use, you can set a different number
 ./marginPolish
-# to create a symlink
-ln -s marginPolish /usr/local/bin
+# Optional: create a symlink
+sudo ln -s `pwd`/marginPolish /usr/local/bin
+
 ```
 
 ### Step 2: Install HELEN with GPU
@@ -208,9 +222,7 @@ TRUE
 #### Install HELEN
 `HELEN` requires `cmake` and `python3` to be installed in the system.
 ```bash
-sudo apt-get -y install cmake
-sudo apt-get -y install python3
-sudo apt-get -y install python3-dev
+sudo apt-get -y install python3 python3-dev python3-pip
 ```
 To install `HELEN`:
 
@@ -255,7 +267,9 @@ samtools index -@32 reads_2_assembly.bam
 #### Step 3: Generate images using MarginPolish
 To generate images with MarginPolish run:
 ```bash
-marginPolish \
+cd <path/to/marginPolish/build/>
+
+./marginPolish \
 </path/to/reads_2_assembly.bam> \
 <path/to/shasta_assembly.fa> \
 <path/to/marginpolish/params/allParams.np.human.guppy-ff-235.json> \
@@ -272,14 +286,20 @@ Before running `call_consensus.py` please download the appropriate model suitabl
 ##### Run call_consensus.py
 First we have to run `call_consensus.py` to generate all the predictions:
 ```bash
+cd <path/to/helen/>
+
 python3 call_consensus.py \
 --image_file </path/to/marginpolish_output/marginpolish_images> \
 --batch_size 512 \
---model_path <path/to/helen_models/HELEN_v0_lc_r941_flip233_hap.pkl> \
+--model_path <path/to/helen_models/HELEN_vXXX.pkl> \
 --output_dir <path/to/helen_out/consensus_sequence/> \
---num_workers 32 \
+--num_workers <number_of_threads> \
 --gpu_mode 1
 
+# batch_size: We recommend using 512/1024
+# model_path: Download the model using model guideline
+# output_dir: Path to output directory
+# num_workers: Can be set to number of available CPU cores
 # you can run CPU inference by removing --gpu_mode parameter
 ```
 
@@ -289,7 +309,7 @@ Finally you can run `stitch.py` to get a consensus sequence:
 python3 stitch.py \
 --sequence_hdf <path/to/helen_out/consensus_sequence/helen_predictions.hdf> \
 --output_dir <path/to/helen_out/consensus_sequence/> \
---threads 32
+--threads <number_of_threads>
 ```
 
 <b>NOTE: We are working on a documentation with instructions for running this pipeline end-to-end.  </b>
