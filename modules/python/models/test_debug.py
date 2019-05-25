@@ -39,7 +39,7 @@ label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: '-'}
 def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size, output_directory,
          num_base_classes, num_rle_classes, print_details=False):
     # transformations = transforms.Compose([transforms.ToTensor()])
-    torch.set_num_threads(num_workers)
+    # torch.set_num_threads(num_workers)
     # data loader
     test_data = SequenceDataset(data_file)
     test_loader = DataLoader(test_data,
@@ -119,7 +119,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 true_bases = label_base_chunk.cpu().numpy().tolist()
                 true_rles = label_rle_chunk.cpu().numpy().tolist()
 
-                for i in range(image_chunk.size(0)):
+                for i in tqdm(range(image_chunk.size(0)), ncols=50):
                     column_count = 0
                     for pred_rle, true_rle, pred_base, true_base, pos in zip(predicted_rle_labels[i], true_rles[i],
                                                                              predicted_base_label[i], true_bases[i],
