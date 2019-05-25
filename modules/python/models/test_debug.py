@@ -120,8 +120,8 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 true_rles = label_rle_chunk.cpu().contiguous().numpy().tolist()
                 positions = position_chunk.cpu().contiguous().numpy().tolist()
 
-                image_chunk = image_chunk.cpu().contiguous()
-                print("HERE", image_chunk.size(0))
+                # image_chunk = image_chunk.cpu().contiguous()
+                # print("HERE", image_chunk.size(0))
                 for i in tqdm(range(image_chunk.size(0)), ncols=50):
                     column_count = 0
                     for pred_rle, true_rle, pred_base, true_base, pos in zip(predicted_rle_labels[i], true_rles[i],
