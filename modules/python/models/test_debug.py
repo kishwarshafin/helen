@@ -39,7 +39,7 @@ label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: '-'}
 def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size, output_directory,
          num_base_classes, num_rle_classes, print_details=False):
     # transformations = transforms.Compose([transforms.ToTensor()])
-
+    torch.set_num_threads(num_workers)
     # data loader
     test_data = SequenceDataset(data_file)
     test_loader = DataLoader(test_data,
