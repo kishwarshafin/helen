@@ -140,15 +140,15 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                                       "CHUNK ID: " + str(chunk_id[i].item())+ ",",
                                       "POS: {:3d} {:3d} INDEX: {:2d} SPLIT INDEX:{:2d}".format(pos[0].item() + contig_start[i].item(), pos[0].item(), pos[1].item(), pos[2].item())+ ",",
                                       "FILENAME: ", str(filename[i])+ ",")
-                                print(''.join(['-'] * 93))
-                                print("R: ", ' '.join(["{:5d}".format(int(x/2)) if x % 2 == 0 else ' ' for x in range(0, 21)]), '  |')
-                                print(''.join(['-'] * 93))
-                                print("A: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[0:22]]), '|')
-                                print("C: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[22:44]]), '|')
-                                print("G: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[44:66]]), '|')
-                                print("T: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[66:88]]), '|')
-                                print("*: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[88:]]), ' '*79, '|')
-                                print(''.join(['-'] * 93))
+                                # print(''.join(['-'] * 93))
+                                # print("R: ", ' '.join(["{:5d}".format(int(x/2)) if x % 2 == 0 else ' ' for x in range(0, 21)]), '  |')
+                                # print(''.join(['-'] * 93))
+                                # print("A: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[0:22]]), '|')
+                                # print("C: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[22:44]]), '|')
+                                # print("G: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[44:66]]), '|')
+                                # print("T: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[66:88]]), '|')
+                                # print("*: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[88:]]), ' '*79, '|')
+                                # print(''.join(['-'] * 93))
                         column_count += 1
 
                 loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
