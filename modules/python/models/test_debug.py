@@ -125,21 +125,23 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                                 column_count += 1
                                 continue
                             prediction_name_set.add(prediction_name)
-                            print("RLE TRUE/PRED: " + "{:02d}/{:02d}".format(true_rle[0] , pred_rle) + ",",
-                                  "BASE TRUE/PRED: " + "{}/{}".format(label_decoder[true_base[0]], label_decoder[pred_base])+ ",",
-                                  "CONTIG: " + (str(contig[i]) + ":" + str(contig_start[i].item()) + "-" + str(contig_end[i].item()))+ ",",
-                                  "CHUNK ID: " + str(chunk_id[i].item())+ ",",
-                                  "POS: {:3d} {:3d} INDEX: {:2d} SPLIT INDEX:{:2d}".format(pos[0].item() + contig_start[i].item(), pos[0].item(), pos[1].item(), pos[2].item())+ ",",
-                                  "FILENAME: ", str(filename[i])+ ",")
-                            print(''.join(['-'] * 93))
-                            print("R: ", ' '.join(["{:5d}".format(int(x/2)) if x % 2 == 0 else ' ' for x in range(0, 21)]), '  |')
-                            print(''.join(['-'] * 93))
-                            print("A: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[0:22]]), '|')
-                            print("C: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[22:44]]), '|')
-                            print("G: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[44:66]]), '|')
-                            print("T: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[66:88]]), '|')
-                            print("*: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[88:]]), ' '*79, '|')
-                            print(''.join(['-'] * 93))
+
+                            if print_details:
+                                print("RLE TRUE/PRED: " + "{:02d}/{:02d}".format(true_rle[0] , pred_rle) + ",",
+                                      "BASE TRUE/PRED: " + "{}/{}".format(label_decoder[true_base[0]], label_decoder[pred_base])+ ",",
+                                      "CONTIG: " + (str(contig[i]) + ":" + str(contig_start[i].item()) + "-" + str(contig_end[i].item()))+ ",",
+                                      "CHUNK ID: " + str(chunk_id[i].item())+ ",",
+                                      "POS: {:3d} {:3d} INDEX: {:2d} SPLIT INDEX:{:2d}".format(pos[0].item() + contig_start[i].item(), pos[0].item(), pos[1].item(), pos[2].item())+ ",",
+                                      "FILENAME: ", str(filename[i])+ ",")
+                                print(''.join(['-'] * 93))
+                                print("R: ", ' '.join(["{:5d}".format(int(x/2)) if x % 2 == 0 else ' ' for x in range(0, 21)]), '  |')
+                                print(''.join(['-'] * 93))
+                                print("A: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[0:22]]), '|')
+                                print("C: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[22:44]]), '|')
+                                print("G: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[44:66]]), '|')
+                                print("T: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[66:88]]), '|')
+                                print("*: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[88:]]), ' '*79, '|')
+                                print(''.join(['-'] * 93))
                         column_count += 1
 
 
