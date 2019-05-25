@@ -1,6 +1,5 @@
 import sys
 import torch
-from tqdm import tqdm
 import torchnet.meter as meter
 import torch.nn as nn
 from torch.utils.data import DataLoader
