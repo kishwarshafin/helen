@@ -121,6 +121,9 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
                 for i in tqdm(range(image_chunk.size(0)), ncols=50):
                     column_count = 0
+                    print(type(predicted_rle_labels[i]), type(true_rles[i]),
+                          type(predicted_base_label[i]), type(true_bases[i]),
+                          type(position_chunk[i]))
                     for pred_rle, true_rle, pred_base, true_base, pos in zip(predicted_rle_labels[i], true_rles[i],
                                                                              predicted_base_label[i], true_bases[i],
                                                                              position_chunk[i]):
