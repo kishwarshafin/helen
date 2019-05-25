@@ -103,7 +103,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 # do softmax and get prediction
                 m = nn.Softmax(dim=2)
                 soft_probs = m(output_base)
-                output_preds = soft_probs.cpu().contiguous()
+                output_preds = soft_probs.cpu()
                 base_max_value, predicted_base_label = torch.max(output_preds, dim=2)
 
                 # convert everything to list
@@ -112,16 +112,13 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 # do softmax and get prediction for rle
                 m_rle = nn.Softmax(dim=2)
                 rle_soft_probs = m_rle(output_rle)
-                rle_output_preds = rle_soft_probs.cpu().contiguous()
+                rle_output_preds = rle_soft_probs.cpu()
                 rle_max_value, predicted_rle_labels = torch.max(rle_output_preds, dim=2)
                 predicted_rle_labels = predicted_rle_labels.data.numpy().tolist()
 
                 true_bases = label_base_chunk.cpu().contiguous().numpy().tolist()
-                true_rles = label_rle_chunk.cpu().contiguous().numpy().tolist()
-                # positions = position_chunk.cpu().contiguous().numpy().tolist()
+                true_rles = label_rle_chunk.cpu().numpy().tolist()
 
-                # image_chunk = image_chunk.cpu().contiguous()
-                # print("HERE", image_chunk.size(0))
                 for i in tqdm(range(image_chunk.size(0)), ncols=50):
                     column_count = 0
                     for pred_rle, true_rle, pred_base, true_base, pos in zip(predicted_rle_labels[i], true_rles[i],
