@@ -4,6 +4,7 @@ import torchnet.meter as meter
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
+from tqdm import tqdm
 from modules.python.models.dataloader_debug import SequenceDataset
 from modules.python.TextColor import TextColor
 from modules.python.Options import ImageSizeOptions, TrainOptions
@@ -31,10 +32,11 @@ def label_to_literal(label):
 
     return 'T', label - 60
 
+
 label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: '-'}
 
 
-def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size,
+def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_layers, hidden_size, output_directory,
          num_base_classes, num_rle_classes, print_details=False):
     # transformations = transforms.Compose([transforms.ToTensor()])
 
@@ -49,6 +51,11 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
     # set the evaluation mode of the model
     transducer_model.eval()
+
+    test_file_logger = None
+    if print_details:
+        test_file_logger = open(output_directory + "prediction_debug.txt", 'w')
+        sys.stdout = test_file_logger
 
     # class_weights = torch.Tensor(CLASS_WEIGHTS)
     # Loss not doing class weights for the first pass
@@ -70,6 +77,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
     accuracy = 0
     prediction_name_set = set()
     with torch.no_grad():
+        pbar = tqdm(total=len(test_loader), desc='Accuracy: ', leave=True, ncols=100)
         for ii, (images, label_base, label_run_length, position, contig, contig_start, contig_end, chunk_id, filename) in \
                 enumerate(test_loader):
             images = images.type(torch.FloatTensor)
@@ -143,7 +151,6 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                                 print(''.join(['-'] * 93))
                         column_count += 1
 
-
                 loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
                                            label_base_chunk.contiguous().view(-1))
                 loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
@@ -172,6 +179,15 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
             for label in range(0, ImageSizeOptions.TOTAL_RLE_LABELS):
                 rle_corrects = rle_corrects + rle_cm_value[label][label]
                 # rle_denom = rle_denom - rle_cm_value[0][label]
+
+            # calculate the accuracy
+            base_accuracy = 100.0 * (base_corrects / max(1.0, base_denom))
+            rle_accuracy = 100.0 * (rle_corrects / max(1.0, rle_denom))
+
+            # set the tqdm bar's accuracy and loss value
+            pbar.update(1)
+            pbar.set_description("Base acc: " + str(round(base_accuracy, 4)) +
+                                 ", RLE acc: " + str(round(rle_accuracy, 4)))
 
     avg_loss = total_loss / total_images if total_images else 0
     np.set_printoptions(threshold=np.inf)

@@ -9,6 +9,7 @@ import torch.nn.parallel
 from modules.python.models.test_debug import test
 from modules.python.models.ModelHander import ModelHandler
 from modules.python.TextColor import TextColor
+from modules.python.FileManager import FileManager
 from modules.python.Options import ImageSizeOptions
 """
 FREEZE THIS BRANCH TO HAVE 1 WINDOW!!
@@ -89,7 +90,7 @@ def save_base_confusion_matrix(stats_dictionary):
     plt.savefig("BASE_CONFUSION_MATRIX.png", dpi=100)
 
 
-def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_details):
+def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_directory, print_details):
     """
     Train a model and save
     :param test_file: A CSV file containing test image information
@@ -124,6 +125,7 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, print_deta
     stats_dictionary = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
                             gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
                             num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS,
+                            output_directory=output_directory,
                             print_details=print_details)
 
     save_rle_confusion_matrix(stats_dictionary)
@@ -168,6 +170,13 @@ if __name__ == '__main__':
         help="If true then cuda is on."
     )
     parser.add_argument(
+        "--output_dir",
+        type=str,
+        required=False,
+        default='./debug_output',
+        help="Path and file_name to save the debug output"
+    )
+    parser.add_argument(
         "--num_workers",
         type=int,
         required=False,
@@ -175,4 +184,11 @@ if __name__ == '__main__':
         help="Epoch size for training iteration."
     )
     FLAGS, not_parsed = parser.parse_known_args()
-    do_test(FLAGS.test_file, FLAGS.batch_size, FLAGS.gpu_mode, FLAGS.num_workers, FLAGS.model_path, FLAGS.print_details)
+    output_dir = FileManager.handle_output_directory(FLAGS.output_dir)
+    do_test(FLAGS.test_file,
+            FLAGS.batch_size,
+            FLAGS.gpu_mode,
+            FLAGS.num_workers,
+            FLAGS.model_path,
+            output_dir,
+            FLAGS.print_details)
