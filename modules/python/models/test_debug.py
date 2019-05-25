@@ -116,8 +116,8 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 rle_max_value, predicted_rle_labels = torch.max(rle_output_preds, dim=2)
                 predicted_rle_labels = predicted_rle_labels.data.numpy().tolist()
 
-                true_bases = label_base_chunk.numpy().tolist()
-                true_rles = label_rle_chunk.numpy().tolist()
+                true_bases = label_base_chunk.cpu().numpy().tolist()
+                true_rles = label_rle_chunk.cpu().numpy().tolist()
 
                 for i in range(image_chunk.size(0)):
                     column_count = 0
