@@ -29,13 +29,14 @@ The algorithm is described here:
 """
 
 
-def polish_genome(image_filepath, model_path, batch_size, num_workers, output_dir, gpu_mode):
+def polish_genome(image_filepath, model_path, batch_size, num_workers, threads, output_dir, gpu_mode):
     """
     This method provides an interface too call the predict method that generates the prediction hdf5 file
     :param image_filepath: Path to directory where all MarginPolish images are saved
     :param model_path: Path to a trained model
     :param batch_size: Batch size for minibatch processing
     :param num_workers: Number of workers for minibatch processing
+    :param threads: Number of threads for pytorch
     :param output_dir: Path to the output directory
     :param gpu_mode: If true, predict method will use GPU.
     :return:
@@ -47,7 +48,7 @@ def polish_genome(image_filepath, model_path, batch_size, num_workers, output_di
     output_filename = output_dir + "helen_predictions.hdf"
 
     # call the predict method to generate the prediction hdf5 file
-    predict(image_filepath, output_filename, model_path, batch_size, num_workers, gpu_mode)
+    predict(image_filepath, output_filename, model_path, batch_size, num_workers, threads, gpu_mode)
 
     # notify the user that process has completed successfully
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "PREDICTION GENERATED SUCCESSFULLY.\n")
@@ -86,6 +87,13 @@ if __name__ == '__main__':
         help="Batch size for testing, default is 100."
     )
     parser.add_argument(
+        "--threads",
+        type=int,
+        required=False,
+        default=4,
+        help="Batch size for testing, default is 100."
+    )
+    parser.add_argument(
         "--output_dir",
         type=str,
         required=False,
@@ -106,6 +114,7 @@ if __name__ == '__main__':
                   FLAGS.model_path,
                   FLAGS.batch_size,
                   FLAGS.num_workers,
+                  FLAGS.threads,
                   FLAGS.output_dir,
                   FLAGS.gpu_mode)
 
