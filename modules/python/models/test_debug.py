@@ -149,7 +149,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                                 print("T: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[66:88]]), '|')
                                 print("*: ", ' '.join(["{:3d}".format(int(x)) for x in image_chunk[i, column_count].numpy().tolist()[88:]]), ' '*79, '|')
                                 print(''.join(['-'] * 93))
-                                
+
                         column_count += 1
 
                 loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
