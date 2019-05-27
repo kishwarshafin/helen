@@ -1,12 +1,13 @@
 class StitchOptions(object):
-    BASE_ERROR_RATE = 1.0
+    BASE_ERROR_RATE = 0.0
     label_decoder = {1: 'A', 2: 'C', 3: 'G', 4: 'T', 0: ''}
     MATCH_PENALTY = 4
     MISMATCH_PENALTY = 6
     GAP_PENALTY = 8
     GAP_EXTEND_PENALTY = 2
     MIN_SEQUENCE_REQUIRED_FOR_MULTITHREADING = 2
-    OVERLAP_THRESHOLD = 5
+    OVERLAP_THRESHOLD = 10
+    KMER_SIZE = 15
 
 
 class ImageSizeOptions(object):

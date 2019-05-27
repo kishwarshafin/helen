@@ -141,7 +141,7 @@ class Stitch:
                     # is append 50 Ns to compensate for the overlap regions and then add the next chunk. This happens
                     # very rarely but happens for sure.
                     if len(right_current_sequence) > 10:
-                        running_sequence = running_sequence + 50 * 'N'
+                        running_sequence = running_sequence + 10 * 'N'
                         running_sequence = running_sequence + right_current_sequence
                         running_end = this_end
 
@@ -158,7 +158,7 @@ class Stitch:
                         if len(this_sequence) > 10:
                             left_sequence = running_sequence[:-overlap_bases]
                             overlap_sequence = left_running_sequence_chunk
-                            running_sequence = left_sequence + overlap_sequence + 20 * 'N' + this_sequence
+                            running_sequence = left_sequence + overlap_sequence + 10 * 'N' + this_sequence
                             running_end = this_end
                     else:
                         # this is a perfect match so we can simply stitch them
@@ -180,11 +180,10 @@ class Stitch:
 
                 # if the sequence is worth adding, then we add
                 if len(this_sequence) > 10:
-                    running_sequence = running_sequence + 50 * 'N' + this_sequence
+                    running_sequence = running_sequence + 10 * 'N' + this_sequence
                     running_end = this_end
 
         return contig, running_start, running_end, running_sequence
-
 
     def small_chunk_stitch(self, file_name, contig, small_chunk_keys):
         """
