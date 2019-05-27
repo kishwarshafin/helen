@@ -152,9 +152,13 @@ class Stitch:
                     if pos_a == -1 or pos_b == -1:
                         # in this case we couldn't find a place that we can use as an anchor
                         # we again compensate this Ns in the sequence.
-                        sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAPS IN ALIGNMENT : \n"
-                                         + str(sequence_chunks[i]) + "\n" + TextColor.END)
-
+                        sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAPS IN ALIGNMENT : \n" + TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "LEFT : " + str(left_running_sequence_chunk) + "\n" +
+                                         TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "RIGHT: " + str(right_current_sequence) + "\n" +
+                                         TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "CIGAR: " + str(alignment.cigar_string) + "\n" +
+                                         TextColor.END)
                         if len(this_sequence) > 10:
                             left_sequence = running_sequence[:-overlap_bases]
                             overlap_sequence = left_running_sequence_chunk

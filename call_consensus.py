@@ -64,41 +64,41 @@ if __name__ == '__main__':
         "--image_file",
         type=str,
         required=True,
-        help="HDF5 file containing all image segments for prediction."
+        help="Path to a directory where all MarginPolish generated images are."
     )
     parser.add_argument(
         "--model_path",
         type=str,
         required=True,
-        help="Path to the trained model."
+        help="Path to a trained model."
     )
     parser.add_argument(
         "--batch_size",
         type=int,
         required=False,
-        default=100,
-        help="Batch size for testing, default is 100."
+        default=512,
+        help="Batch size for testing, default is 512."
     )
     parser.add_argument(
         "--num_workers",
         type=int,
         required=False,
-        default=4,
-        help="Batch size for testing, default is 100."
+        default=16,
+        help="Number of workers to assign to the dataloader."
     )
     parser.add_argument(
         "--threads",
         type=int,
         required=False,
-        default=4,
-        help="Batch size for testing, default is 100."
+        default=1,
+        help="Number of pytorch threads to use."
     )
     parser.add_argument(
         "--output_dir",
         type=str,
         required=False,
-        default='vcf_output',
-        help="Output directory."
+        default='./output/',
+        help="Path to the output directory."
     )
     parser.add_argument(
         "--gpu_mode",
