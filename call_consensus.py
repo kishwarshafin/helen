@@ -52,7 +52,6 @@ def polish_genome(image_filepath, model_path, batch_size, num_workers, threads, 
 
     # notify the user that process has completed successfully
     sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "PREDICTION GENERATED SUCCESSFULLY.\n")
-    sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "COMPILING PREDICTIONS TO CALL VARIANTS.\n")
 
 
 if __name__ == '__main__':
