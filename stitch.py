@@ -111,4 +111,4 @@ if __name__ == '__main__':
     )
 
     FLAGS, unparsed = parser.parse_known_args()
-    process_marginpolish_h5py(FLAGS.sequence_hdf, FLAGS.output_dir, FLAGS.output_prefix, FLAGS.threads)
+    process_marginpolish_h5py(FLAGS.input_hdf, FLAGS.output_dir, FLAGS.output_prefix, FLAGS.threads)
