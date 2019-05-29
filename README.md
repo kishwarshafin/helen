@@ -307,7 +307,7 @@ python3 call_consensus.py \
 Finally you can run `stitch.py` to get a consensus sequence:
 ```bash
 python3 stitch.py \
---sequence_hdf <path/to/helen_out/consensus_sequence/helen_predictions.hdf> \
+--input_hdf <path/to/helen_out/consensus_sequence/helen_predictions.hdf> \
 --output_dir <path/to/helen_out/consensus_sequence/> \
 --threads <number_of_threads>
 ```
