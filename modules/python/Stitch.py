@@ -141,7 +141,7 @@ class Stitch:
                     # is append 50 Ns to compensate for the overlap regions and then add the next chunk. This happens
                     # very rarely but happens for sure.
                     if len(right_current_sequence) > 10:
-                        running_sequence = running_sequence + 50 * 'N'
+                        running_sequence = running_sequence + 10 * 'N'
                         running_sequence = running_sequence + right_current_sequence
                         running_end = this_end
 
@@ -152,13 +152,17 @@ class Stitch:
                     if pos_a == -1 or pos_b == -1:
                         # in this case we couldn't find a place that we can use as an anchor
                         # we again compensate this Ns in the sequence.
-                        sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAPS IN ALIGNMENT : \n"
-                                         + str(sequence_chunks[i]) + "\n" + TextColor.END)
-
+                        sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAPS IN ALIGNMENT : \n" + TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "LEFT : " + str(left_running_sequence_chunk) + "\n" +
+                                         TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "RIGHT: " + str(right_current_sequence) + "\n" +
+                                         TextColor.END)
+                        sys.stderr.write(TextColor.YELLOW + "CIGAR: " + str(alignment.cigar_string) + "\n" +
+                                         TextColor.END)
                         if len(this_sequence) > 10:
                             left_sequence = running_sequence[:-overlap_bases]
                             overlap_sequence = left_running_sequence_chunk
-                            running_sequence = left_sequence + overlap_sequence + 20 * 'N' + this_sequence
+                            running_sequence = left_sequence + overlap_sequence + 10 * 'N' + this_sequence
                             running_end = this_end
                     else:
                         # this is a perfect match so we can simply stitch them
@@ -180,11 +184,10 @@ class Stitch:
 
                 # if the sequence is worth adding, then we add
                 if len(this_sequence) > 10:
-                    running_sequence = running_sequence + 50 * 'N' + this_sequence
+                    running_sequence = running_sequence + 10 * 'N' + this_sequence
                     running_end = this_end
 
         return contig, running_start, running_end, running_sequence
-
 
     def small_chunk_stitch(self, file_name, contig, small_chunk_keys):
         """

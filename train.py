@@ -114,8 +114,8 @@ if __name__ == '__main__':
         "--num_workers",
         type=int,
         required=False,
-        default=40,
-        help="Epoch size for training iteration."
+        default=16,
+        help="Number of workers to assign to the dataloader."
     )
     FLAGS, unparsed = parser.parse_known_args()
     model_out_dir, log_dir = FileManager.handle_train_output_directory(FLAGS.model_out)

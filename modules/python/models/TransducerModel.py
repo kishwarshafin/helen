@@ -1,5 +1,10 @@
 import torch
 import torch.nn as nn
+import warnings
+
+# this ignore is to avoid the flatten parameter warning from showing up. There is no way around it on GPU but it
+# still shows up.
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 """
 This script defines a pytorch deep neural network model for a multi-task classification problem that we 
 use in HELEN.
