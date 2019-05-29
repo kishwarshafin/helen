@@ -118,7 +118,7 @@ if __name__ == '__main__':
         "--gpu_mode",
         default=False,
         action='store_true',
-        help="If set then we will use GPU for inference."
+        help="If set then PyTorch will use GPUs for inference."
     )
     FLAGS, unparsed = parser.parse_known_args()
     FLAGS.output_dir = FileManager.handle_output_directory(FLAGS.output_dir)
