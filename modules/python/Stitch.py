@@ -202,17 +202,7 @@ class Stitch:
         name_sequence_tuples = list()
 
         # go through all the chunk keys
-        for contig_name, _st, _end in small_chunk_keys:
-            # re-create the chunk name from the three values in small chunk keys
-            chunk_name = contig_name + '-' + str(_st) + '-' + str(_end)
-
-            with h5py.File(file_name, 'r') as hdf5_file:
-                if 'predictions' in hdf5_file:
-                    contig_start = hdf5_file['predictions'][contig][chunk_name]['contig_start'][()]
-                    contig_end = hdf5_file['predictions'][contig][chunk_name]['contig_end'][()]
-                else:
-                    continue
-
+        for contig_name, chunk_name, contig_start, contig_end in small_chunk_keys:
             smaller_chunks = []
             with h5py.File(file_name, 'r') as hdf5_file:
                 if 'predictions' in hdf5_file:
@@ -275,15 +265,13 @@ class Stitch:
         :return: A consensus sequence for a contig
         """
         # first we sort the sequence chunks
-        sequence_chunk_keys = sorted(sequence_chunk_keys)
         sequence_chunk_key_list = list()
         # then we split the chunks to so get contig name, start and end positions so we can sort them properly
-        for sequence_chunk_key in sequence_chunk_keys:
-            contig, st, end = sequence_chunk_key.split('-')
-            sequence_chunk_key_list.append((contig, int(st), int(end)))
+        for chunk_key, st, end in sequence_chunk_keys:
+            sequence_chunk_key_list.append((contig, chunk_key, int(st), int(end)))
 
         # we sort based on positions
-        sequence_chunk_key_list = sorted(sequence_chunk_key_list, key=lambda element: (element[1], element[2]))
+        sequence_chunk_key_list = sorted(sequence_chunk_key_list, key=lambda element: (element[2], element[3]))
 
         sequence_chunks = list()
         # we submit the chunks in process pool
