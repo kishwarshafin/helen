@@ -49,7 +49,7 @@ def process_marginpolish_h5py(hdf_file_path, output_path, output_prefix, threads
     sys.stderr.write(TextColor.GREEN + "INFO: OUTPUT FILE: " + output_filename + "\n" + TextColor.END)
 
     # for each contig
-    for i, contig in enumerate(contigs):
+    for i, contig in enumerate(sorted(contigs)):
         log_prefix = "{:04d}".format(i) + "/" + "{:04d}".format(len(contigs)) + ":"
         sys.stderr.write(TextColor.GREEN + "INFO: " + str(log_prefix) + " PROCESSING CONTIG: " + contig + "\n"
                          + TextColor.END)
@@ -58,9 +58,16 @@ def process_marginpolish_h5py(hdf_file_path, output_path, output_prefix, threads
         with h5py.File(hdf_file_path, 'r') as hdf5_file:
             chunk_keys = sorted(hdf5_file['predictions'][contig].keys())
 
+        chunk_name_tuple = list()
+        with h5py.File(hdf_file_path, 'r') as hdf5_file:
+            for chunk_key in chunk_keys:
+                chunk_contig_start = hdf5_file['predictions'][contig][chunk_key]['contig_start'][()]
+                chunk_contig_end = hdf5_file['predictions'][contig][chunk_key]['contig_end'][()]
+                chunk_name_tuple.append((chunk_key, chunk_contig_start, chunk_contig_end))
+
         # call stitch to generate a sequence for this contig
         stich_object = Stitch()
-        consensus_sequence = stich_object.create_consensus_sequence(hdf_file_path, contig, chunk_keys, threads)
+        consensus_sequence = stich_object.create_consensus_sequence(hdf_file_path, contig, chunk_name_tuple, threads)
         sys.stderr.write(TextColor.BLUE + "INFO: " + str(log_prefix) + " FINISHED PROCESSING " + contig
                          + ", POLISHED SEQUENCE LENGTH: " + str(len(consensus_sequence)) + ".\n" + TextColor.END)
 
