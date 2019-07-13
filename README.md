@@ -1,5 +1,5 @@
 # H.E.L.E.N.
-H.E.L.E.N. (Haplotype Embedded Long-read Error-corrector for Nanopore)
+H.E.L.E.N. (Homopolymer Encoded Long-read Error-corrector for Nanopore)
 
 
 [![Build Status](https://travis-ci.com/kishwarshafin/helen.svg?branch=master)](https://travis-ci.com/kishwarshafin/helen)
@@ -458,5 +458,14 @@ We acknowledge the work of the developers of these packages: </br>
 * [hdf5 python (h5py)](https://www.h5py.org/)
 * [pybind](https://github.com/pybind/pybind11)
 * [hyperband](https://github.com/zygmuntz/hyperband)
+
+## Fun Fact
+<img src="https://vignette.wikia.nocookie.net/marveldatabase/images/e/eb/Iron_Man_Armor_Model_45_from_Iron_Man_Vol_5_8_002.jpg/revision/latest?cb=20130420194800" alt="guppy235" width="240p">
+<img src="https://vignette.wikia.nocookie.net/marveldatabase/images/c/c0/H.E.L.E.N._%28Earth-616%29_from_Iron_Man_Vol_5_19_002.jpg/revision/latest?cb=20140110025158" alt="guppy235" width="120p"> <br/>
+The name "HELEN" is inspired from the A.I. create by Tony Stark in the  Marvel Comics (Earth-616). HELEN was created to control the city Tony was building named "Troy" making the A.I. "HELEN of Troy".
+
+READ MORE: [HELEN](https://marvel.fandom.com/wiki/H.E.L.E.N._(Earth-616))
+
+
 
 © 2019 Kishwar Shafin, Trevor Pesout, Benedict Paten.
