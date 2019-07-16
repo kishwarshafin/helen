@@ -55,7 +55,8 @@ def read_bed_file(file):
     with open(file) as f:
         for line in f:
             line = line.rstrip()
-            known_svs.append(line.split('\t'))
+            known_svs.append(line.split('\t')[0:3])
+            # print(line.split('\t')[0:3])
     # returns a list of known svs as a list where each element is [chr_name, st, end]
     return known_svs
 
@@ -78,6 +79,8 @@ def count_miassemblies_in_autosomes(misassemblies):
             elif ms_type == 'inversion':
                 inversion_count += 1
                 total_count += 1
+        else:
+            print(chr, st, end, ms_type)
 
     print("#####--TOTAL MISSASSEMBLIES: IN AUTOSOMES--#####")
     print("Total Misassemblies:\t", total_count)
@@ -89,6 +92,7 @@ def count_miassemblies_in_autosomes(misassemblies):
 
 def count_misassemblies_not_overlapping_with_svs(known_svs, misassemblies):
     total_count = 0
+    total_base_count = 0
     relocation_count = 0
     translocation_count = 0
     inversion_count = 0
@@ -108,9 +112,9 @@ def count_misassemblies_not_overlapping_with_svs(known_svs, misassemblies):
             if overlaps:
                 break
 
-        # this means the misassembly does not overlap with any known SV
         if overlaps is False:
             total_count += 1
+            total_base_count += (int(end_ms) - int(st_ms) + 1)
             if ms_type == 'relocation':
                 relocation_count += 1
             elif ms_type == 'translocation':
@@ -123,6 +127,7 @@ def count_misassemblies_not_overlapping_with_svs(known_svs, misassemblies):
     print("Total relocations:\t", relocation_count)
     print("Total translocations:\t", translocation_count)
     print("Total inversions:\t", inversion_count)
+    print("Total Bases:\t", total_base_count/ 1000000000)
     print("########################################")
 
 
@@ -139,17 +144,39 @@ if __name__ == '__main__':
         help="Path to the QUAST's TSV input file located in /QUAST_output/contig_reports/all_alignments_$$.tsv"
     )
     parser.add_argument(
-        "-sv",
+        "-s",
         "--sv_file",
         type=str,
         required=True,
         help="Path to a bed file containing all known SVs for the sample."
     )
+    parser.add_argument(
+        "-c",
+        "--cen_file",
+        type=str,
+        required=True,
+        help="Path to a bed file containing all known centromeric region."
+    )
+    parser.add_argument(
+        "-d",
+        "--segdup_file",
+        type=str,
+        required=True,
+        help="Path to a bed file containing all known segdup for the sample."
+    )
     FLAGS, unparsed = parser.parse_known_args()
     # get regions from files
-    k_svs = read_bed_file(FLAGS.sv_file)
+    svs = read_bed_file(FLAGS.sv_file)
+    centromeres = read_bed_file(FLAGS.cen_file)
+    segdups = read_bed_file(FLAGS.segdup_file)
+
+    centromeres_only = centromeres
+    centromeres_and_segdups = centromeres + segdups
     m_assemblies = read_quast_file(FLAGS.quast_file)
 
     # count stuff
-    count_miassemblies_in_autosomes(m_assemblies)
-    count_misassemblies_not_overlapping_with_svs(k_svs, m_assemblies)
+    # count_miassemblies_in_autosomes(m_assemblies)
+    print("OUTSIDE CENTROMERES")
+    count_misassemblies_not_overlapping_with_svs(centromeres_only, m_assemblies)
+    print("\nOUTSIDE CENTROMERES AND SEG DUPS")
+    count_misassemblies_not_overlapping_with_svs(centromeres_and_segdups, m_assemblies)
