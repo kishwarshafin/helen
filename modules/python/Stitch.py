@@ -213,37 +213,32 @@ class Stitch:
             all_positions = set()
             # now create two dictionaries where we will save all the predictions
             base_prediction_dict = defaultdict()
-            rle_prediction_dict = defaultdict()
             for chunk in smaller_chunks:
                 # grab the predictions and the positions
                 with h5py.File(file_name, 'r') as hdf5_file:
                     bases = hdf5_file['predictions'][contig][chunk_name][chunk]['bases'][()]
-                    rles = hdf5_file['predictions'][contig][chunk_name][chunk]['rles'][()]
                     positions = hdf5_file['predictions'][contig][chunk_name][chunk]['position'][()]
 
                 positions = np.array(positions, dtype=np.int64)
                 base_predictions = np.array(bases, dtype=np.int)
-                rle_predictions = np.array(rles, dtype=np.int)
 
                 # now iterate over each position and add the predictions to the dictionary
-                for position, base_pred, rle_pred in zip(positions, base_predictions, rle_predictions):
-                    indx = position[1]
+                for position, base_pred in zip(positions, base_predictions):
                     pos = position[0]
-                    split_indx = position[2]
+                    indx = position[1]
+
                     if indx < 0 or pos < 0:
                         continue
-                    if (pos, indx, split_indx) not in base_prediction_dict:
-                        base_prediction_dict[(pos, indx, split_indx)] = base_pred
-                        rle_prediction_dict[(pos, indx, split_indx)] = rle_pred
-                        all_positions.add((pos, indx, split_indx))
+                    if (pos, indx) not in base_prediction_dict:
+                        base_prediction_dict[(pos, indx)] = base_pred
+                        all_positions.add((pos, indx))
 
             # now simply create a position list and query the  dictionary to generate the predicted sequence
-            pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1], element[2]))
+            pos_list = sorted(list(all_positions), key=lambda element: (element[0], element[1]))
             dict_fetch = operator.itemgetter(*pos_list)
             predicted_base_labels = list(dict_fetch(base_prediction_dict))
-            predicted_rle_labels = list(dict_fetch(rle_prediction_dict))
-            sequence = ''.join([StitchOptions.label_decoder[base] * int(rle)
-                                for base, rle in zip(predicted_base_labels, predicted_rle_labels)])
+            sequence = ''.join([StitchOptions.label_decoder[base] for base in predicted_base_labels])
+
             # now add the generated sequence for further stitching
             name_sequence_tuples.append((contig, contig_start, contig_end, sequence))
 

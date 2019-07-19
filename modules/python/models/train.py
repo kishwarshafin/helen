@@ -118,18 +118,14 @@ def train(train_file,
         model_optimizer = ModelHandler.load_simple_optimizer(model_optimizer, retrain_model_path, gpu_mode)
         sys.stderr.write(TextColor.GREEN + "INFO: OPTIMIZER LOADED\n" + TextColor.END)
 
-    class_weights = torch.Tensor(TrainOptions.CLASS_WEIGHTS)
     # we perform a multi-task classification, so we need two loss functions, each performing a single task
     # criterion base is the loss function for base prediction
     criterion_base = nn.CrossEntropyLoss()
-    # criterion rle is the loss function for RLE prediction
-    criterion_rle = nn.CrossEntropyLoss(weight=class_weights)
 
     # if gpu mode is true then transfer the model and loss functions to cuda
     if gpu_mode is True:
         transducer_model = torch.nn.DataParallel(transducer_model).cuda()
         criterion_base = criterion_base.cuda()
-        criterion_rle = criterion_rle.cuda()
 
     start_epoch = prev_ite
 
@@ -151,14 +147,13 @@ def train(train_file,
         batch_no = 1
 
         # tqdm is the progress bar we use for logging
-        with tqdm(total=len(train_loader), desc='Loss', leave=True, ncols=100) as progress_bar:
+        with tqdm(total=len(train_loader), desc='AVG LOSS', leave=True, ncols=100) as progress_bar:
             # make sure the model is in train mode. BN is different in train and eval.
             transducer_model.train()
-            for images, label_base, label_rle in train_loader:
+            for images, label_base in train_loader:
                 # convert the tensors to the proper datatypes.
                 images = images.type(torch.FloatTensor)
                 label_base = label_base.type(torch.LongTensor)
-                label_rle = label_rle.type(torch.LongTensor)
 
                 # initialize the hidden input for the first chunk
                 hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
@@ -167,7 +162,6 @@ def train(train_file,
                 if gpu_mode:
                     images = images.cuda()
                     label_base = label_base.cuda()
-                    label_rle = label_rle.cuda()
                     hidden = hidden.cuda()
 
                 # perform a sliding window on the entire image sequence length
@@ -183,20 +177,16 @@ def train(train_file,
                     # get the chunks for this window
                     image_chunk = images[:, i:i+TrainOptions.TRAIN_WINDOW]
                     label_base_chunk = label_base[:, i:i+TrainOptions.TRAIN_WINDOW]
-                    label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
                     # get the inference from the model
-                    output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
+                    output_base, hidden = transducer_model(image_chunk, hidden)
 
                     # calculate loss for base prediction
                     loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
                                                label_base_chunk.contiguous().view(-1))
-                    # calculate loss for RLE prediction
-                    loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
-                                             label_rle_chunk.contiguous().view(-1))
 
                     # sum the losses to have a singlee optimization over multiple tasks
-                    loss = loss_base + loss_rle
+                    loss = loss_base
 
                     # backpropagation and weight update
                     loss.backward()
@@ -205,7 +195,6 @@ def train(train_file,
                     # update the loss values
                     total_loss += loss.item()
                     total_loss_base += loss_base.item()
-                    total_loss_rle += loss_rle.item()
                     total_images += image_chunk.size(0)
 
                     # detach the hidden from the graph as the next chunk will be a new optimization
@@ -213,9 +202,7 @@ def train(train_file,
 
                 # update the progress bar
                 avg_loss = (total_loss / total_images) if total_images else 0
-                progress_bar.set_description("Base: " + str(round(total_loss_base, 4)) +
-                                             ", RLE: " + str(round(total_loss_rle, 4)) +
-                                             ", TOTAL: " + str(round(total_loss, 4)))
+                progress_bar.set_description("AVG LOSS: " + str(round(avg_loss, 4)))
 
                 if not_hyperband is True:
                     train_loss_logger.write(str(epoch + 1) + "," + str(batch_no) + "," + str(avg_loss) + "\n")

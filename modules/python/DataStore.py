@@ -81,7 +81,7 @@ class DataStore(object):
         self._meta.update(meta)
 
     def write_prediction(self, contig, contig_start, contig_end, chunk_id, position,
-                         predicted_bases, predicted_rles, filename):
+                         predicted_bases, filename):
         """
         This is the method we use to write the data to the HDF file. This method is called by each image we
         generate.
@@ -91,7 +91,6 @@ class DataStore(object):
         :param chunk_id: Chunk id from marginpolish to know which chunk the image is from.
         :param position: Array of values indicating genomic positions.
         :param predicted_bases: Array of values indicating predicted bases for each genomic position.
-        :param predicted_rles: Array of values indicating predicted run-length for each genomic position.
         :param filename: Name of the file the image belongs to (used for debugging mostly)
         :return:
         """
@@ -128,6 +127,3 @@ class DataStore(object):
             self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
                                                       chunk_name_suffix, 'bases')] = np.array(predicted_bases,
                                                                                               dtype=np.uint8)
-            self.file_handler['{}/{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix,
-                                                      chunk_name_suffix, 'rles')] = np.array(predicted_rles,
-                                                                                             dtype=np.uint8)

@@ -55,7 +55,6 @@ class TransducerGRU(nn.Module):
         self.gru_decoder.flatten_parameters()
         # the linear layer for base and RLE classification
         self.dense1_base = nn.Linear(self.hidden_size * 2, self.num_base_classes)
-        self.dense2_rle = nn.Linear(self.hidden_size * 2, self.num_rle_classes)
 
     def forward(self, x, hidden):
         """
@@ -73,10 +72,9 @@ class TransducerGRU(nn.Module):
 
         # classification
         base_out = self.dense1_base(x_out_final)
-        rle_out = self.dense2_rle(x_out_final)
 
         hidden_final = hidden_final.transpose(0, 1).contiguous()
-        return base_out, rle_out, hidden_final
+        return base_out, hidden_final
 
     def init_hidden(self, batch_size, num_layers, bidirectional=True):
         """
