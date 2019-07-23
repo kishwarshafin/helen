@@ -7,7 +7,6 @@
 
 To install MarginPolish in a Ubuntu/Linux bases system, follow these instructions:
 
-
 ##### Install Dependencies
 ```bash
 sudo apt-get -y install cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev
@@ -108,7 +107,9 @@ cd helen
 
 These steps will install `HELEN` in your local system. `HELEN` also requires installing some python3 packages.
 ```bash
-python3 -m pip install h5py tqdm numpy torchnet
+python3 -m pip install h5py tqdm numpy torchnet pyyaml
 ```
 
-After installation is complete please see the [walkthough](walkthough.md) document.
+#### Usage
+If you have installed sucessfully then please follow the [Local Install Usage Guide](docs/usage_local_install.md).
+.
