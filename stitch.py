@@ -1,6 +1,7 @@
 import h5py
 import argparse
 import sys
+import os
 from modules.python.Stitch import Stitch
 from modules.python.TextColor import TextColor
 """
@@ -44,7 +45,7 @@ def process_marginpolish_h5py(hdf_file_path, output_path, output_prefix, threads
 
     # open an output fasta file
     # we should really use a fasta handler for this, I don't like this.
-    output_filename = output_path + output_prefix + '.fa'
+    output_filename = os.path.join(output_path, output_prefix + '.fa')
     consensus_fasta_file = open(output_filename, 'w')
     sys.stderr.write(TextColor.GREEN + "INFO: OUTPUT FILE: " + output_filename + "\n" + TextColor.END)
 
