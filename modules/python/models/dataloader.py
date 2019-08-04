@@ -61,7 +61,7 @@ class SequenceDataset(Dataset):
         label_base[label_base == 71] = 3
         label_base[label_base == 84] = 4
         label_base[label_base == 95] = 0
-        label_base[label_base > 5] = 0
+        label_base[label_base > 4] = 0
 
         return image, label_base
 
