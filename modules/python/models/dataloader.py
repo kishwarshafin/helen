@@ -62,6 +62,10 @@ class SequenceDataset(Dataset):
         label_base[label_base == 84] = 4
         label_base[label_base == 95] = 0
 
+        for l in label_base:
+            if l not in [0, 1, 2, 3, 4]:
+                print(l)
+
         return image, label_base
 
     def __len__(self):
