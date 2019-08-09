@@ -21,9 +21,6 @@ gunzip r94_ec_rad2.181119.60x-10kb.fasta.gz
 #### Generate draft assembly using Shasta
 Although any assembler can be used to generate the initial assembly, we highly recommend using [Shasta](https://github.com/chanzuckerberg/shasta).
 
-Please see the [quick start documentation](https://chanzuckerberg.github.io/shasta/QuickStart.html) to see how to use Shasta. Shasta requires memory intensive computing.
-> For a human size assembly, AWS instance type x1.32xlarge is recommended. It is usually available at a cost around $4/hour on the AWS spot market and should complete the human size assembly in a few hours, at coverage around 60x.
-
 As our set of reads is very small. We can safely assemble the reads. First, download the Shasta binary.
 ```bash
 wget https://github.com/chanzuckerberg/shasta/releases/download/0.1.0/shasta-Linux-0.1.0
@@ -43,8 +40,6 @@ Install Minimap2
 # clone the github repo and install minimap2
 git clone https://github.com/lh3/minimap2
 cd minimap2 && make
-# if you get dependency errors make sure you have installed dependency for MarginPolish and install make and gcc
-sudo apt-get install make gcc
 cd ..
 ```
 
@@ -75,39 +70,83 @@ samtools index -@32 reads_2_shasta_ec.bam
 ```bash
 sudo docker pull tpesout/margin_polish:latest
 sudo docker run tpesout/margin_polish:latest --help
-wget https://github.com/UCSC-nanopore-cgl/MarginPolish/blob/master/params/allParams.np.human.guppy-ff-235.json
+wget https://raw.githubusercontent.com/UCSC-nanopore-cgl/MarginPolish/master/params/allParams.np.human.guppy-ff-235.json
+mkdir marginpolish_output
 ```
 
 ```bash
-marginPolish \
-data/reads_2_assembly.bam \
-data/shasta_assembly/Assembly.fasta \
-../params/allParams.np.ecoli.json \
--t 32 \
--o data/marginpolish_images/marginpolish_images \
--f
+# Copy the absolute path to walkthough
+pwd
+# copy the output
+```
 
-sudo docker run -v "$pwd":/data tpesout/margin_polish:latest reads_2_shasta_ec.bam \
+```bash
+sudo docker run -v <absolute/path/to/walkthrough/>:/data tpesout/margin_polish:latest \
+ reads_2_shasta_ec.bam \
 r94_ec_shasta_assembly/Assembly.fa \
 allParams.np.ecoli.json \
 -t 32 \
--o output/marginpolish_images \
+-o marginpolish_output/marginpolish_images \
 -f
 ```
-## Run HELEN
+### Run HELEN
 ```bash
-time python3 call_consensus.py \
---image_file data/marginpolish_images/ \
---batch_size 512 \
---model_path data/helen_models/HELEN_v0_lc_r941_flip233_hap.pkl \
---output_dir data/helen_out/consensus_sequence/ \
---num_workers 32 \
---gpu_mode 1
+sudo docker pull kishwars/helen:0.0.1.cpu
+sudo docker run kishwars/helen:0.0.1.cpu call_consensus.py -h
+mkdir helen_output
+wget https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0.0.1/r941_flip235_v001.pkl
 ```
 
 ```bash
-time python3 stitch.py \
---sequence_hdf data/helen_out/consensus_sequence/helen_predictions.hdf \
---output_dir data/helen_out/consensus_sequence/ \
---threads 32
+# Run call_consensus
+sudo docker run -v <absolute/path/to/walkthrough/>:/data kishwars/helen:0.0.1.cpu call_consensus.py \
+-i marginpolish_output/ \
+-b 64 \
+-m r941_flip235_v001.pkl \
+-o helen_output \
+-w 0 \
+-t 1
+
+# Run Stitch
+sudo docker run -v <absolute/path/to/walkthrough/>:/data kishwars/helen:0.0.1.cpu \
+stitch.py \
+-i <helen_output/helen_predictions_XX.hdf> \
+-t 32 \
+-o helen_output/ \
+-p r94_ec_shasta_mp_helen
+```
+
+### Benchmarking
+After running Shasta-MarginPolish-HELEN, we get a polished assembly at `helen_output/r94_ec_shasta_mp_helen.fa`. We can now benchmark the assembly using `Pomoxis`.
+
+##### Download truth Assembly
+```bash
+wget https://storage.googleapis.com/kishwar-friday-data/helen_polisher/e_coli_data/e_coli_truth.fasta
+mkdir pomoxis_output
+```
+
+##### Install Pomoxis
+```bash
+git clone --recursive https://github.com/nanoporetech/pomoxis
+cd pomoxis
+make install
+. ./venv/bin/activate
+cd ..
+```
+
+```bash
+# ASSESSMENT OF SHASTA ASSEMBLY
+time assess_assembly \
+-i r94_ec_shasta_assembly/Assembly.fasta  \
+-r e_coli_truth.fasta \
+-p pomoxis_output/shasta_ec_q \
+-t 32
+# expected error rate(err_ont): ~2.50%
+
+time assess_assembly \
+-i helen_output/r94_ec_shasta_mp_helen.fa \
+-r e_coli_truth.fasta \
+-p pomoxis_output/shasta_helen_ec_q \
+-t 32
+# expected error rate(err_ont): ~1.50%
 ```
