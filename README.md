@@ -18,6 +18,9 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 * We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 * Open source [(MIT License)](LICENSE).
 
+## Walkthrough
+A `demo` walkthrough is available here: [demo](docs/walkthrough.md)
+
 ## Table of contents
 * [Workflow](#workflow)
 * [Results](#Results)

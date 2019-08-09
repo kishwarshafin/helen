@@ -10,10 +10,10 @@ Please make sure you have installed `MarginPolish` and `HELEN` using the [instal
 ## Download data
 Create a data directory and download the reads there.
 ```bash
-mkdir -p helen_walkthrough/data
-cd helen_walkthrough/data
-wget https://storage.googleapis.com/kishwar-helen/helen_walkthrough/GM24385_tgif2/reads_HG002_tgif2.fa
-cd ..
+mkdir -p walkthrough/
+cd walkthrough
+wget https://s3-us-west-2.amazonaws.com/lc2019/shasta/ecoli_test/r94_ec_rad2.181119.60x-10kb.fasta.gz
+gunzip r94_ec_rad2.181119.60x-10kb.fasta.gz
 ```
 ## Assembly and Alignment
 `MarginPolish` requires a draft genome assembly and a mapping of the reads to the draft assembly.
@@ -26,30 +26,20 @@ Please see the [quick start documentation](https://chanzuckerberg.github.io/shas
 
 As our set of reads is very small. We can safely assemble the reads. First, download the Shasta binary.
 ```bash
-pwd
-# expected output: <path_to>/helen_walkthrough/
-mkdir shasta
-cd shasta
 wget https://github.com/chanzuckerberg/shasta/releases/download/0.1.0/shasta-Linux-0.1.0
 chmod ugo+x shasta-Linux-0.1.0
 ./shasta-Linux-0.1.0 --help
-cd ..
 ```
 
 Now assemble the reads using Shasta.
 ```bash
-pwd
-# expected output: <path_to>/helen_walkthrough/
-shasta/shasta-Linux-0.1.0 --input data/reads_HG002_tgif2.fa --output data/shasta_assembly
-ls data/shasta_assembly/
-# this generated a file called "Assembly.fasta" which contains the assembly of the reads.
+sudo ./shasta-Linux-0.1.0 --input r94_ec_rad2.181119.60x-10kb.fasta --output r94_ec_shasta_assembly
+# this generates a file called "Assembly.fasta" which contains the assembly of the reads.
 ```
 
 #### Create read to assembly mapping using MiniMap2
 Install Minimap2
 ```bash
-pwd
-# expected output: <path_to>/helen_walkthrough/
 # clone the github repo and install minimap2
 git clone https://github.com/lh3/minimap2
 cd minimap2 && make
@@ -77,21 +67,31 @@ cd ..
 
 Suppose you have 32 threads. The command would be:
 ```bash
-minimap2/minimap2 -ax map-ont -t 32 data/shasta_assembly/Assembly.fasta data/reads_HG002_tgif2.fa | samtools sort -@ 32 | samtools view -hb -F 0x104 > data/reads_2_assembly.bam
-
-cd data
-samtools index -@32 reads_2_assembly.bam
-cd ..
+minimap2/minimap2 -ax map-ont -t 32 r94_ec_shasta_assembly/Assembly.fasta r94_ec_rad2.181119.60x-10kb.fasta | samtools sort -@ 32 | samtools view -hb -F 0x104 > reads_2_shasta_ec.bam
+samtools index -@32 reads_2_shasta_ec.bam
 ```
 
 ## Run MarginPolish
 ```bash
+sudo docker pull tpesout/margin_polish:latest
+sudo docker run tpesout/margin_polish:latest --help
+wget https://github.com/UCSC-nanopore-cgl/MarginPolish/blob/master/params/allParams.np.human.guppy-ff-235.json
+```
+
+```bash
 marginPolish \
 data/reads_2_assembly.bam \
 data/shasta_assembly/Assembly.fasta \
-../params/allParams.np.human.guppy-ff-235.json \
+../params/allParams.np.ecoli.json \
 -t 32 \
 -o data/marginpolish_images/marginpolish_images \
+-f
+
+sudo docker run -v "$pwd":/data tpesout/margin_polish:latest reads_2_shasta_ec.bam \
+r94_ec_shasta_assembly/Assembly.fa \
+allParams.np.ecoli.json \
+-t 32 \
+-o output/marginpolish_images \
 -f
 ```
 ## Run HELEN
