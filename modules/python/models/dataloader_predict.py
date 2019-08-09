@@ -69,7 +69,7 @@ class SequenceDataset(Dataset):
             image = np.append(image, empty_image_columns, 0)
             image = image.astype(np.uint8)
 
-            empty_positions = np.array([[-1, -1, -1]] * total_empty_needed)
+            empty_positions = np.array([[-1, -1]] * total_empty_needed)
             position = np.append(position, empty_positions, 0)
             position = position.astype(np.int)
 
