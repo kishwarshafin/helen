@@ -82,8 +82,8 @@ pwd
 ```bash
 sudo docker run -v <absolute/path/to/walkthrough/>:/data tpesout/margin_polish:latest \
  reads_2_shasta_ec.bam \
-r94_ec_shasta_assembly/Assembly.fa \
-allParams.np.ecoli.json \
+r94_ec_shasta_assembly/Assembly.fasta \
+allParams.np.human.guppy-ff-235.json \
 -t 32 \
 -o marginpolish_output/marginpolish_images \
 -f
