@@ -4,8 +4,7 @@
 This document provides a guideline on how to use the polishing pipeline.
 
 ## Installation
-Please make sure you have installed `MarginPolish` and `HELEN` using the [installation guide](installation.md).
-
+For this walkthrough we use docker containers. Please make sure you have docker installed.
 
 ## Download data
 Create a data directory and download the reads there.
