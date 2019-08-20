@@ -89,6 +89,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
         for contig, contig_start, contig_end, chunk_id, images, position, filename in tqdm(test_loader, ncols=50):
             # the images are usually in uint8, convert them to FloatTensor
             images = images.type(torch.FloatTensor)
+
             # initialize the first hidden input as all zeros
             hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
 

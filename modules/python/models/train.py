@@ -202,7 +202,7 @@ def train(train_file,
 
                 # update the progress bar
                 avg_loss = (total_loss / total_images) if total_images else 0
-                progress_bar.set_description("AVG LOSS: " + str(round(avg_loss, 4)))
+                progress_bar.set_description("AVG LOSS: " + str(avg_loss))
 
                 if not_hyperband is True:
                     train_loss_logger.write(str(epoch + 1) + "," + str(batch_no) + "," + str(avg_loss) + "\n")

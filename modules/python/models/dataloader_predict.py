@@ -58,7 +58,7 @@ class SequenceDataset(Dataset):
             contig_start = hdf5_file['contig_start'][()][0].astype(np.int)
             contig_end = hdf5_file['contig_end'][()][0].astype(np.int)
             chunk_id = hdf5_file['feature_chunk_idx'][()][0].astype(np.int)
-            image = hdf5_file['image'][()].astype(np.uint8)
+            image = hdf5_file['image'][()]
             position = hdf5_file['position'][()].astype(np.int)
 
         # if the size of the image is smaller than the sequence length, then we need to pad to the image to make
@@ -67,7 +67,7 @@ class SequenceDataset(Dataset):
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.shape[0]
             empty_image_columns = np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed)
             image = np.append(image, empty_image_columns, 0)
-            image = image.astype(np.uint8)
+            image = image.astype(np.float)
 
             empty_positions = np.array([[-1, -1]] * total_empty_needed)
             position = np.append(position, empty_positions, 0)
