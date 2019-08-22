@@ -44,11 +44,11 @@ def polish_genome(image_filepath, model_path, batch_size, num_workers, threads, 
     :param gpu_mode: If true, predict method will use GPU.
     :return:
     """
-    # inform the output directory
-    sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "OUTPUT DIRECTORY: " + output_dir + "\n")
-
     # create a filename for the output file
     output_filename = os.path.join(output_dir, output_prefix + '.hdf')
+
+    # inform the output directory
+    sys.stderr.write(TextColor.GREEN + "INFO: " + TextColor.END + "OUTPUT FILE: " + output_filename + "\n")
 
     # call the predict method to generate the prediction hdf5 file
     predict(image_filepath, output_filename, model_path, batch_size, num_workers, threads, gpu_mode)
@@ -95,8 +95,8 @@ if __name__ == '__main__':
         "--num_workers",
         type=int,
         required=False,
-        default=16,
-        help="Number of workers to assign to the dataloader. Can be inferred as min(8, number_of_gpus * 4)"
+        default=0,
+        help="Number of workers to assign to the dataloader. Should be 0 if using Docker."
     )
     parser.add_argument(
         "-t",
