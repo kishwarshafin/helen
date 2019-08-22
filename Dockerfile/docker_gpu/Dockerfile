@@ -22,7 +22,7 @@ RUN git clone https://github.com/kishwarshafin/helen.git && \
     cd /opt/helen && \
     git fetch && \
     git submodule update --init && \
-    rm -rf /opt/helen/.git
+    git pull origin master
 
 WORKDIR /opt/helen/build
 RUN cmake .. -Wno-deprecated && make
