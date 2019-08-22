@@ -122,11 +122,13 @@ sudo nvidia-docker run -v <path/to/input>:/data kishwars/helen:0.0.1.gpu call_co
 -b <batch_size> \
 -m <r941_flip235_v001.pkl> \
 -o <output_dir/> \
+-p <output_filename_prefix> \
 -w 0 \
 -t 1 \
 -g
 
 Arguments:
+  -h, --help            show this help message and exit
   -i IMAGE_FILE, --image_file IMAGE_FILE
                         [REQUIRED] Path to a directory where all MarginPolish
                         generated images are.
@@ -137,15 +139,17 @@ Arguments:
                         Batch size for testing, default is 512. Please set to
                         512 or 1024 for a balanced execution time.
   -w NUM_WORKERS, --num_workers NUM_WORKERS
-                        Number of workers to assign to the dataloader.
-                        FOR THE DOCKER GPU IT HAS TO BE 0.
+                        Number of workers to assign to the dataloader. Should
+                        be 0 if using Docker.
   -t THREADS, --threads THREADS
                         Number of PyTorch threads to use, default is 1. This
-                        is helpful during CPU-only inference.
+                        may be helpful during CPU-only inference.
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
                         Path to the output directory.
+  -p OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
+                        Prefix for the output file. Default is:
+                        HELEN_prediction
   -g, --gpu_mode        If set then PyTorch will use GPUs for inference.
-
 ```
 ###### Run stitch.py
 Finally you can run `stitch.py` to get a consensus sequence:
@@ -154,7 +158,7 @@ sudo nvidia-docker run -v <path/to/input>:/data kishwars/helen:0.0.1.gpu \
 stitch.py \
 -i <output_dir/helen_predictions_XX.hdf> \
 -t <number_of_threads> \
--o <output_dir> \
+-o <output_dir/> \
 -p <output_prefix>
 
 Arguments:
@@ -186,10 +190,9 @@ sudo docker run -v <path/to/input>:/data kishwars/helen:0.0.1.cpu call_consensus
 -b <batch_size> \
 -m <r941_flip235_v001.pkl> \
 -o <output_dir/> \
+-p <output_filename_prefix> \
 -w 0 \
 -t <number_of_threads>
-
-# make sure (number_of_workers + number_of_threads < total available CPU threads) is TRUE.
 ```
 
 ##### Run stitch.py

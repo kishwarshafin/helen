@@ -96,7 +96,7 @@ if __name__ == '__main__':
         type=int,
         required=False,
         default=0,
-        help="Number of workers to assign to the dataloader. Should be 0 if using Docker."
+        help="Number of workers to assign to the dataloader. Shouldg be 0 if using Docker."
     )
     parser.add_argument(
         "-t",
