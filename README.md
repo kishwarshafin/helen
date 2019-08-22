@@ -186,7 +186,7 @@ sudo docker run -v <path/to/input>:/data kishwars/helen:0.0.1.cpu call_consensus
 -b <batch_size> \
 -m <r941_flip235_v001.pkl> \
 -o <output_dir/> \
--w <number_of_workers> \
+-w 0 \
 -t <number_of_threads>
 
 # make sure (number_of_workers + number_of_threads < total available CPU threads) is TRUE.
