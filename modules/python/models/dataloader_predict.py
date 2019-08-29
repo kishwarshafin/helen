@@ -67,7 +67,7 @@ class SequenceDataset(Dataset):
             total_empty_needed = ImageSizeOptions.SEQ_LENGTH - image.shape[0]
             empty_image_columns = np.array([[0] * ImageSizeOptions.IMAGE_HEIGHT] * total_empty_needed)
             image = np.append(image, empty_image_columns, 0)
-            image = image.astype(np.float)
+            image = image.astype(np.float32)
 
             empty_positions = np.array([[-1, -1]] * total_empty_needed)
             position = np.append(position, empty_positions, 0)
