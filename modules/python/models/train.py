@@ -72,8 +72,6 @@ def train(train_file,
                               shuffle=True,
                               num_workers=num_workers,
                               pin_memory=gpu_mode)
-    num_base_classes = ImageSizeOptions.TOTAL_BASE_LABELS
-    num_rle_classes = ImageSizeOptions.TOTAL_RLE_LABELS
 
     # if retrain model is true then load the model from the model path
     if retrain_model is True:
@@ -82,12 +80,7 @@ def train(train_file,
             exit(1)
         sys.stderr.write(TextColor.GREEN + "INFO: RETRAIN MODEL LOADING\n" + TextColor.END)
         transducer_model, hidden_size, gru_layers, prev_ite = \
-            ModelHandler.load_simple_model(retrain_model_path,
-                                           input_channels=ImageSizeOptions.IMAGE_CHANNELS,
-                                           image_features=ImageSizeOptions.IMAGE_HEIGHT,
-                                           seq_len=ImageSizeOptions.SEQ_LENGTH,
-                                           num_base_classes=num_base_classes,
-                                           num_rle_classes=num_rle_classes)
+            ModelHandler.load_simple_model(retrain_model_path)
 
         if not_hyperband is True:
             epoch_limit = prev_ite + epoch_limit
@@ -95,12 +88,7 @@ def train(train_file,
         sys.stderr.write(TextColor.GREEN + "INFO: RETRAIN MODEL LOADED\n" + TextColor.END)
     else:
         # if training from scractch, then create a new model
-        transducer_model = ModelHandler.get_new_gru_model(input_channels=ImageSizeOptions.IMAGE_CHANNELS,
-                                                          image_features=ImageSizeOptions.IMAGE_HEIGHT,
-                                                          gru_layers=gru_layers,
-                                                          hidden_size=hidden_size,
-                                                          num_base_classes=num_base_classes,
-                                                          num_rle_classes=num_rle_classes)
+        transducer_model = ModelHandler.get_new_gru_model()
         prev_ite = 0
 
     # count the number of trainable parameters for reporting
@@ -154,21 +142,32 @@ def train(train_file,
         with tqdm(total=len(train_loader), desc='Loss', leave=True, ncols=100) as progress_bar:
             # make sure the model is in train mode. BN is different in train and eval.
             transducer_model.train()
-            for images, label_base, label_rle in train_loader:
+
+            for base_channel, rle_channels, normalization, label_base, label_rle in train_loader:
                 # convert the tensors to the proper datatypes.
-                images = images.type(torch.FloatTensor)
+                base_image = base_channel.type(torch.FloatTensor)
+                rle_image = rle_channels.type(torch.FloatTensor)
                 label_base = label_base.type(torch.LongTensor)
                 label_rle = label_rle.type(torch.LongTensor)
 
                 # initialize the hidden input for the first chunk
-                hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
+                hidden = torch.zeros(base_image.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
+                hidden_rle_a = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_c = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_g = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_t = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
 
                 # if gpu_mode is true then transfer all tensors to cuda
                 if gpu_mode:
-                    images = images.cuda()
+                    base_image = base_image.cuda()
+                    rle_image = rle_image.cuda()
                     label_base = label_base.cuda()
                     label_rle = label_rle.cuda()
                     hidden = hidden.cuda()
+                    hidden_rle_a = hidden_rle_a.cuda()
+                    hidden_rle_c = hidden_rle_c.cuda()
+                    hidden_rle_g = hidden_rle_g.cuda()
+                    hidden_rle_t = hidden_rle_t.cuda()
 
                 # perform a sliding window on the entire image sequence length
                 for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
@@ -181,18 +180,23 @@ def train(train_file,
                         break
 
                     # get the chunks for this window
-                    image_chunk = images[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    base_image_chunk = base_image[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    rle_image_chunk = rle_image[:, :, i:i+TrainOptions.TRAIN_WINDOW]
                     label_base_chunk = label_base[:, i:i+TrainOptions.TRAIN_WINDOW]
                     label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
-                    # get the inference from the model
-                    output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
+                    # get the base inference from the model
+                    base_out, base_prob, rle_out, rle_prob, hidden, hidden_rle_a, hidden_rle_c, \
+                    hidden_rle_g, hidden_rle_t = transducer_model(base_image_chunk, rle_image_chunk, hidden,
+                                                                  hidden_rle_a, hidden_rle_c,
+                                                                  hidden_rle_g, hidden_rle_t)
 
                     # calculate loss for base prediction
-                    loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
+                    loss_base = criterion_base(base_out.contiguous().view(-1, TrainOptions.TOTAL_BASE_LABELS),
                                                label_base_chunk.contiguous().view(-1))
+
                     # calculate loss for RLE prediction
-                    loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
+                    loss_rle = criterion_rle(rle_out.contiguous().view(-1, TrainOptions.TOTAL_RLE_LABELS),
                                              label_rle_chunk.contiguous().view(-1))
 
                     # sum the losses to have a singlee optimization over multiple tasks
@@ -206,10 +210,14 @@ def train(train_file,
                     total_loss += loss.item()
                     total_loss_base += loss_base.item()
                     total_loss_rle += loss_rle.item()
-                    total_images += image_chunk.size(0)
+                    total_images += base_image.size(0)
 
                     # detach the hidden from the graph as the next chunk will be a new optimization
                     hidden = hidden.detach()
+                    hidden_rle_a = hidden_rle_a.detach()
+                    hidden_rle_c = hidden_rle_c.detach()
+                    hidden_rle_g = hidden_rle_g.detach()
+                    hidden_rle_t = hidden_rle_t.detach()
 
                 # update the progress bar
                 avg_loss = (total_loss / total_images) if total_images else 0

@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import sys
+import numpy as np
 from modules.python.TextColor import TextColor
 from modules.python.FileManager import FileManager
 
@@ -56,11 +57,15 @@ class SequenceDataset(Dataset):
 
         # load the image and the label
         with h5py.File(hdf5_filepath, 'r') as hdf5_file:
-            image = hdf5_file['images'][image_name]['image'][()]
+            normalization = hdf5_file['images'][image_name]['normalization'][()]
+            base_channel = hdf5_file['images'][image_name]['nucleotide'][()]
+            rle_channels = hdf5_file['images'][image_name]['runLengths'][()]
             label_base = hdf5_file['images'][image_name]['label_base'][()]
-            label_run_length = hdf5_file['images'][image_name]['label_run_length'][()]
+            label_rle = hdf5_file['images'][image_name]['label_run_length'][()]
 
-        return image, label_base, label_run_length
+        rle_channels = rle_channels.transpose(2, 0, 1)
+
+        return base_channel, rle_channels, normalization, label_base, label_rle
 
     def __len__(self):
         """

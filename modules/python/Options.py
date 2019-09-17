@@ -11,8 +11,10 @@ class StitchOptions(object):
 
 
 class ImageSizeOptions(object):
-    IMAGE_HEIGHT = 90
-    IMAGE_CHANNELS = 1
+    RLE_IMAGE_HEIGHT = 22
+    RLE_IMAGE_CHANNEL = 4
+    BASE_IMAGE_HEIGHT = 10
+    BASE_IMAGE_CHANNELS = 1
     SEQ_LENGTH = 1000
     SEQ_OVERLAP = 200
     LABEL_LENGTH = SEQ_LENGTH
@@ -25,6 +27,11 @@ class TrainOptions(object):
     TRAIN_WINDOW = 100
     WINDOW_JUMP = 50
     GRU_LAYERS = 1
+    RLE_GRU_LAYERS = 1
     HIDDEN_SIZE = 128
+    RLE_HIDDEN_SIZE = 128
+
+    TOTAL_BASE_LABELS = 5
+    TOTAL_RLE_LABELS = 11
     CLASS_WEIGHTS = [0.3, 0.5, 0.5, 0.5, 0.5, 0.8, 0.9, 1.0, 1.0, 1.0, 0.9]
 

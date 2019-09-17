@@ -74,23 +74,31 @@ def test(data_filepath,
     with torch.no_grad():
         with tqdm(total=len(test_loader), desc='Accuracy: ', leave=True, ncols=100) as pbar:
             # iterate over the dataset in minibatch
-            for ii, (images, label_base, label_rle) in enumerate(test_loader):
+            for ii, (base_channel, rle_channels, normalization, label_base, label_rle) in enumerate(test_loader):
                 # convert the tensors to a proper datatype
-                images = images.type(torch.FloatTensor)
+                base_image = base_channel.type(torch.FloatTensor)
+                rle_image = rle_channels.type(torch.FloatTensor)
                 label_base = label_base.type(torch.LongTensor)
                 label_rle = label_rle.type(torch.LongTensor)
 
+                # initialize the hidden input for the first chunk
+                hidden = torch.zeros(base_image.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
+                hidden_rle_a = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_c = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_g = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+                hidden_rle_t = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+
+                # if gpu_mode is true then transfer all tensors to cuda
                 if gpu_mode:
-                    # encoder_hidden = encoder_hidden.cuda()
-                    images = images.cuda()
+                    base_image = base_image.cuda()
+                    rle_image = rle_image.cuda()
                     label_base = label_base.cuda()
                     label_rle = label_rle.cuda()
-
-                # initialize the hidden input for the first chunk
-                hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
-
-                if gpu_mode:
                     hidden = hidden.cuda()
+                    hidden_rle_a = hidden_rle_a.cuda()
+                    hidden_rle_c = hidden_rle_c.cuda()
+                    hidden_rle_g = hidden_rle_g.cuda()
+                    hidden_rle_t = hidden_rle_t.cuda()
 
                 # slide over the image in a sliding window manner
                 for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
@@ -99,30 +107,36 @@ def test(data_filepath,
                     if i + TrainOptions.TRAIN_WINDOW > ImageSizeOptions.SEQ_LENGTH:
                         break
 
-                    # chunk the images and labels to this window
-                    image_chunk = images[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    # get the chunks for this window
+                    base_image_chunk = base_image[:, i:i+TrainOptions.TRAIN_WINDOW]
+                    rle_image_chunk = rle_image[:, :, i:i+TrainOptions.TRAIN_WINDOW]
                     label_base_chunk = label_base[:, i:i+TrainOptions.TRAIN_WINDOW]
                     label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
                     # perform an inference on the images
-                    output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
+                    base_out, base_prob, rle_out, rle_prob, hidden, hidden_rle_a, hidden_rle_c, \
+                    hidden_rle_g, hidden_rle_t = transducer_model(base_image_chunk, rle_image_chunk, hidden,
+                                                                  hidden_rle_a, hidden_rle_c,
+                                                                  hidden_rle_g, hidden_rle_t)
 
                     # calculate loss between the prediction and the true labels
-                    loss_base = criterion_base(output_base.contiguous().view(-1, num_base_classes),
+                    loss_base = criterion_base(base_out.contiguous().view(-1, TrainOptions.TOTAL_BASE_LABELS),
                                                label_base_chunk.contiguous().view(-1))
-                    loss_rle = criterion_rle(output_rle.contiguous().view(-1, num_rle_classes),
+
+                    # calculate loss for RLE prediction
+                    loss_rle = criterion_rle(rle_out.contiguous().view(-1, TrainOptions.TOTAL_RLE_LABELS),
                                              label_rle_chunk.contiguous().view(-1))
 
                     loss = loss_base + loss_rle
 
                     # populate the confusion matrix
-                    base_confusion_matrix.add(output_base.data.contiguous().view(-1, num_base_classes),
+                    base_confusion_matrix.add(base_out.data.contiguous().view(-1, num_base_classes),
                                               label_base_chunk.data.contiguous().view(-1))
-                    rle_confusion_matrix.add(output_rle.data.contiguous().view(-1, num_rle_classes),
+                    rle_confusion_matrix.add(rle_out.data.contiguous().view(-1, num_rle_classes),
                                              label_rle_chunk.data.contiguous().view(-1))
 
                     total_loss += loss.item()
-                    total_images += images.size(0)
+                    total_images += base_image.size(0)
                     total_loss_rle += loss_rle.item()
 
                 pbar.update(1)

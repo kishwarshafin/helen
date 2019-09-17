@@ -66,12 +66,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
 
     # load the model using the model path
     transducer_model, hidden_size, gru_layers, prev_ite = \
-        ModelHandler.load_simple_model(model_path,
-                                       input_channels=ImageSizeOptions.IMAGE_CHANNELS,
-                                       image_features=ImageSizeOptions.IMAGE_HEIGHT,
-                                       seq_len=ImageSizeOptions.SEQ_LENGTH,
-                                       num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
-                                       num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS)
+        ModelHandler.load_simple_model(model_path)
 
     # set the model to evaluation mode.
     transducer_model.eval()
@@ -86,23 +81,34 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
     # iterate over the data in minibatches
     with torch.no_grad():
         # the dataloader loop, iterates in minibatches. tqdm is the progress logger.
-        for contig, contig_start, contig_end, chunk_id, images, position, filename in tqdm(test_loader, ncols=50):
+        for contig, contig_start, contig_end, chunk_id, base_image, rle_image, position, filename in tqdm(test_loader, ncols=50):
             # the images are usually in uint8, convert them to FloatTensor
-            images = images.type(torch.FloatTensor)
-            # initialize the first hidden input as all zeros
-            hidden = torch.zeros(images.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
+            base_image = base_image.type(torch.FloatTensor)
+            rle_image = rle_image.type(torch.FloatTensor)
+
+            # initialize the hidden input for the first chunk
+            hidden = torch.zeros(base_image.size(0), 2 * TrainOptions.GRU_LAYERS, TrainOptions.HIDDEN_SIZE)
+            hidden_rle_a = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+            hidden_rle_c = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+            hidden_rle_g = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+            hidden_rle_t = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
 
             # if gpu_mode is True, transfer the image and hidden tensors to the GPU
             if gpu_mode:
-                images = images.cuda()
+                base_image = base_image.cuda()
+                rle_image = rle_image.cuda()
                 hidden = hidden.cuda()
+                hidden_rle_a = hidden_rle_a.cuda()
+                hidden_rle_c = hidden_rle_c.cuda()
+                hidden_rle_g = hidden_rle_g.cuda()
+                hidden_rle_t = hidden_rle_t.cuda()
 
             # this is a multi-task neural network where we predict a base and a run-length. We use two dictionaries
             # to keep track of predictions.
             # these two dictionaries save predictions for each of the chunks and later we aggregate all the predictions
             # over the entire sequence to get a sequence prediction for the whole sequence.
-            prediction_base_tensor = torch.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_BASE_LABELS))
-            prediction_rle_tensor = torch.zeros((images.size(0), images.size(1), ImageSizeOptions.TOTAL_RLE_LABELS))
+            prediction_base_tensor = torch.zeros((base_image.size(0), base_image.size(1), ImageSizeOptions.TOTAL_BASE_LABELS))
+            prediction_rle_tensor = torch.zeros((rle_image.size(0), rle_image.size(2), ImageSizeOptions.TOTAL_RLE_LABELS))
 
             if gpu_mode:
                 prediction_base_tensor = prediction_base_tensor.cuda()
@@ -118,10 +124,14 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
                 chunk_end = i + TrainOptions.TRAIN_WINDOW
 
                 # get the image chunk
-                image_chunk = images[:, chunk_start:chunk_end]
+                base_image_chunk = base_image[:, i:i+TrainOptions.TRAIN_WINDOW]
+                rle_image_chunk = rle_image[:, :, i:i+TrainOptions.TRAIN_WINDOW]
 
-                # run inference
-                output_base, output_rle, hidden = transducer_model(image_chunk, hidden)
+                # get the base inference from the model
+                base_out, base_prob, rle_out, rle_prob, hidden, hidden_rle_a, hidden_rle_c, \
+                hidden_rle_g, hidden_rle_t = transducer_model(base_image_chunk, rle_image_chunk, hidden,
+                                                              hidden_rle_a, hidden_rle_c,
+                                                              hidden_rle_g, hidden_rle_t)
 
                 # now calculate how much padding is on the top and bottom of this chunk so we can do a simple
                 # add operation
@@ -137,8 +147,8 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
                     inference_layers = inference_layers.cuda()
 
                 # run the softmax and padding layers
-                base_prediction = inference_layers(output_base)
-                rle_prediction = inference_layers(output_rle)
+                base_prediction = inference_layers(base_out)
+                rle_prediction = inference_layers(rle_out)
 
                 # now simply add the tensor to the global counter
                 prediction_base_tensor = torch.add(prediction_base_tensor, base_prediction)
@@ -155,7 +165,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
             predicted_rle_labels = rle_labels.cpu().numpy()
 
             # go to each of the images and save the predictions to the file
-            for i in range(images.size(0)):
+            for i in range(base_image.size(0)):
                 prediction_data_file.write_prediction(contig[i], contig_start[i], contig_end[i], chunk_id[i],
                                                       position[i], predicted_base_labels[i], predicted_rle_labels[i],
                                                       filename[i])

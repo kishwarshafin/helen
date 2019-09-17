@@ -18,32 +18,20 @@ class ModelHandler:
         torch.save(state, filename)
 
     @staticmethod
-    def get_new_gru_model(input_channels, image_features, gru_layers, hidden_size, num_base_classes, num_rle_classes):
+    def get_new_gru_model():
         """
         Create a new model object and return it.
-        :param input_channels: Number of channels in the input image (usually 1)
-        :param image_features: Number of features in one column of the pileup
-        :param gru_layers: Number of layers in the transducer model
-        :param hidden_size: The size of the hidden layer
-        :param num_base_classes: Number of base classes
-        :param num_rle_classes: Number of RLE classes
         :return: A new model object
         """
         # get a new model
-        transducer_model = TransducerGRU(input_channels, image_features, gru_layers, hidden_size, num_base_classes,
-                                         num_rle_classes, bidirectional=True)
+        transducer_model = TransducerGRU()
         return transducer_model
 
     @staticmethod
-    def load_simple_model(model_path, input_channels, image_features, seq_len, num_base_classes, num_rle_classes):
+    def load_simple_model(model_path):
         """
         This method loads a model from a given model path.
         :param model_path: Path to a model
-        :param input_channels: Number of channels in the input image (usually 1)
-        :param image_features: Number of features in one column of the pileup
-        :param seq_len: Length of the sequence in one image
-        :param num_base_classes: Number of base classes
-        :param num_rle_classes: Number of RLE classes
         :return: A loaded model with some other auxiliary information
         """
         # first load the model to cpu, it's usually a dicttionary
@@ -54,12 +42,7 @@ class ModelHandler:
         epochs = checkpoint['epochs']
 
         # create a new model
-        transducer_model = ModelHandler.get_new_gru_model(input_channels=input_channels,
-                                                          image_features=image_features,
-                                                          gru_layers=gru_layers,
-                                                          hidden_size=hidden_size,
-                                                          num_base_classes=num_base_classes,
-                                                          num_rle_classes=num_rle_classes)
+        transducer_model = ModelHandler.get_new_gru_model()
         # load the model state/weights
         model_state_dict = checkpoint['model_state_dict']
 
