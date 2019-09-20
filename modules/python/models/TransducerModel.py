@@ -85,22 +85,16 @@ class TransducerGRU(nn.Module):
 
         # the linear layer for base and RLE classification
         self.dense1_base = nn.Linear(TrainOptions.HIDDEN_SIZE * 2, TrainOptions.TOTAL_BASE_LABELS)
-        self.base_softmax = nn.Softmax(dim=2)
 
         self.dense_rleA = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleC = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleG = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleT = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
-        self.rle_a_softmax = nn.Softmax(dim=2)
-        self.rle_c_softmax = nn.Softmax(dim=2)
-        self.rle_g_softmax = nn.Softmax(dim=2)
-        self.rle_t_softmax = nn.Softmax(dim=2)
 
         self.total_rle_features = TrainOptions.TOTAL_BASE_LABELS + 4 * TrainOptions.TOTAL_RLE_LABELS
         self.dense_rle_layer1 = nn.Linear(self.total_rle_features, 2 * self.total_rle_features)
         self.dense_rle_layer2 = nn.Linear(2 * self.total_rle_features, 4 * self.total_rle_features)
         self.dense_rle_layer3 = nn.Linear(4 * self.total_rle_features, TrainOptions.TOTAL_RLE_LABELS)
-        self.rle_prob = nn.Softmax(dim=2)
 
     def forward(self, x_base, x_rle, hidden, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t):
         """
@@ -125,9 +119,6 @@ class TransducerGRU(nn.Module):
         # classification
         base_out = self.dense1_base(x_out_final)
 
-        base_prob_layer = nn.Softmax(dim=2)
-        base_prob = base_prob_layer(base_out)
-
         rle_a_features = x_rle[:, 0]
         rle_c_features = x_rle[:, 1]
         rle_g_features = x_rle[:, 2]
@@ -137,33 +128,28 @@ class TransducerGRU(nn.Module):
         x_out_rle_a, hidden_out_rle_a = self.rle_encoder_A(rle_a_features, hidden_rle_a)
         x_out_rle_a_final, hidden_rle_a_final = self.rle_decoder_A(x_out_rle_a, hidden_out_rle_a)
         x_out_rle_a_out = self.dense_rleA(x_out_rle_a_final)
-        rle_a_prob = self.rle_a_softmax(x_out_rle_a_out)
 
         # encoding-decoding RLE C
         x_out_rle_c, hidden_out_rle_c = self.rle_encoder_C(rle_c_features, hidden_rle_c)
         x_out_rle_c_final, hidden_rle_c_final = self.rle_decoder_C(x_out_rle_c, hidden_out_rle_c)
         x_out_rle_c_out = self.dense_rleC(x_out_rle_c_final)
-        rle_c_prob = self.rle_c_softmax(x_out_rle_c_out)
 
         # encoding-decoding RLE G
         x_out_rle_g, hidden_out_rle_g = self.rle_encoder_G(rle_g_features, hidden_rle_g)
         x_out_rle_g_final, hidden_rle_g_final = self.rle_decoder_G(x_out_rle_g, hidden_out_rle_g)
         x_out_rle_g_out = self.dense_rleG(x_out_rle_g_final)
-        rle_g_prob = self.rle_g_softmax(x_out_rle_g_out)
 
         # encoding-decoding RLE T
         x_out_rle_t, hidden_out_rle_t = self.rle_encoder_T(rle_t_features, hidden_rle_t)
         x_out_rle_t_final, hidden_rle_t_final = self.rle_decoder_T(x_out_rle_t, hidden_out_rle_t)
         x_out_rle_t_out = self.dense_rleT(x_out_rle_t_final)
-        rle_t_prob = self.rle_t_softmax(x_out_rle_t_out)
 
-        all_rle_features = torch.cat([base_prob, rle_a_prob, rle_c_prob, rle_g_prob, rle_t_prob],
+        all_rle_features = torch.cat([base_out, x_out_rle_a_out, x_out_rle_c_out, x_out_rle_g_out, x_out_rle_t_out],
                                      dim=2)
 
         rle_out_layer1 = self.dense_rle_layer1(all_rle_features)
         rle_out_layer2 = self.dense_rle_layer2(rle_out_layer1)
         rle_out = self.dense_rle_layer3(rle_out_layer2)
-        rle_prob = self.rle_prob(rle_out)
 
         hidden_final = hidden_final.transpose(0, 1).contiguous()
         hidden_rle_a_final = hidden_rle_a_final.transpose(0, 1).contiguous()
@@ -171,8 +157,8 @@ class TransducerGRU(nn.Module):
         hidden_rle_g_final = hidden_rle_g_final.transpose(0, 1).contiguous()
         hidden_rle_t_final = hidden_rle_t_final.transpose(0, 1).contiguous()
 
-        return base_out, base_prob, rle_out, rle_prob, hidden_final, hidden_rle_a_final, hidden_rle_c_final, \
-            hidden_rle_g_final, hidden_rle_t_final
+        return base_out, rle_out, hidden_final, hidden_rle_a_final, hidden_rle_c_final, hidden_rle_g_final, \
+            hidden_rle_t_final
 
     def init_hidden(self, batch_size, num_layers, bidirectional=True):
         """

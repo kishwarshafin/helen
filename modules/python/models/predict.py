@@ -128,10 +128,10 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
                 rle_image_chunk = rle_image[:, :, i:i+TrainOptions.TRAIN_WINDOW]
 
                 # get the base inference from the model
-                base_out, base_prob, rle_out, rle_prob, hidden, hidden_rle_a, hidden_rle_c, \
-                hidden_rle_g, hidden_rle_t = transducer_model(base_image_chunk, rle_image_chunk, hidden,
-                                                              hidden_rle_a, hidden_rle_c,
-                                                              hidden_rle_g, hidden_rle_t)
+                base_out, rle_out, hidden, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t = \
+                    transducer_model(base_image_chunk, rle_image_chunk, hidden,
+                                     hidden_rle_a, hidden_rle_c,
+                                     hidden_rle_g, hidden_rle_t)
 
                 # now calculate how much padding is on the top and bottom of this chunk so we can do a simple
                 # add operation

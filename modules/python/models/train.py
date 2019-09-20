@@ -186,10 +186,10 @@ def train(train_file,
                     label_rle_chunk = label_rle[:, i:i+TrainOptions.TRAIN_WINDOW]
 
                     # get the base inference from the model
-                    base_out, base_prob, rle_out, rle_prob, hidden, hidden_rle_a, hidden_rle_c, \
-                    hidden_rle_g, hidden_rle_t = transducer_model(base_image_chunk, rle_image_chunk, hidden,
-                                                                  hidden_rle_a, hidden_rle_c,
-                                                                  hidden_rle_g, hidden_rle_t)
+                    base_out, rle_out, hidden, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t = \
+                        transducer_model(base_image_chunk, rle_image_chunk, hidden,
+                                         hidden_rle_a, hidden_rle_c,
+                                         hidden_rle_g, hidden_rle_t)
 
                     # calculate loss for base prediction
                     loss_base = criterion_base(base_out.contiguous().view(-1, TrainOptions.TOTAL_BASE_LABELS),
