@@ -28,30 +28,24 @@ class TrainModule:
         self.retrain_model = retrain_model
         self.retrain_model_path = retrain_model_path
         self.stats_dir = stats_dir
-        self.hidden_size = TrainOptions.HIDDEN_SIZE
-        self.gru_layers = TrainOptions.GRU_LAYERS
         self.learning_rate = 0.0001
         self.weight_decay = 0
 
     def train_model(self):
         # train a model
-        model, optimizer, stats_dictionary = train(self.train_file,
-                                                   self.test_file,
-                                                   self.batch_size,
-                                                   self.epochs,
-                                                   self.gpu_mode,
-                                                   self.num_workers,
-                                                   self.retrain_model,
-                                                   self.retrain_model_path,
-                                                   self.gru_layers,
-                                                   self.hidden_size,
-                                                   self.learning_rate,
-                                                   self.weight_decay,
-                                                   self.model_dir,
-                                                   self.stats_dir,
-                                                   not_hyperband=True)
-
-        return model, optimizer, stats_dictionary
+        train(self.train_file,
+              self.test_file,
+              self.batch_size,
+              self.epochs,
+              self.gpu_mode,
+              self.num_workers,
+              self.retrain_model,
+              self.retrain_model_path,
+              self.learning_rate,
+              self.weight_decay,
+              self.model_dir,
+              self.stats_dir,
+              not_hyperband=True)
 
 
 if __name__ == '__main__':

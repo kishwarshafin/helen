@@ -18,15 +18,15 @@ is very popular in multi-task classification problems.
 """
 
 
-class TransducerGRU(nn.Module):
+class TransducerGRUBase(nn.Module):
     """
-    The GRU based transducer model class.
+    The GRU based transducer model class for base inference.
     """
     def __init__(self):
         """
-        The initialization of the model
+        The initialization of the model for base inference
         """
-        super(TransducerGRU, self).__init__()
+        super(TransducerGRUBase, self).__init__()
 
         # the gru encoder-decoder layer for base
         self.gru_encoder = nn.GRU(ImageSizeOptions.BASE_IMAGE_HEIGHT, TrainOptions.HIDDEN_SIZE,
@@ -38,6 +38,56 @@ class TransducerGRU(nn.Module):
                                   num_layers=TrainOptions.GRU_LAYERS,
                                   bidirectional=True,
                                   batch_first=True)
+
+        # the linear layer for base and RLE classification
+        self.dense1_base = nn.Linear(TrainOptions.HIDDEN_SIZE * 2, TrainOptions.TOTAL_BASE_LABELS)
+
+    def forward(self, x_base, hidden):
+        """
+        The forward method of the model.
+        :param x_base: Input base image
+        :param hidden: Hidden input
+        :return:
+        """
+        # this needs to ensure consistency between GPU/CPU training
+        hidden = hidden.transpose(0, 1).contiguous()
+
+        # encoding
+        x_out_layer1, hidden_out_layer1 = self.gru_encoder(x_base, hidden)
+        # decoding
+        x_out_final, hidden_final = self.gru_decoder(x_out_layer1, hidden_out_layer1)
+
+        # classification
+        base_out = self.dense1_base(x_out_final)
+
+        hidden_final = hidden_final.transpose(0, 1).contiguous()
+
+        return base_out, hidden_final
+
+    def init_hidden(self, batch_size, num_layers, bidirectional=True):
+        """
+        Initialize the hidden tensor.
+        :param batch_size: Size of the batch
+        :param num_layers: Number of GRU layers
+        :param bidirectional: If true then GRU layers are bidirectional
+        :return:
+        """
+        num_directions = 1
+        if bidirectional:
+            num_directions = 2
+
+        return torch.zeros(batch_size, num_directions * num_layers, self.hidden_size)
+
+
+class TransducerGRURLE(nn.Module):
+    """
+    The GRU based transducer model class for RLE inference.
+    """
+    def __init__(self):
+        """
+        The initialization of the model for RLE inference
+        """
+        super(TransducerGRURLE, self).__init__()
 
         # the gru encoder-decoder layer for RLE on A base
         self.rle_encoder_A = nn.GRU(ImageSizeOptions.RLE_IMAGE_HEIGHT, TrainOptions.RLE_HIDDEN_SIZE,
@@ -84,40 +134,38 @@ class TransducerGRU(nn.Module):
                                     batch_first=True)
 
         # the linear layer for base and RLE classification
-        self.dense1_base = nn.Linear(TrainOptions.HIDDEN_SIZE * 2, TrainOptions.TOTAL_BASE_LABELS)
-
         self.dense_rleA = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleC = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleG = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
         self.dense_rleT = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
 
         self.total_rle_features = TrainOptions.TOTAL_BASE_LABELS + 4 * TrainOptions.TOTAL_RLE_LABELS
-        self.dense_rle_layer1 = nn.Linear(self.total_rle_features, 2 * self.total_rle_features)
-        self.dense_rle_layer2 = nn.Linear(2 * self.total_rle_features, 4 * self.total_rle_features)
-        self.dense_rle_layer3 = nn.Linear(4 * self.total_rle_features, TrainOptions.TOTAL_RLE_LABELS)
 
-    def forward(self, x_base, x_rle, hidden, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t):
+        # the gru encoder-decoder layer for RLE on combined bases
+        self.rle_encoder_combined = nn.GRU(self.total_rle_features, TrainOptions.RLE_HIDDEN_SIZE,
+                                           num_layers=TrainOptions.RLE_GRU_LAYERS,
+                                           bidirectional=True,
+                                           batch_first=True)
+
+        self.rle_decoder_combined = nn.GRU(2 * TrainOptions.RLE_HIDDEN_SIZE, TrainOptions.RLE_HIDDEN_SIZE,
+                                           num_layers=TrainOptions.RLE_GRU_LAYERS,
+                                           bidirectional=True,
+                                           batch_first=True)
+
+        self.dense_rle_combined = nn.Linear(TrainOptions.RLE_HIDDEN_SIZE * 2, TrainOptions.TOTAL_RLE_LABELS)
+
+    def forward(self, x_rle, base_out, hidden_rle_combined, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t):
         """
         The forward method of the model.
-        :param x_base: Input base image
         :param x_rle: Input RLE image
-        :param hidden: Hidden input
         :return:
         """
         # this needs to ensure consistency between GPU/CPU training
-        hidden = hidden.transpose(0, 1).contiguous()
         hidden_rle_a = hidden_rle_a.transpose(0, 1).contiguous()
         hidden_rle_c = hidden_rle_c.transpose(0, 1).contiguous()
         hidden_rle_g = hidden_rle_g.transpose(0, 1).contiguous()
         hidden_rle_t = hidden_rle_t.transpose(0, 1).contiguous()
-
-        # encoding
-        x_out_layer1, hidden_out_layer1 = self.gru_encoder(x_base, hidden)
-        # decoding
-        x_out_final, hidden_final = self.gru_decoder(x_out_layer1, hidden_out_layer1)
-
-        # classification
-        base_out = self.dense1_base(x_out_final)
+        hidden_rle_combined = hidden_rle_combined.transpose(0, 1).contiguous()
 
         rle_a_features = x_rle[:, 0]
         rle_c_features = x_rle[:, 1]
@@ -147,18 +195,20 @@ class TransducerGRU(nn.Module):
         all_rle_features = torch.cat([base_out, x_out_rle_a_out, x_out_rle_c_out, x_out_rle_g_out, x_out_rle_t_out],
                                      dim=2)
 
-        rle_out_layer1 = self.dense_rle_layer1(all_rle_features)
-        rle_out_layer2 = self.dense_rle_layer2(rle_out_layer1)
-        rle_out = self.dense_rle_layer3(rle_out_layer2)
+        # encoding-decoding RLE combined
+        x_out_rle_combined, hidden_out_rle_combined = self.rle_encoder_combined(all_rle_features, hidden_rle_combined)
+        x_out_rle_combined_final, hidden_rle_combined_final = self.rle_decoder_combined(x_out_rle_combined,
+                                                                                        hidden_out_rle_combined)
+        rle_out = self.dense_rleT(x_out_rle_combined_final)
 
-        hidden_final = hidden_final.transpose(0, 1).contiguous()
         hidden_rle_a_final = hidden_rle_a_final.transpose(0, 1).contiguous()
         hidden_rle_c_final = hidden_rle_c_final.transpose(0, 1).contiguous()
         hidden_rle_g_final = hidden_rle_g_final.transpose(0, 1).contiguous()
         hidden_rle_t_final = hidden_rle_t_final.transpose(0, 1).contiguous()
+        hidden_rle_combined_final = hidden_rle_combined_final.transpose(0, 1).contiguous()
 
-        return base_out, rle_out, hidden_final, hidden_rle_a_final, hidden_rle_c_final, hidden_rle_g_final, \
-            hidden_rle_t_final
+        return rle_out, hidden_rle_a_final, hidden_rle_c_final, hidden_rle_g_final, hidden_rle_t_final, \
+            hidden_rle_combined_final
 
     def init_hidden(self, batch_size, num_layers, bidirectional=True):
         """
