@@ -162,7 +162,7 @@ def test(data_filepath,
     np.set_printoptions(threshold=np.inf)
     # print some statistics
     sys.stderr.write(TextColor.YELLOW+'\nBase Test Loss: ' + str(avg_loss_base) + "\n"+TextColor.END)
-    sys.stderr.write(TextColor.YELLOW+'\nRLE Test Loss: ' + str(avg_loss_rle) + "\n"+TextColor.END)
+    sys.stderr.write(TextColor.YELLOW+'RLE Test Loss: ' + str(avg_loss_rle) + "\n"+TextColor.END)
     sys.stderr.write(TextColor.BLUE + "Base Confusion Matrix: \n" + str(base_confusion_matrix.value()) + "\n" + TextColor.END)
     sys.stderr.write(TextColor.RED + "RLE Confusion Matrix: \n" + TextColor.END)
     for row in rle_confusion_matrix.value():
