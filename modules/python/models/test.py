@@ -156,7 +156,6 @@ def test(data_filepath,
                 pbar.set_description("Base acc: " + str(round(accuracy_base, 4)) +
                                      ", RLE acc: " + str(round(accuracy_rle, 4)) +
                                      ", RLE loss: " + str(round(total_loss_rle, 4)))
-                break
 
     avg_loss_base = total_loss_base / total_images if total_images else 0
     avg_loss_rle = total_loss_rle / total_images if total_images else 0

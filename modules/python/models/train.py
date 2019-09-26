@@ -238,7 +238,6 @@ def train(train_file,
                 progress_bar.refresh()
                 progress_bar.update(1)
                 batch_no += 1
-                break
 
             progress_bar.close()
 
