@@ -2,7 +2,6 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import sys
-import numpy as np
 from modules.python.TextColor import TextColor
 from modules.python.FileManager import FileManager
 
@@ -32,8 +31,12 @@ class SequenceDataset(Dataset):
             # for each of the files get all the images
             with h5py.File(hdf5_file_path, 'r') as hdf5_file:
                 # check if marginpolish somehow generated an empty file
-                if 'image' in hdf5_file:
-                    file_image_pair.append(hdf5_file_path)
+                if 'images' in hdf5_file:
+                    image_names = list(hdf5_file['images'].keys())
+
+                    # save the file-image pair to the list
+                    for image_name in image_names:
+                        file_image_pair.append((hdf5_file_path, image_name))
                 else:
                     sys.stderr.write(TextColor.YELLOW + "WARN: NO IMAGES FOUND IN FILE: "
                                      + hdf5_file_path + "\n" + TextColor.END)
@@ -49,19 +52,12 @@ class SequenceDataset(Dataset):
         :return:
         """
         # get the file path and the name of the image
-        hdf5_filepath = self.all_images[index]
+        hdf5_filepath, image_name = self.all_images[index]
 
         # load the image and the label
         with h5py.File(hdf5_filepath, 'r') as hdf5_file:
-            image = hdf5_file['image'][()]
-            label_base = hdf5_file['label_base'][()]
-
-        label_base[label_base == 65] = 1
-        label_base[label_base == 67] = 2
-        label_base[label_base == 71] = 3
-        label_base[label_base == 84] = 4
-        label_base[label_base == 95] = 0
-        label_base[label_base > 4] = 0
+            image = hdf5_file['images'][image_name]['image'][()]
+            label_base = hdf5_file['images'][image_name]['label_base'][()]
 
         return image, label_base
 
