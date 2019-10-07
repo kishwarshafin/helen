@@ -65,15 +65,16 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
                              num_workers=num_workers)
 
     # load the model using the model path
-    transducer_model, hidden_size, gru_layers, prev_ite = \
-        ModelHandler.load_simple_model(model_path)
+    transducer_model_base, transducer_model_rle, epochs = ModelHandler.load_simple_model(model_path)
 
     # set the model to evaluation mode.
-    transducer_model.eval()
+    transducer_model_base.eval()
+    transducer_model_rle.eval()
 
     # if gpu mode is True, then load the model in the GPUs
     if gpu_mode:
-        transducer_model = torch.nn.DataParallel(transducer_model).cuda()
+        transducer_model_base = torch.nn.DataParallel(transducer_model_base).cuda()
+        transducer_model_rle = torch.nn.DataParallel(transducer_model_rle).cuda()
 
     # notify that the model has loaded successfully
     sys.stderr.write(TextColor.CYAN + 'MODEL LOADED\n')
@@ -92,16 +93,20 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
             hidden_rle_c = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
             hidden_rle_g = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
             hidden_rle_t = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
+            hidden_rle_combined = torch.zeros(rle_image.size(0), 2 * TrainOptions.RLE_GRU_LAYERS, TrainOptions.RLE_HIDDEN_SIZE)
 
             # if gpu_mode is True, transfer the image and hidden tensors to the GPU
             if gpu_mode:
                 base_image = base_image.cuda()
                 rle_image = rle_image.cuda()
+                label_base = label_base.cuda()
+                label_rle = label_rle.cuda()
                 hidden = hidden.cuda()
                 hidden_rle_a = hidden_rle_a.cuda()
                 hidden_rle_c = hidden_rle_c.cuda()
                 hidden_rle_g = hidden_rle_g.cuda()
                 hidden_rle_t = hidden_rle_t.cuda()
+                hidden_rle_combined = hidden_rle_combined.cuda()
 
             # this is a multi-task neural network where we predict a base and a run-length. We use two dictionaries
             # to keep track of predictions.
@@ -128,10 +133,10 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
                 rle_image_chunk = rle_image[:, :, i:i+TrainOptions.TRAIN_WINDOW]
 
                 # get the base inference from the model
-                base_out, rle_out, hidden, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t = \
-                    transducer_model(base_image_chunk, rle_image_chunk, hidden,
-                                     hidden_rle_a, hidden_rle_c,
-                                     hidden_rle_g, hidden_rle_t)
+                base_out, hidden = transducer_model_base(base_image_chunk, hidden)
+                rle_out, hidden_rle_a, hidden_rle_c, hidden_rle_g, hidden_rle_t, hidden_rle_combined = \
+                    transducer_model_rle(rle_image_chunk, base_out, hidden_rle_combined, hidden_rle_a,
+                                         hidden_rle_c, hidden_rle_g, hidden_rle_t)
 
                 # now calculate how much padding is on the top and bottom of this chunk so we can do a simple
                 # add operation
