@@ -99,8 +99,6 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, thr
             if gpu_mode:
                 base_image = base_image.cuda()
                 rle_image = rle_image.cuda()
-                label_base = label_base.cuda()
-                label_rle = label_rle.cuda()
                 hidden = hidden.cuda()
                 hidden_rle_a = hidden_rle_a.cuda()
                 hidden_rle_c = hidden_rle_c.cuda()
