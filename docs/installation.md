@@ -9,9 +9,8 @@ To install MarginPolish in a Ubuntu/Linux bases system, follow these instruction
 
 ##### Install Dependencies
 ```bash
-sudo apt-get -y install cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev
-sudo apt-get -y install libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev
-sudo apt-get -y install liblzma-dev libhdf5-dev
+sudo apt-get -y install cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev \
+ libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev liblzma-dev libhdf5-dev
 ```
 
 ##### Install marginPolish

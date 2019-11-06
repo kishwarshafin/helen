@@ -31,7 +31,7 @@ cd <path/to/marginPolish/build/>
 ./marginPolish \
 </path/to/reads_2_assembly.bam> \
 <path/to/shasta_assembly.fa> \
-<path/to/marginpolish/params/allParams.np.human.guppy-ff-235.json> \
+<path/to/marginpolish/params/allParams.np.human.guppy-ff-xxx.json> \
 -t <number_of_threads> \
 -o </path/to/marginpolish_output/marginpolish_images> \
 -f 2>&1 | tee </path/to/marginpolish.log>
@@ -139,5 +139,12 @@ Change in the basecaller algorithm can directly affect the outcome of HELEN. We 
     <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0.0.1/r941_flip235_v001.pkl">Model_link</a></td>
     <td>The model is trained on autosomes of HG002 except <br>chr 20 with Guppy 2.3.5 base called data.</td>
   </tr>
+  <tr>
+      <td>r941_flip305_v001.pkl</td>
+      <td>06/11/2019</td>
+      <td>Guppy 3.0.5</td>
+      <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/guppy305_trained_models/r941_flip305_helen.pkl">Model_link</a></td>
+      <td>The model is trained on autosomes of HG002 except <br>chr 20 with Guppy 3.0.5 base called data.</td>
+    </tr>
 </table>
 </center>

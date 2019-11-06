@@ -240,6 +240,13 @@ Change in the basecaller algorithm can directly affect the outcome of HELEN. We 
     <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/v0.0.1/r941_flip235_v001.pkl">Model_link</a></td>
     <td>The model is trained on autosomes of HG002 except <br>chr 20 with Guppy 2.3.5 base called data.</td>
   </tr>
+  <tr>
+      <td>r941_flip305_v001.pkl</td>
+      <td>06/11/2019</td>
+      <td>Guppy 3.0.5</td>
+      <td><a href="https://storage.googleapis.com/kishwar-helen/helen_trained_models/guppy305_trained_models/r941_flip305_helen.pkl">Model_link</a></td>
+      <td>The model is trained on autosomes of HG002 except <br>chr 20 with Guppy 3.0.5 base called data.</td>
+    </tr>
 </table>
 </center>
 
@@ -306,12 +313,12 @@ We also see significant improvement in time over other available polishing algor
 We compared `Medaka` and `HELEN` as polishing pipelines on Shasta assembly with `assess_assembly` module available from `Pomoxis`. The summary of the quality we produce is here:
 
 <p align="center">
-<img src="img/Figure4a.png" alt="accuracy_plot" height=420p>
+<img src="img/Figure4a.png" alt="error_rate" height=420p>
 </p>
 
 We also see that `MarginPolish-HELEN` perform consistently across multiple assemblers.
 <p align="center">
-<img src="img/Figure4c.png" alt="accuracy_plot" height=420p>
+<img src="img/Figure4c.png" alt="Multiple_assembler_error_rate" height=420p>
 </p>
 
 ## Eleven high-quality assemblies
