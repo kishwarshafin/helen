@@ -135,15 +135,17 @@ class Stitch:
 
                 # check we have an alignment between the sequences
                 if alignment.best_score == 0:
-                    sys.stderr.write(TextColor.YELLOW + "WARNING: NO ALIGNMENT FOUND: " + str(this_start)
-                                     + " " + str(this_end) + "\n" + TextColor.END)
-                    # this is a special case, happens when we encounter a region that is empty. In this case what we do
-                    # is append 50 Ns to compensate for the overlap regions and then add the next chunk. This happens
-                    # very rarely but happens for sure.
-                    if len(right_current_sequence) > 10:
-                        running_sequence = running_sequence + 10 * 'N'
-                        running_sequence = running_sequence + right_current_sequence
-                        running_end = this_end
+                    # we are going to say that the left sequence is right
+                    left_sequence = running_sequence
+
+                    # we are going to  say right sequence is also right
+                    right_sequence = this_sequence
+
+                    # but there are 10 'N's as overlaps
+                    overlap_sequence = 10 * 'N'
+                    # now append all three parts and we have a contiguous sequence
+                    running_sequence = left_sequence + overlap_sequence + right_sequence
+                    running_end = this_end
 
                 else:
                     # we have a valid aignment so we try to find an anchor position
@@ -151,19 +153,18 @@ class Stitch:
 
                     if pos_a == -1 or pos_b == -1:
                         # in this case we couldn't find a place that we can use as an anchor
-                        # we again compensate this Ns in the sequence.
-                        sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAPS IN ALIGNMENT : \n" + TextColor.END)
-                        sys.stderr.write(TextColor.YELLOW + "LEFT : " + str(left_running_sequence_chunk) + "\n" +
-                                         TextColor.END)
-                        sys.stderr.write(TextColor.YELLOW + "RIGHT: " + str(right_current_sequence) + "\n" +
-                                         TextColor.END)
-                        sys.stderr.write(TextColor.YELLOW + "CIGAR: " + str(alignment.cigar_string) + "\n" +
-                                         TextColor.END)
-                        if len(this_sequence) > 10:
-                            left_sequence = running_sequence[:-overlap_bases]
-                            overlap_sequence = left_running_sequence_chunk
-                            running_sequence = left_sequence + overlap_sequence + 10 * 'N' + this_sequence
-                            running_end = this_end
+                        # we are going to say that the left sequence is right
+                        left_sequence = running_sequence
+
+                        # we are going to  say right sequence is also right
+                        right_sequence = this_sequence
+
+                        # but there are 10 'N's as overlaps
+                        overlap_sequence = 10 * 'N'
+
+                        # now append all three parts and we have a contiguous sequence
+                        running_sequence = left_sequence + overlap_sequence + right_sequence
+                        running_end = this_end
                     else:
                         # this is a perfect match so we can simply stitch them
                         # take all of the sequence from the left
@@ -177,15 +178,9 @@ class Stitch:
                         running_sequence = left_sequence + overlap_sequence + right_sequence
                         running_end = this_end
             else:
-                # in this case we encountered a region where there's no high level overlap.
-                # In this case we again compensate with Ns.
-                sys.stderr.write(TextColor.YELLOW + "WARNING: NO OVERLAP IN CHUNKS: " + " " + str(contig)
-                                 + " " + str(this_start) + " " + str(running_end) + "\n" + TextColor.END)
-
-                # if the sequence is worth adding, then we add
-                if len(this_sequence) > 10:
-                    running_sequence = running_sequence + 10 * 'N' + this_sequence
-                    running_end = this_end
+                # this means there was a gap before this chunk, which could be low read coverage in a small contig.
+                running_sequence = running_sequence + this_sequence
+                running_end = this_end
 
         return contig, running_start, running_end, running_sequence
 
