@@ -66,8 +66,10 @@ class TransducerGRU(nn.Module):
         # this needs to ensure consistency between GPU/CPU training
         hidden = hidden.transpose(0, 1).contiguous()
         # encoding
+        self.gru_encoder.flatten_parameters()
         x_out_layer1, hidden_out_layer1 = self.gru_encoder(x, hidden)
         # decoding
+        self.gru_encoder.flatten_parameters()
         x_out_final, hidden_final = self.gru_decoder(x_out_layer1, hidden_out_layer1)
 
         # classification
