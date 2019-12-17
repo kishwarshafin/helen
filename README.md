@@ -84,16 +84,16 @@ samtools index -@32 reads_2_assembly.bam
 ##### Run MarginPolish using docker
 `MarginPolish` can be used in a docker container. You can get the image from:
 ```bash
-docker pull tpesout/margin_polish:latest
-docker run tpesout/margin_polish:latest --help
+docker pull kishwars/margin_polish:latest
+docker run kishwars/margin_polish:latest --help
 ```
 
 To generate images with `MarginPolish` docker, first collect all your input data (`shasta_assembly.fa, reads_2_assembly.bam, allParams.np.human.guppy-ff-235.json`) to a directory i.e. `</your/data/dir>`.
 Then please run:
 ```bash
-docker run -v </your/data/dir>:/data tpesout/margin_polish:latest reads_2_assembly.bam \
+docker run -it --rm --user=`id -u`:`id -g` --cpus=<number_of_threads> -v </your/current/directory>:/data kishwars/margin_polish:latest reads_2_assembly.bam \
 shasta_assembly.fa \
-allParams.np.human.guppy-ff-235.json \
+/opt/MarginPolish/params/<model_name.json> \
 -t <number_of_threads> \
 -o output/marginpolish_images \
 -f
@@ -185,7 +185,7 @@ sudo docker run kishwars/helen:0.0.1.cpu call_consensus.py -h
 ##### Run call_consensus.py (CPU)
 Please gather all your data to a input directory. Then run `call_consensus.py` using the following command:
 ```bash
-sudo docker run -v <path/to/input>:/data kishwars/helen:0.0.1.cpu call_consensus.py \
+docker run -it --rm --user=`id -u`:`id -g` --cpus=<number_of_threads> -v </your/current/directory>:/data kishwars/helen:0.0.1.cpu call_consensus.py \
 -i <marginpolish_images> \
 -b <batch_size> \
 -m <r941_flip235_v001.pkl> \
@@ -198,8 +198,7 @@ sudo docker run -v <path/to/input>:/data kishwars/helen:0.0.1.cpu call_consensus
 ##### Run stitch.py
 Finally you can run `stitch.py` to get a consensus sequence:
 ```bash
-docker run -v /data:/data kishwars/helen:0.0.1.cpu \
-stitch.py \
+docker run -it --rm --user=`id -u`:`id -g` --cpus=<number_of_threads> -v </your/current/directory>:/data kishwars/helen:0.0.1.cpu stitch.py \
 -i <output_dir/helen_predictions_XX.hdf> \
 -t <number_of_threads> \
 -o <output_dir> \
