@@ -257,5 +257,3 @@ def train(train_file,
     # notify that the model has finished training.
     sys.stderr.write(TextColor.PURPLE + 'Finished training\n' + TextColor.END)
 
-    return transducer_model, model_optimizer, stats
-
