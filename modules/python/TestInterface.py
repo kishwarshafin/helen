@@ -121,6 +121,11 @@ def test_interface(test_file, batch_size, gpu_mode, num_workers, model_path, out
 
     sys.stderr.write(TextColor.GREEN + "INFO: MODEL LOADED\n" + TextColor.END)
 
+    if print_details and gpu_mode:
+        sys.stderr.write(TextColor.GREEN + "INFO: GPU MODE NOT AVAILABLE WHEN PRINTING DETAILS. "
+                                           "SETTING GPU MODE TO FALSE.\n" + TextColor.END)
+        gpu_mode = False
+
     if gpu_mode:
         transducer_model = transducer_model.cuda()
 
