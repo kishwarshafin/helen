@@ -102,6 +102,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
             # now the images usually contain 1000 bases, we iterate on a sliding window basis where we process
             # the window size then jump to the next window
             for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
+                start_time = time.time()
                 # if current position + window size goes beyond the size of the window, that means we've reached the end
                 if i + TrainOptions.TRAIN_WINDOW > ImageSizeOptions.SEQ_LENGTH:
                     break
@@ -153,7 +154,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
 
             if rank == 0:
                 # calculate the expected time to finish
-                eta = ((time.time() - start_time) / batch_iterator) * total_batches
+                eta = (time.time() - start_time) * (total_batches - batch_iterator)
                 hours = str(int(eta/3600))
                 eta = eta - (eta/3600)
                 mins = str(int(eta/60))
