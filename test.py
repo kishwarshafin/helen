@@ -119,8 +119,14 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_dir
 
     sys.stderr.write(TextColor.GREEN + "INFO: MODEL LOADED\n" + TextColor.END)
 
+    if print_details and gpu_mode:
+        sys.stderr.write(TextColor.GREEN + "INFO: GPU MODE NOT AVAILABLE WHEN PRINTING DETAILS. "
+                                           "SETTING GPU MODE TO FALSE.\n" + TextColor.END)
+        gpu_mode = False
+
     if gpu_mode:
-        transducer_model = torch.nn.DataParallel(transducer_model).cuda()
+        # GPU mode is not available when print details is on
+        transducer_model = transducer_model.cuda()
 
     stats_dictionary = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
                             gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
