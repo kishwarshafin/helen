@@ -66,7 +66,7 @@ def polish_genome(image_dir, model_path, batch_size, num_workers, threads, outpu
     output_dir = FileManager.handle_output_directory(output_dir)
     timestr = time.strftime("%m%d%Y_%H%M%S")
 
-    prediction_output_directory = output_dir + "predictions_" + str(timestr) + "/"
+    prediction_output_directory = output_dir + "/predictions_" + str(timestr) + "/"
     prediction_output_directory = FileManager.handle_output_directory(prediction_output_directory)
 
     sys.stderr.write(TextColor.GREEN + "INFO: RUN-ID: " + str(timestr) + "\n" + TextColor.END)
@@ -80,7 +80,7 @@ def polish_genome(image_dir, model_path, batch_size, num_workers, threads, outpu
                    batch_size,
                    num_workers,
                    threads,
-                   output_dir,
+                   prediction_output_directory,
                    output_prefix,
                    gpu_mode,
                    device_ids,
@@ -89,6 +89,7 @@ def polish_genome(image_dir, model_path, batch_size, num_workers, threads, outpu
 
     stitch_start_time = time.time()
     sys.stderr.write(TextColor.GREEN + "INFO: STITCH STARTING\n" + TextColor.END)
+    print(prediction_output_directory)
     perform_stitch(prediction_output_directory,
                    output_dir,
                    output_prefix,
