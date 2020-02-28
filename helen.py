@@ -343,7 +343,8 @@ def main():
         print("HELEN VERSION: ", __version__)
 
     else:
-        sys.stderr.write(TextColor.RED + "ERROR: NO SUBCOMMAND SELECTED. PLEASE SELECT ONE OF THE AVAIABLE SUB-COMMANDS.\n"
+        sys.stderr.write(TextColor.RED + "ERROR: NO SUBCOMMAND SELECTED. "
+                                         "PLEASE SELECT ONE OF THE AVAIABLE SUB-COMMANDS.\n"
                          + TextColor.END)
         parser.print_help()
 
