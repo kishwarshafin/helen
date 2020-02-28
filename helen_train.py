@@ -246,7 +246,7 @@ def main():
                        FLAGS.gpu_mode,
                        FLAGS.num_workers,
                        FLAGS.model_path,
-                       FLAGS.output_directory,
+                       FLAGS.output_dir,
                        FLAGS.print_details)
 
     elif FLAGS.sub_command == 'torch_stat':
