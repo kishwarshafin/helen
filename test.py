@@ -4,8 +4,6 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import torch
-import torch.nn.parallel
 from modules.python.models.test_debug import test
 from modules.python.models.ModelHander import ModelHandler
 from modules.python.TextColor import TextColor
