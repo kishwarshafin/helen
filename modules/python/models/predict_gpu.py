@@ -89,10 +89,10 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
         # keep an eye for batch
         total_batches = len(test_loader)
         batch_iterator = 0
-        start_time = time.time()
 
         # the dataloader loop, iterates in minibatches. tqdm is the progress logger.
         for contig, contig_start, contig_end, chunk_id, images, position, filename in test_loader:
+            start_time = time.time()
             # the images are usually in uint8, convert them to FloatTensor
             images = images.type(torch.FloatTensor)
             # initialize the first hidden input as all zeros
@@ -162,7 +162,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
 
             if rank == 0:
                 # calculate the expected time to finish
-                eta = ((time.time() - start_time) / batch_iterator) * total_batches
+                eta = (time.time() - start_time) * (total_batches - batch_iterator)
                 hours = str(int(eta/3600))
                 eta = eta - (eta/3600)
                 mins = str(int(eta/60))
