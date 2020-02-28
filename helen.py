@@ -3,6 +3,7 @@ import sys
 import torch
 from version import __version__
 from modules.python.TextColor import TextColor
+from modules.python.PolishInterface import polish_genome
 from modules.python.CallConsensusInterface import call_consensus
 from modules.python.StitchInterface import perform_stitch
 
@@ -83,14 +84,6 @@ def add_polish_arguments(parser):
         help="List of gpu device ids to use for inference. Only used in distributed setting.\n"
              "Example usage: --device_ids 0,1,2 (this will create three callers in id 'cuda:0, cuda:1 and cuda:2'\n"
              "If none then it will use all available devices."
-    )
-    parser.add_argument(
-        "-tpc",
-        "--threads_per_caller",
-        type=int,
-        required=False,
-        default=8,
-        help="Total threads to be used per caller. A sane value would be num_callers * threads <= total_threads."
     )
     parser.add_argument(
         "-c",
@@ -303,6 +296,16 @@ def main():
 
     if FLAGS.sub_command == 'polish':
         sys.stderr.write(TextColor.GREEN + "INFO: POLISH MODULE SELECTED\n" + TextColor.END)
+        polish_genome(FLAGS.image_dir,
+                      FLAGS.model_path,
+                      FLAGS.batch_size,
+                      FLAGS.num_workers,
+                      FLAGS.threads,
+                      FLAGS.output_dir,
+                      FLAGS.output_prefix,
+                      FLAGS.gpu_mode,
+                      FLAGS.device_ids,
+                      FLAGS.callers)
 
     elif FLAGS.sub_command == 'call_consensus':
         sys.stderr.write(TextColor.GREEN + "INFO: CALL CONSENSUS MODULE SELECTED\n" + TextColor.END)
