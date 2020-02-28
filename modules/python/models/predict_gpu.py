@@ -71,6 +71,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
 
     # only output for rank 0 caller
     if rank == 0:
+        print(output_filename + "_" + str(rank) + ".hdf")
         sys.stderr.write(TextColor.GREEN + 'INFO: TORCH THREADS SET TO: ' + str(torch.get_num_threads()) + ".\n"
                          + TextColor.END)
         # notify that the process has started and loading data
