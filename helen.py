@@ -3,7 +3,6 @@ import sys
 import torch
 from version import __version__
 from modules.python.TextColor import TextColor
-from modules.python.PolishInterface import polish_genome
 from modules.python.CallConsensusInterface import call_consensus
 from modules.python.StitchInterface import perform_stitch
 
