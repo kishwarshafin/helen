@@ -83,10 +83,10 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
         # keep an eye for batch
         total_batches = len(test_loader)
         batch_iterator = 0
-        start_time = time.time()
 
         # the dataloader loop, iterates in minibatches. tqdm is the progress logger.
         for contig, contig_start, contig_end, chunk_id, images, position, filename in test_loader:
+            start_time = time.time()
             # the images are usually in uint8, convert them to FloatTensor
             images = images.type(torch.FloatTensor)
             # initialize the first hidden input as all zeros
@@ -102,7 +102,6 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
             # now the images usually contain 1000 bases, we iterate on a sliding window basis where we process
             # the window size then jump to the next window
             for i in range(0, ImageSizeOptions.SEQ_LENGTH, TrainOptions.WINDOW_JUMP):
-                start_time = time.time()
                 # if current position + window size goes beyond the size of the window, that means we've reached the end
                 if i + TrainOptions.TRAIN_WINDOW > ImageSizeOptions.SEQ_LENGTH:
                     break
