@@ -15,7 +15,7 @@ class SequenceDataset(Dataset):
     It initializes all the given images and returns each image through __getitem__.
     """
 
-    def __init__(self, image_directory):
+    def __init__(self, image_directory, file_list=None):
         """
         This method initializes the dataset by loading all the image information. It creates a sequential list
         call all_images from which we can grab images iteratively through __getitem__.
@@ -28,8 +28,13 @@ class SequenceDataset(Dataset):
         # from the list of files.
         file_image_pair = []
 
-        # get all the h5 files that we have in the directory
-        hdf_files = FileManager.get_file_paths_from_directory(image_directory)
+        # check if a file list is given, otherwise load all files from the directory
+        if file_list is not None:
+            hdf_files = file_list
+        else:
+            # get all the h5 files that we have in the directory
+            hdf_files = FileManager.get_file_paths_from_directory(image_directory)
+
         for hdf5_file_path in hdf_files:
             # for each of the files get all the images
             with h5py.File(hdf5_file_path, 'r') as hdf5_file:

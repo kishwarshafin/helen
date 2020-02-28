@@ -189,11 +189,10 @@ class Stitch:
 
         return contig, running_start, running_end, running_sequence
 
-    def small_chunk_stitch(self, file_name, contig, small_chunk_keys):
+    def small_chunk_stitch(self, contig, small_chunk_keys):
         """
         This process stitches regional image chunk predictions. Among these image chunks, the positions are
         always consistent, we don't need an alignment to stitch these chunks.
-        :param file_name: Name of the file
         :param contig: Contig name
         :param small_chunk_keys: Chunk keys in list as (contig_name, start_position, end_position)
         :return:
@@ -202,7 +201,7 @@ class Stitch:
         name_sequence_tuples = list()
 
         # go through all the chunk keys
-        for contig_name, chunk_name, contig_start, contig_end in small_chunk_keys:
+        for contig_name, file_name, chunk_name, contig_start, contig_end in small_chunk_keys:
             smaller_chunks = []
             with h5py.File(file_name, 'r') as hdf5_file:
                 if 'predictions' in hdf5_file:
@@ -255,10 +254,9 @@ class Stitch:
 
         return contig, running_start, running_end, running_sequence
 
-    def create_consensus_sequence(self, hdf5_file_path, contig, sequence_chunk_keys, threads):
+    def create_consensus_sequence(self, contig, sequence_chunk_keys, threads):
         """
         This is the consensus sequence create method that creates a sequence for a given contig.
-        :param hdf5_file_path: Path to the hdf5 file
         :param contig: Contig name
         :param sequence_chunk_keys: All the chunk keys in the contig
         :param threads: Number of available threads
@@ -266,12 +264,13 @@ class Stitch:
         """
         # first we sort the sequence chunks
         sequence_chunk_key_list = list()
+
         # then we split the chunks to so get contig name, start and end positions so we can sort them properly
-        for chunk_key, st, end in sequence_chunk_keys:
-            sequence_chunk_key_list.append((contig, chunk_key, int(st), int(end)))
+        for hdf5_file, chunk_key, st, end in sequence_chunk_keys:
+            sequence_chunk_key_list.append((contig, hdf5_file, chunk_key, int(st), int(end)))
 
         # we sort based on positions
-        sequence_chunk_key_list = sorted(sequence_chunk_key_list, key=lambda element: (element[2], element[3]))
+        sequence_chunk_key_list = sorted(sequence_chunk_key_list, key=lambda element: (element[3], element[4]))
 
         sequence_chunks = list()
         # we submit the chunks in process pool
@@ -282,7 +281,7 @@ class Stitch:
                                                  int(len(sequence_chunk_key_list) / threads) + 1))
 
             # we do the stitching per chunk of keys
-            futures = [executor.submit(self.small_chunk_stitch, hdf5_file_path, contig, file_chunk)
+            futures = [executor.submit(self.small_chunk_stitch, contig, file_chunk)
                        for file_chunk in file_chunks]
 
             # as they complete we add them to a list
