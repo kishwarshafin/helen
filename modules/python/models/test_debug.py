@@ -119,7 +119,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
                 true_bases = label_base_chunk.cpu().contiguous().numpy().tolist()
                 true_rles = label_rle_chunk.cpu().numpy().tolist()
 
-                for i in tqdm(range(image_chunk.size(0)), ncols=50):
+                for i in range(image_chunk.size(0)):
                     column_count = 0
                     for pred_rle, true_rle, pred_base, true_base, pos in zip(predicted_rle_labels[i], true_rles[i],
                                                                              predicted_base_label[i], true_bases[i],
@@ -192,6 +192,7 @@ def test(data_file, batch_size, gpu_mode, transducer_model, num_workers, gru_lay
 
     avg_loss = total_loss / total_images if total_images else 0
     np.set_printoptions(threshold=np.inf)
+    pbar.close()
 
     sys.stderr.write(TextColor.YELLOW+'\nTest Loss: ' + str(avg_loss) + "\n"+TextColor.END)
     sys.stderr.write(TextColor.BLUE + "Base Confusion Matrix: \n" + str(base_confusion_matrix.value()) + "\n" + TextColor.END)
