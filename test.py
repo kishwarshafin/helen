@@ -116,7 +116,7 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_dir
                                        num_rle_classes=ImageSizeOptions.TOTAL_RLE_LABELS)
 
     sys.stderr.write(TextColor.GREEN + "INFO: MODEL LOADED\n" + TextColor.END)
-
+    print(print_details, gpu_mode)
     if print_details and gpu_mode:
         sys.stderr.write(TextColor.GREEN + "INFO: GPU MODE NOT AVAILABLE WHEN PRINTING DETAILS. "
                                            "SETTING GPU MODE TO FALSE.\n" + TextColor.END)
