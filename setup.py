@@ -1,10 +1,14 @@
 import os
 import re
 import sys
+import shutil
 
 from setuptools import setup, Extension
+from setuptools import Distribution
+from setuptools.command.install import install
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+from glob import glob
 import subprocess
 
 __pkg_name__ = 'helen'
@@ -77,8 +81,17 @@ class CMakeBuild(build_ext):
         os.makedirs(dest_directory, exist_ok=True)
 
         dest_path = dest_directory + self.get_ext_filename(ext.name)
-
         self.copy_file(source_path, dest_path)
+
+        # move marginpolish source
+        mp_source_path = os.path.abspath(self.build_temp + "/" + "marginpolish/src/marginpolish-build/marginPolish")
+
+        mp_dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/bin"
+
+        os.makedirs(mp_dest_directory, exist_ok=True)
+
+        mp_dest_path = mp_dest_directory + "/marginPolish"
+        self.copy_file(mp_source_path, mp_dest_path)
 
 
 def get_dependencies():
@@ -115,6 +128,29 @@ def get_long_description():
     return long_description, long_description_content_type
 
 
+# Nasty hack to get binaries into bin path
+class GetPaths(install):
+    def run(self):
+        self.distribution.install_scripts = self.install_scripts
+        self.distribution.install_libbase = self.install_libbase
+
+
+def get_setuptools_script_dir():
+    # Run the above class just to get paths
+    dist = Distribution({'cmdclass': {'install': GetPaths}})
+    dist.dry_run = True
+    dist.parse_config_files()
+    command = dist.get_command_obj('install')
+    command.ensure_finalized()
+    command.run()
+
+    src_dir = glob(os.path.join(dist.install_libbase, 'helen-*', 'bin'))[0]
+
+    for exe in (os.path.join(src_dir, x) for x in os.listdir(src_dir)):
+        shutil.copy(exe, dist.install_scripts)
+    return dist.install_libbase, dist.install_scripts
+
+
 if __name__ == '__main__':
     # check python3 version
     pymajor, pyminor = sys.version_info[0:2]
@@ -142,7 +178,7 @@ if __name__ == '__main__':
         entry_points={
             'console_scripts': [
                 '{0} = {0}:main'.format(__pkg_name__),
-                '{0}_train = {0}_train:main'.format(__pkg_name__),
+                '{0}_train = {0}_train:main'.format(__pkg_name__)
             ]
         },
         ext_modules=[CMakeExtension('HELEN')],
@@ -151,3 +187,4 @@ if __name__ == '__main__':
         },
         zip_safe=False,
     )
+    get_setuptools_script_dir()

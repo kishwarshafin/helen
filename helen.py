@@ -6,6 +6,7 @@ from modules.python.TextColor import TextColor
 from modules.python.PolishInterface import polish_genome
 from modules.python.CallConsensusInterface import call_consensus
 from modules.python.StitchInterface import perform_stitch
+from modules.python.DownloadModel import download_models
 
 
 def add_polish_arguments(parser):
@@ -250,7 +251,11 @@ def main():
                                                  "2) call_consensus: This module takes the summary images and a"
                                                  "trained neural network and generates predictions per base.\n"
                                                  "3) stitch: This module takes the inference files as input and "
-                                                 "stitches them to generate a polished assembly.\n",
+                                                 "stitches them to generate a polished assembly.\n"
+                                                 "4) download_model: Download available helen models\n"
+                                                 "5) torch_stat: See the torch configuration\n"
+                                                 "6) version: check HELEN version.\n",
+
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "--version",
@@ -329,7 +334,7 @@ def main():
 
     elif FLAGS.sub_command == 'download_models':
         sys.stderr.write(TextColor.GREEN + "INFO: DOWNLOAD MODELS SELECTED\n" + TextColor.END)
-        # download_models(FLAGS.output_dir)
+        download_models(FLAGS.output_dir)
 
     elif FLAGS.sub_command == 'torch_stat':
         sys.stderr.write(TextColor.YELLOW + "TORCH VERSION: " + TextColor.END + str(torch.__version__) + "\n\n")
