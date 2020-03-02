@@ -186,7 +186,7 @@ if __name__ == '__main__':
         },
         zip_safe=False,
     )
-
+    print(os.environ.get('INSTALL_BINARIES'))
     if os.environ.get('INSTALL_BINARIES') is not None:
         print("\nCopying utility binaries to your path.")
         get_setuptools_marginpolish_dir()
