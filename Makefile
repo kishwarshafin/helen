@@ -10,7 +10,7 @@ venv/bin/activate:
 .PHONY: install
 install: venv | $(addprefix $(BINCACHEDIR)/, $(BINARIES))
 	${IN_VENV} && pip install -r requirements.txt
-	${IN_VENV} && python setup.py install
+	${IN_VENV} && INSTALL_BINARIES=1 python setup.py install
 
 .PHONY: clean
 clean:
