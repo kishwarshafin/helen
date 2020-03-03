@@ -28,6 +28,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 `MarginPolish-HELEN` is supported on  <b>`Ubuntu 16.10/18.04`</b> or any other Linux-based system.
 
 ##### Install prerequisites
+Before you follow any of the methods, make sure you install all the dependencies:
 ```bash
 sudo apt-get -y install git cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev \
 libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev liblzma-dev libhdf5-dev \
@@ -35,23 +36,23 @@ python3-pip python3-virtualenv virtualenv
 ```
 
 ##### Method 1: Install MarginPolish-HELEN from GitHub
+You can install from the `GitHub` repository:
 ```bash
 git clone https://github.com/kishwarshafin/helen.git
 cd helen
 make install
 . ./venv/bin/activate
 
-marginPolish --version
-helen --version
 helen --help
-marginPolish --help
+marginpolish --help
 ```
 Each time you want to use it, activate the virtualenv:
 ```bash
-source <path/to/helen/venv/bin/activate>
+. <path/to/helen/venv/bin/activate>
 ```
 
 ##### Method 2: Install using PyPi
+Install  prerequisites and the install `MarginPolish-HELEN` using pip:
 ```bash
 python3 -m pip install helen --user
 
@@ -59,16 +60,20 @@ python3 -m marginpolish --help
 python3 -m helen --help
 ```
 
+Update the installed version:
+```bash
+python3 -m pip install update pip
+python3 -m pip install helen --upgrade
+```
+
+You can also add module locations to path:
 ```bash
 echo 'export PATH="$(python3 -m site --user-base)/bin":$PATH' >> ~/.bashrc
 source ~/.bashrc
-```
 
-```bash
-python3 -m pip install update pip
-python3 -m pip install update helen
+marginpolish --help
+helen --help
 ```
-
 ## Usage
 `MarginPolish` requires a draft assembly and a mapping of reads to the draft assembly. We commend using `Shasta` as the initial assembler and `MiniMap2` for the mapping.
 
@@ -80,16 +85,19 @@ Generate an assembly using one of the ONT assemblers:
 * [WTDBG2 assembler](https://github.com/ruanjue/wtdbg2)
 
 #### Step 2: Create an alignment between reads and shasta assembly
-We recommend using `MiniMap2` to generate the mapping between the reads and the assembly.
+We recommend using `MiniMap2` to generate the mapping between the reads and the assembly. You don't have to follow these exact commands.
 ```bash
-# we recommend using FASTQ as marginPolish uses quality values
-# This command can run MiniMap2 with 32 threads, you can change the number as you like.
-minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools sort -@ 32 | samtools view -hb -F 0x104 > reads_2_assembly.bam
-samtools index -@32 reads_2_assembly.bam
-
-#  the -F 0x104 flag removes unaligned and secondary sequences
+minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools view -hb -q 60 -F 0x904 > unsorted.bam ; samtools sort -@ 32 unsorted.bam | samtools view > reads_2_assembly.0x904q60.bam
+samtools index -@32 reads_2_assembly.0x904q60.bam
 ```
 #### Step 3: Generate images using MarginPolish
+##### Download Model
+```bash
+helen download_models \
+--output_dir <path/to/helen_models/>
+```
+
+##### Ru MarginPolish
 You can generate images using MarginPolish by running:
 ```bash
 marginPolish reads_2_assembly.bam \
@@ -103,13 +111,7 @@ Assembly.fa \
 You can get the `params.json` from `path/to/marginpolish/params/`.
 
 #### Step 4: Run HELEN
-##### Download Model
-```bash
-helen download_models \
---output_dir <path/to/helen_models/>
-```
-
-##### Run HELEN
+Next, run `HELEN` to polish using a RNN.
 ```bash
 helen polish \
 --image_dir </path/to/marginpolish_images/> \
