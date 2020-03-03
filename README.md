@@ -27,7 +27,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 ## Installation
 `MarginPolish-HELEN` is supported on  <b>`Ubuntu 16.10/18.04`</b> or any other Linux-based system.
 
-##### Install prerequisites
+#### Install prerequisites
 Before you follow any of the methods, make sure you install all the dependencies:
 ```bash
 sudo apt-get -y install git cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev \
@@ -35,7 +35,7 @@ libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev liblzma-dev libhdf5-dev \
 python3-pip python3-virtualenv virtualenv
 ```
 
-##### Method 1: Install MarginPolish-HELEN from GitHub
+#### Method 1: Install MarginPolish-HELEN from GitHub
 You can install from the `GitHub` repository:
 ```bash
 git clone https://github.com/kishwarshafin/helen.git
@@ -51,7 +51,7 @@ Each time you want to use it, activate the virtualenv:
 . <path/to/helen/venv/bin/activate>
 ```
 
-##### Method 2: Install using PyPi
+#### Method 2: Install using PyPi
 Install  prerequisites and the install `MarginPolish-HELEN` using pip:
 ```bash
 python3 -m pip install helen --user
