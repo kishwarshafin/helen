@@ -19,7 +19,7 @@ class FileManager:
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        return output_dir
+        return os.path.abspath(output_dir)
 
     @staticmethod
     def handle_train_output_directory(output_dir):

@@ -1,4 +1,3 @@
-import argparse
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -24,7 +23,7 @@ Output:
 """
 
 
-def save_rle_confusion_matrix(stats_dictionary):
+def save_rle_confusion_matrix(stats_dictionary, output_directory):
     # plot confusion matrix
     fig, ax = plt.subplots(figsize=(20, 20))
     cf = np.array(stats_dictionary['rle_confusion_matrix'], dtype=np.int)
@@ -54,10 +53,10 @@ def save_rle_confusion_matrix(stats_dictionary):
     ax.set_title("RLE Confusion Matrix")
     fig.tight_layout()
     # plt.show()
-    plt.savefig("RLE_CONFUSION_MATRIX.png", dpi=100)
+    plt.savefig(output_directory + "/RLE_CONFUSION_MATRIX.png", dpi=100)
 
 
-def save_base_confusion_matrix(stats_dictionary):
+def save_base_confusion_matrix(stats_dictionary, output_directory):
     # plot confusion matrix
     fig, ax = plt.subplots(figsize=(5, 5))
     cf = np.array(stats_dictionary['base_confusion_matrix'], dtype=np.int)
@@ -87,21 +86,24 @@ def save_base_confusion_matrix(stats_dictionary):
     ax.set_title("BASE Confusion Matrix")
     fig.tight_layout()
     # plt.show()
-    plt.savefig("BASE_CONFUSION_MATRIX.png", dpi=100)
+    plt.savefig(output_directory + "/BASE_CONFUSION_MATRIX.png", dpi=100)
 
 
-def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_directory, print_details):
+def test_interface(test_file, batch_size, gpu_mode, num_workers, model_path, output_directory, print_details):
     """
-    Train a model and save
-    :param test_file: A CSV file containing test image information
+    Test a trained model
+    :param test_file: Path to directory containing test images
     :param batch_size: Batch size for training
     :param gpu_mode: If true the model will be trained on GPU
     :param num_workers: Number of workers for data loading
     :param model_path: Path to a saved model
-    :param num_classes: Number of output classes
+    :param output_directory: Path to output_directory
+    :param print_details: If true then logs will be printed
     :return:
     """
     sys.stderr.write(TextColor.PURPLE + 'Loading data\n' + TextColor.END)
+
+    output_directory = FileManager.handle_output_directory(output_directory)
 
     if os.path.isfile(model_path) is False:
         sys.stderr.write(TextColor.RED + "ERROR: INVALID PATH TO MODEL\n")
@@ -119,8 +121,13 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_dir
 
     sys.stderr.write(TextColor.GREEN + "INFO: MODEL LOADED\n" + TextColor.END)
 
+    if print_details and gpu_mode:
+        sys.stderr.write(TextColor.GREEN + "INFO: GPU MODE NOT AVAILABLE WHEN PRINTING DETAILS. "
+                                           "SETTING GPU MODE TO FALSE.\n" + TextColor.END)
+        gpu_mode = False
+
     if gpu_mode:
-        transducer_model = torch.nn.DataParallel(transducer_model).cuda()
+        transducer_model = transducer_model.cuda()
 
     stats_dictionary = test(test_file, batch_size, gpu_mode, transducer_model, num_workers,
                             gru_layers, hidden_size, num_base_classes=ImageSizeOptions.TOTAL_BASE_LABELS,
@@ -128,67 +135,7 @@ def do_test(test_file, batch_size, gpu_mode, num_workers, model_path, output_dir
                             output_directory=output_directory,
                             print_details=print_details)
 
-    save_rle_confusion_matrix(stats_dictionary)
-    save_base_confusion_matrix(stats_dictionary)
+    save_rle_confusion_matrix(stats_dictionary, output_directory)
+    save_base_confusion_matrix(stats_dictionary, output_directory)
 
     sys.stderr.write(TextColor.PURPLE + 'DONE\n' + TextColor.END)
-
-
-if __name__ == '__main__':
-    '''
-    Processes arguments and performs tasks.
-    '''
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--test_file",
-        type=str,
-        required=True,
-        help="Training data description csv file."
-    )
-    parser.add_argument(
-        "--batch_size",
-        type=int,
-        required=False,
-        default=100,
-        help="Batch size for training, default is 100."
-    )
-    parser.add_argument(
-        "--model_path",
-        type=str,
-        required=False,
-        default='./model',
-        help="Path of the model to load and retrain"
-    )
-    parser.add_argument(
-        "--gpu_mode",
-        action='store_true',
-        help="If true then cuda is on."
-    )
-    parser.add_argument(
-        "--print_details",
-        action='store_true',
-        help="If true then cuda is on."
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        required=False,
-        default='./debug_output',
-        help="Path and file_name to save the debug output"
-    )
-    parser.add_argument(
-        "--num_workers",
-        type=int,
-        required=False,
-        default=40,
-        help="Epoch size for training iteration."
-    )
-    FLAGS, not_parsed = parser.parse_known_args()
-    output_dir = FileManager.handle_output_directory(FLAGS.output_dir)
-    do_test(FLAGS.test_file,
-            FLAGS.batch_size,
-            FLAGS.gpu_mode,
-            FLAGS.num_workers,
-            FLAGS.model_path,
-            output_dir,
-            FLAGS.print_details)

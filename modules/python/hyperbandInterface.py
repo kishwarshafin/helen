@@ -10,7 +10,7 @@ import time
 # Custom generator for our dataset
 from modules.python.models.hyperband import Hyperband
 from modules.python.TextColor import TextColor
-from modules.python.models.train import train, save_best_model
+from modules.python.models.train import train
 from modules.python.Options import TrainOptions
 """
 Tune hyper-parameters of a model using hyperband.
@@ -97,7 +97,7 @@ class WrapHyperband:
                                                                     stats_dir=None,
                                                                     train_mode=False)
 
-        save_best_model(transducer_model, model_optimizer, self.hidden_size, self.gru_layers, epoch_limit, model_path)
+        # save_best_model(transducer_model, model_optimizer, self.hidden_size, self.gru_layers, epoch_limit, model_path)
 
         return transducer_model, model_optimizer, stats_dictionary
 
@@ -124,88 +124,3 @@ class WrapHyperband:
             print("Accuracy:\t", result['accuracy'])
             print("Params:\t\t", result['params'])
             print("Model path:\t", result['model_path'])
-
-
-def handle_output_directory(output_dir):
-    """
-    Process the output directory and return a valid directory where we save the outputs
-    :param output_dir: Output directory path
-    :return:
-    """
-    # process the output directory
-    if output_dir[-1] != "/":
-        output_dir += "/"
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-
-    # create an internal directory so we don't overwrite previous runs
-    timestr = time.strftime("%m%d%Y_%H%M%S")
-    internal_directory = "hyperband_run_" + timestr + "/"
-    output_dir = output_dir + internal_directory
-
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-    model_output_dir = output_dir+'trained_models/'
-    log_output_dir = output_dir+'logs/'
-    os.mkdir(model_output_dir)
-    os.mkdir(log_output_dir)
-
-    return model_output_dir, log_output_dir
-
-
-if __name__ == '__main__':
-    '''
-    Processes arguments and performs tasks.
-    '''
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--train_file",
-        type=str,
-        required=True,
-        help="Training data description csv file."
-    )
-    parser.add_argument(
-        "--test_file",
-        type=str,
-        required=True,
-        help="Training data description csv file."
-    )
-    parser.add_argument(
-        "--gpu_mode",
-        type=bool,
-        default=False,
-        help="If true then cuda is on."
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        required=False,
-        default='./hyperband_output/',
-        help="Directory to save the model"
-    )
-    parser.add_argument(
-        "--batch_size",
-        type=int,
-        required=False,
-        default=100,
-        help="Batch size for training, default is 100."
-    )
-    parser.add_argument(
-        "--max_epochs",
-        type=int,
-        required=False,
-        default=10,
-        help="Epoch size for training iteration."
-    )
-    parser.add_argument(
-        "--num_workers",
-        type=int,
-        required=False,
-        default=40,
-        help="Epoch size for training iteration."
-    )
-    FLAGS, unparsed = parser.parse_known_args()
-    model_dir, log_dir = handle_output_directory(FLAGS.output_dir)
-    wh = WrapHyperband(FLAGS.train_file, FLAGS.test_file, FLAGS.gpu_mode, model_dir, log_dir, FLAGS.max_epochs,
-                       FLAGS.batch_size, FLAGS.num_workers)
-    wh.run(save_output=True)
