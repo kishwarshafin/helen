@@ -94,13 +94,13 @@ samtools index -@32 reads_2_assembly.0x904q60.bam
 ##### Download Model
 ```bash
 helen download_models \
---output_dir <path/to/helen_models/>
+--output_dir <path/to/mp_helen_models/>
 ```
 
 ##### Ru MarginPolish
 You can generate images using MarginPolish by running:
 ```bash
-marginPolish reads_2_assembly.bam \
+marginpolish reads_2_assembly.bam \
 Assembly.fa \
 </path/to/model_name.json> \
 -t <number_of_threads> \
