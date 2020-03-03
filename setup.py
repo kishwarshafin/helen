@@ -120,7 +120,7 @@ def get_version():
 def get_long_description():
     from os import path
     this_directory = path.abspath(path.dirname(__file__))
-    kwargs = {'encoding':'utf-8'} if sys.version_info.major == 3 else {}
+    kwargs = {'encoding':  'utf-8'} if sys.version_info.major == 3 else {}
     with open(path.join(this_directory, 'README.md'), **kwargs) as f:
         long_description = f.read()
     long_description_content_type = 'text/markdown'
@@ -166,6 +166,9 @@ if __name__ == '__main__':
         package_dir={'modules/python': 'modules/python',
                      'modules/python/models': 'modules/python/models',
                      'modules/python/helper': 'modules/python/helper'},
+        package_data={
+
+        },
         url='https://github.com/kishwarshafin/helen',
         author=__author__,
         author_email="kishwar.shafin@gmail.com",
@@ -186,7 +189,7 @@ if __name__ == '__main__':
         },
         zip_safe=False,
     )
-    print(os.environ.get('INSTALL_BINARIES'))
+
     if os.environ.get('INSTALL_BINARIES') is not None:
         print("\nCopying utility binaries to your path.")
         get_setuptools_marginpolish_dir()
