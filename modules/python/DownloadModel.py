@@ -12,7 +12,7 @@ def download_models(output_dir):
     sys.stderr.write("\n")
     sys.stderr.flush()
 
-    with open(output_dir+'model_description.csv') as f:
+    with open(output_dir+'/model_description.csv') as f:
         models = [line.rstrip() for line in f]
 
     for model in models:
