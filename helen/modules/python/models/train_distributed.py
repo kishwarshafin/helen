@@ -11,7 +11,7 @@ from helen.modules.python.models.dataloader import SequenceDataset
 from helen.modules.python.TextColor import TextColor
 from helen.modules.python.models.ModelHander import ModelHandler
 from helen.modules.python.models.test import test
-from helen.modules.python.Options import ImageSizeOptions,
+from helen.modules.python.Options import ImageSizeOptions, TrainOptions
 
 os.environ['PYTHONWARNINGS'] = 'ignore:semaphore_tracker:UserWarning'
 
