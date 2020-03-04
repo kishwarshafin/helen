@@ -73,7 +73,7 @@ class CMakeBuild(build_ext):
     def move_output(self, ext):
         source_path = os.path.abspath(self.build_temp + "/" + self.get_ext_filename(ext.name))
 
-        dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/build/"
+        dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/helen/build/"
         os.makedirs(dest_directory, exist_ok=True)
 
         dest_path = dest_directory + self.get_ext_filename(ext.name)
@@ -82,7 +82,7 @@ class CMakeBuild(build_ext):
         # move marginpolish source
         mp_source_path = os.path.abspath(self.build_temp + "/" + "marginpolish/src/marginpolish-build/marginPolish")
 
-        mp_dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/bin"
+        mp_dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/helen/bin"
 
         os.makedirs(mp_dest_directory, exist_ok=True)
 
