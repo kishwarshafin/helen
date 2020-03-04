@@ -97,7 +97,7 @@ helen download_models \
 --output_dir <path/to/mp_helen_models/>
 ```
 
-##### Ru MarginPolish
+##### Run MarginPolish
 You can generate images using MarginPolish by running:
 ```bash
 marginpolish reads_2_assembly.bam \
@@ -108,7 +108,7 @@ Assembly.fa \
 -f
 ```
 
-You can get the `params.json` from `path/to/marginpolish/params/`.
+You can find the models by downloading them.
 
 #### Step 4: Run HELEN
 Next, run `HELEN` to polish using a RNN.
