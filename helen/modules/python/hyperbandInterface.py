@@ -1,17 +1,14 @@
 from __future__ import print_function
-import argparse
 from hyperopt import hp
 from hyperopt.pyll.stochastic import sample
 import pickle
 import sys
-import os
-import time
 
 # Custom generator for our dataset
-from modules.python.models.hyperband import Hyperband
-from modules.python.TextColor import TextColor
-from modules.python.models.train import train
-from modules.python.Options import TrainOptions
+from helen.modules.python.models.hyperband import Hyperband
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.models.train import train
+from helen.modules.python.Options import TrainOptions
 """
 Tune hyper-parameters of a model using hyperband.
 Input:

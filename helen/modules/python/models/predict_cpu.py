@@ -8,11 +8,11 @@ import torch
 import torch.nn as nn
 import time
 from torch.utils.data import DataLoader
-from modules.python.models.dataloader_predict import SequenceDataset
-from modules.python.TextColor import TextColor
-from modules.python.models.ModelHander import ModelHandler
-from modules.python.Options import ImageSizeOptions, TrainOptions
-from modules.python.DataStore import DataStore
+from helen.modules.python.models.dataloader_predict import SequenceDataset
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.models.ModelHander import ModelHandler
+from helen.modules.python.Options import ImageSizeOptions, TrainOptions
+from helen.modules.python.DataStore import DataStore
 """
 This script implements the predict method that is used by the call consensus method.
 

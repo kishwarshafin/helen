@@ -1,10 +1,10 @@
 import argparse
 import sys
 import torch
-from version import __version__
-from modules.python.TextColor import TextColor
-from modules.python.TrainInterface import train_interface
-from modules.python.TestInterface import test_interface
+from helen.version import __version__
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.TrainInterface import train_interface
+from helen.modules.python.TestInterface import test_interface
 
 
 def add_train_arguments(parser):

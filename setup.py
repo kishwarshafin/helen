@@ -73,7 +73,7 @@ class CMakeBuild(build_ext):
     def move_output(self, ext):
         source_path = os.path.abspath(self.build_temp + "/" + self.get_ext_filename(ext.name))
 
-        dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/build/"
+        dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/helen/build/"
         os.makedirs(dest_directory, exist_ok=True)
 
         dest_path = dest_directory + self.get_ext_filename(ext.name)
@@ -82,7 +82,7 @@ class CMakeBuild(build_ext):
         # move marginpolish source
         mp_source_path = os.path.abspath(self.build_temp + "/" + "marginpolish/src/marginpolish-build/marginPolish")
 
-        mp_dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/bin"
+        mp_dest_directory = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))) + "/helen/bin"
 
         os.makedirs(mp_dest_directory, exist_ok=True)
 
@@ -108,7 +108,7 @@ def get_dependencies():
 
 def get_version():
     version = {}
-    with open("version.py") as fp:
+    with open("./helen/version.py") as fp:
         exec(fp.read(), version)
     return version['__version__']
 
@@ -136,13 +136,11 @@ if __name__ == '__main__':
     setup(
         name='helen',
         version=get_version(),
-        packages=['', 'modules/python', 'modules/python/models', 'modules/python/helper'],
-        package_dir={'modules/python': 'modules/python',
-                     'modules/python/models': 'modules/python/models',
-                     'modules/python/helper': 'modules/python/helper'},
-        package_data={
-
-        },
+        packages=['helen/', 'helen/modules/python', 'helen/modules/python/models', 'helen/modules/python/helper'],
+        package_dir={'helen/': 'helen/',
+                     'helen/modules/python': 'helen/modules/python',
+                     'helen/modules/python/models': 'helen/modules/python/models',
+                     'helen/modules/python/helper': 'helen/modules/python/helper'},
         url='https://github.com/kishwarshafin/helen',
         author=__author__,
         author_email="kishwar.shafin@gmail.com",
@@ -153,10 +151,10 @@ if __name__ == '__main__':
         install_requires=python_dependencies,
         entry_points={
             'console_scripts': [
-                '{0} = {0}:main'.format(__pkg_name__),
-                '{0}_train = {0}_train:main'.format(__pkg_name__),
-                'marginpolish = marginpolish:main'.format(__pkg_name__),
-                'marginPolish = marginpolish:main'.format(__pkg_name__)
+                '{0} = {0}.{0}:main'.format(__pkg_name__),
+                '{0}_train = {0}.{0}_train:main'.format(__pkg_name__),
+                'marginpolish = {0}.marginpolish:main'.format(__pkg_name__),
+                'marginPolish = {0}.marginpolish:main'.format(__pkg_name__)
             ]
         },
         ext_modules=[CMakeExtension('HELEN')],

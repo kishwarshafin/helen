@@ -22,9 +22,9 @@ option(INSTALL_DEPENDENCIES
         "Install project dependencies"
         ON)
 
-INCLUDE(modules/pybind11.cmake)
-INCLUDE(modules/marginpolish.cmake)
+INCLUDE(helen/modules/pybind11.cmake)
+INCLUDE(helen/modules/marginpolish.cmake)
 
 # pybind11 to interface
-pybind11_add_module(HELEN ${CMAKE_CURRENT_SOURCE_DIR}/modules/src/pybind_api.cpp)
+pybind11_add_module(HELEN helen/modules/src/pybind_api.cpp)
 

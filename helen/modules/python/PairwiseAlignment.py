@@ -1,6 +1,5 @@
 from build import HELEN
-from modules.python.TextColor import TextColor
-from modules.python.Options import StitchOptions
+from helen.modules.python.Options import StitchOptions
 from collections import defaultdict
 
 

@@ -2,11 +2,11 @@ import sys
 import torch
 
 # Custom generator for our dataset
-from modules.python.models.train import train
-from modules.python.models.train_distributed import train_distributed
-from modules.python.Options import TrainOptions
-from modules.python.FileManager import FileManager
-from modules.python.TextColor import TextColor
+from helen.modules.python.models.train import train
+from helen.modules.python.models.train_distributed import train_distributed
+from helen.modules.python.Options import TrainOptions
+from helen.modules.python.FileManager import FileManager
+from helen.modules.python.TextColor import TextColor
 
 """
 The train module of HELEN trains a deep neural network to perform a multi-task classification. It takes a set of

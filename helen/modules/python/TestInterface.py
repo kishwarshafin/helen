@@ -3,13 +3,11 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-import torch
-import torch.nn.parallel
-from modules.python.models.test_debug import test
-from modules.python.models.ModelHander import ModelHandler
-from modules.python.TextColor import TextColor
-from modules.python.FileManager import FileManager
-from modules.python.Options import ImageSizeOptions
+from helen.modules.python.models.test_debug import test
+from helen.modules.python.models.ModelHander import ModelHandler
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.FileManager import FileManager
+from helen.modules.python.Options import ImageSizeOptions
 """
 FREEZE THIS BRANCH TO HAVE 1 WINDOW!!
 Train a model and save the model that performs best.

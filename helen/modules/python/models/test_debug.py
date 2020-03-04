@@ -5,9 +5,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 from tqdm import tqdm
-from modules.python.models.dataloader_debug import SequenceDataset
-from modules.python.TextColor import TextColor
-from modules.python.Options import ImageSizeOptions, TrainOptions
+from helen.modules.python.models.dataloader_debug import SequenceDataset
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.Options import ImageSizeOptions, TrainOptions
 """
 WARNING: THIS IS A DEBUGGING TOOL INTENDED TO BE USED BY THE DEVELOPERS ONLY.
 """

@@ -1,10 +1,10 @@
 import sys
 import os
 import torch
-from modules.python.TextColor import TextColor
-from modules.python.models.predict_cpu import predict_cpu
-from modules.python.models.predict_gpu import predict_gpu
-from modules.python.FileManager import FileManager
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.models.predict_cpu import predict_cpu
+from helen.modules.python.models.predict_gpu import predict_gpu
+from helen.modules.python.FileManager import FileManager
 from os.path import isfile, join
 from os import listdir
 """

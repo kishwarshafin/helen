@@ -1,4 +1,4 @@
-from modules.python.PairwiseAlignment import PairWiseAlignment
+from helen.modules import PairWiseAlignment
 
 a = PairWiseAlignment()
 ref = "TAGTATATACACTATACTATATACTAGTGTATTATACTAGTATATACACTATACTATATACTAGTGTATTATACTAGTATATACACTATACTATATACTAGTGTATATACTAGTATATAC"

@@ -4,10 +4,10 @@ import concurrent.futures
 import numpy as np
 from collections import defaultdict
 import operator
-from modules.python.TextColor import TextColor
-from modules.python.Options import StitchOptions
-from modules.python.FileManager import FileManager
-from build import HELEN
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.Options import StitchOptions
+from helen.modules.python.FileManager import FileManager
+from helen.build import HELEN
 import re
 
 
