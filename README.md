@@ -74,6 +74,25 @@ source ~/.bashrc
 marginpolish --help
 helen --help
 ```
+
+#### Method 3: Use docker image
+
+##### CPU based docker:
+```bash
+docker run --rm -it --ipc=host kishwars/helen:latest helen --help
+docker run --rm -it --ipc=host kishwars/helen:latest marginpolish --help
+
+docker run --rm -it --ipc=host kishwars/helen:latest helen torch_stat
+```
+
+##### GPU based docker:
+```bash
+sudo apt-get install -y nvidia-docker2
+
+nvidia-docker run -it --ipc=host helen:latest helen torch_stat
+nvidia-docker run -it --ipc=host helen:latest helen --help
+nvidia-docker run -it --ipc=host helen:latest marginpolish --help
+```
 ## Usage
 `MarginPolish` requires a draft assembly and a mapping of reads to the draft assembly. We commend using `Shasta` as the initial assembler and `MiniMap2` for the mapping.
 
