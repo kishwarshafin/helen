@@ -1,12 +1,12 @@
 import argparse
 import sys
 import torch
-from version import __version__
-from modules.python.TextColor import TextColor
-from modules.python.PolishInterface import polish_genome
-from modules.python.CallConsensusInterface import call_consensus
-from modules.python.StitchInterface import perform_stitch
-from modules.python.DownloadModel import download_models
+from helen.version import __version__
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.PolishInterface import polish_genome
+from helen.modules.python.CallConsensusInterface import call_consensus
+from helen.modules.python.StitchInterface import perform_stitch
+from helen.modules.python.DownloadModel import download_models
 
 
 def add_polish_arguments(parser):

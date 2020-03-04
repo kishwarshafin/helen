@@ -7,11 +7,11 @@ import torch.nn as nn
 import torch.multiprocessing as mp
 
 from torch.utils.data import DataLoader
-from modules.python.models.dataloader import SequenceDataset
-from modules.python.TextColor import TextColor
-from modules.python.models.ModelHander import ModelHandler
-from modules.python.models.test import test
-from modules.python.Options import ImageSizeOptions, TrainOptions
+from helen.modules.python.models.dataloader import SequenceDataset
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.models.ModelHander import ModelHandler
+from helen.modules.python.models.test import test
+from helen.modules.python.Options import ImageSizeOptions,
 
 os.environ['PYTHONWARNINGS'] = 'ignore:semaphore_tracker:UserWarning'
 

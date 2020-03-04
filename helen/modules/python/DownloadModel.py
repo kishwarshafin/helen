@@ -1,8 +1,8 @@
 import wget
 import sys
 import os
-from modules.python.FileManager import FileManager
-from modules.python.TextColor import TextColor
+from helen.modules.python.FileManager import FileManager
+from helen.modules.python.TextColor import TextColor
 
 
 def download_models(output_dir):

@@ -5,9 +5,9 @@ import torchnet.meter as meter
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
-from modules.python.models.dataloader import SequenceDataset
-from modules.python.TextColor import TextColor
-from modules.python.Options import ImageSizeOptions, TrainOptions
+from helen.modules.python.models.dataloader import SequenceDataset
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.Options import ImageSizeOptions, TrainOptions
 """
 This script implements the test method.
 The test method evaluates a trained model on a given test dataset and report various accuracy matrices.

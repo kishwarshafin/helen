@@ -3,9 +3,9 @@ import sys
 import os
 from os.path import isfile, join
 from os import listdir
-from modules.python.Stitch import Stitch
-from modules.python.TextColor import TextColor
-from modules.python.FileManager import FileManager
+from helen.modules.python.Stitch import Stitch
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.FileManager import FileManager
 """
 The stitch module generates a consensus sequence from all the predictions we generated from call_consensus.py.
 

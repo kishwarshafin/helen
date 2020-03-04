@@ -3,9 +3,9 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import sys
-from modules.python.TextColor import TextColor
-from modules.python.Options import ImageSizeOptions
-from modules.python.FileManager import FileManager
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.Options import ImageSizeOptions
+from helen.modules.python.FileManager import FileManager
 
 
 class SequenceDataset(Dataset):

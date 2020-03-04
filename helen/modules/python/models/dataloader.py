@@ -2,12 +2,8 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import sys
-import numpy as np
-from modules.python.TextColor import TextColor
-from modules.python.FileManager import FileManager
-"""
-WARNING: THIS IS A DEBUGGING TOOL INTENDED TO BE USED BY THE DEVELOPERS ONLY.
-"""
+from helen.modules.python.TextColor import TextColor
+from helen.modules.python.FileManager import FileManager
 
 
 class SequenceDataset(Dataset):
@@ -53,22 +49,18 @@ class SequenceDataset(Dataset):
         This method returns a single object. Dataloader uses this method to load images and then minibatches the loaded
         images
         :param index: Index indicating which image from all_images to be loaded
-        :return: image and their auxiliary information
+        :return:
         """
+        # get the file path and the name of the image
         hdf5_filepath, image_name = self.all_images[index]
 
-        # load all the information we need to save in the prediction hdf5
+        # load the image and the label
         with h5py.File(hdf5_filepath, 'r') as hdf5_file:
-            contig = np.array2string(hdf5_file['images'][image_name]['contig'][()][0].astype(np.str)).replace("'", '')
-            contig_start = hdf5_file['images'][image_name]['contig_start'][()][0].astype(np.int)
-            contig_end = hdf5_file['images'][image_name]['contig_end'][()][0].astype(np.int)
-            chunk_id = hdf5_file['images'][image_name]['feature_chunk_idx'][()][0].astype(np.int)
-            image = hdf5_file['images'][image_name]['image'][()].astype(np.uint8)
-            position = hdf5_file['images'][image_name]['position'][()].astype(np.int)
+            image = hdf5_file['images'][image_name]['image'][()]
             label_base = hdf5_file['images'][image_name]['label_base'][()]
             label_run_length = hdf5_file['images'][image_name]['label_run_length'][()]
 
-        return image, label_base, label_run_length, position, contig, contig_start, contig_end, chunk_id, hdf5_filepath
+        return image, label_base, label_run_length
 
     def __len__(self):
         """

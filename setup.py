@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-from setuptools import setup, Extension
+from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 import subprocess
@@ -108,7 +108,7 @@ def get_dependencies():
 
 def get_version():
     version = {}
-    with open("version.py") as fp:
+    with open("./helen/version.py") as fp:
         exec(fp.read(), version)
     return version['__version__']
 
@@ -136,13 +136,7 @@ if __name__ == '__main__':
     setup(
         name='helen',
         version=get_version(),
-        packages=['', 'modules/python', 'modules/python/models', 'modules/python/helper'],
-        package_dir={'modules/python': 'modules/python',
-                     'modules/python/models': 'modules/python/models',
-                     'modules/python/helper': 'modules/python/helper'},
-        package_data={
-
-        },
+        packages=find_packages(),
         url='https://github.com/kishwarshafin/helen',
         author=__author__,
         author_email="kishwar.shafin@gmail.com",
@@ -153,10 +147,10 @@ if __name__ == '__main__':
         install_requires=python_dependencies,
         entry_points={
             'console_scripts': [
-                '{0} = {0}:main'.format(__pkg_name__),
-                '{0}_train = {0}_train:main'.format(__pkg_name__),
-                'marginpolish = marginpolish:main'.format(__pkg_name__),
-                'marginPolish = marginpolish:main'.format(__pkg_name__)
+                '{0} = {0}.{0}:main'.format(__pkg_name__),
+                '{0}_train = {0}.{0}_train:main'.format(__pkg_name__),
+                'marginpolish = {0}.marginpolish:main'.format(__pkg_name__),
+                'marginPolish = {0}.marginpolish:main'.format(__pkg_name__)
             ]
         },
         ext_modules=[CMakeExtension('HELEN')],

@@ -1,6 +1,6 @@
 import torch
 import os
-from modules.python.models.TransducerModel import TransducerGRU
+from helen.modules.python.models.TransducerModel import TransducerGRU
 
 
 class ModelHandler:
