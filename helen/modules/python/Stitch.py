@@ -7,7 +7,7 @@ import operator
 from helen.modules.python.TextColor import TextColor
 from helen.modules.python.Options import StitchOptions
 from helen.modules.python.FileManager import FileManager
-from build import HELEN
+from helen.build import HELEN
 import re
 
 

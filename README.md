@@ -56,8 +56,8 @@ Install  prerequisites and the install `MarginPolish-HELEN` using pip:
 ```bash
 python3 -m pip install helen --user
 
-python3 -m marginpolish --help
-python3 -m helen --help
+python3 -m helen.helen --help
+python3 -m helen.marginpolish --help
 ```
 
 Update the installed version:

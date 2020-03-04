@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-from setuptools import find_packages, setup, Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 import subprocess
@@ -136,7 +136,11 @@ if __name__ == '__main__':
     setup(
         name='helen',
         version=get_version(),
-        packages=find_packages(),
+        packages=['helen/', 'helen/modules/python', 'helen/modules/python/models', 'helen/modules/python/helper'],
+        package_dir={'helen/': 'helen/',
+                     'helen/modules/python': 'helen/modules/python',
+                     'helen/modules/python/models': 'helen/modules/python/models',
+                     'helen/modules/python/helper': 'helen/modules/python/helper'},
         url='https://github.com/kishwarshafin/helen',
         author=__author__,
         author_email="kishwar.shafin@gmail.com",

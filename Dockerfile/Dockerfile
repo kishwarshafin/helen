@@ -1,20 +1,14 @@
-FROM ubuntu:18.04
+FROM pytorch/pytorch:1.4-cuda10.1-cudnn7-devel
 MAINTAINER Kishwar Shafin, kishwar.shafin@gmail.com
 
 # update and install dependencies
 RUN apt-get update && \
-    apt-get -y install time git make wget autoconf gcc g++ zlib1g-dev libcurl4-openssl-dev libbz2-dev && \
-    apt-get -y install python3 python3-dev python3-pip && \
+    apt-get -y install git cmake make gcc g++ autoconf bzip2 lzma-dev zlib1g-dev \
+    apt-get -y install libcurl4-openssl-dev libpthread-stubs0-dev libbz2-dev liblzma-dev libhdf5-dev \
+    apt-get -y install python3-pip python3-virtualenv virtualenv && \
     apt-get clean && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# install cmake
-WORKDIR /tmp
-RUN mkdir /opt/cmake && \
-    wget https://github.com/Kitware/CMake/releases/download/v3.14.4/cmake-3.14.4-Linux-x86_64.sh && \
-    sh /tmp/cmake-3.14.4-Linux-x86_64.sh --prefix=/opt/cmake --skip-license && \
-    ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # get HELEN
 WORKDIR /opt
@@ -22,15 +16,8 @@ RUN git clone https://github.com/kishwarshafin/helen.git && \
     cd /opt/helen && \
     git fetch && \
     git submodule update --init && \
-    git pull origin master
-
-WORKDIR /opt/helen/build
-RUN cmake .. -Wno-deprecated && make
-
-RUN python3 -m pip install h5py tqdm numpy pyyaml
-# install torch
-RUN python3 -m pip install https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
-RUN python3 -m pip install https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
+    git pull origin master && \
+    make install
 
 WORKDIR /opt/helen
 
