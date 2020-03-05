@@ -1,0 +1,49 @@
+docker run --rm -it --ipc=host kishwars/helen:latest helen --help
+
+/nvme_data/program_outputs/marginpolish/docker_test/
+
+# download model
+mkdir model_out
+
+docker run \
+-v "/nvme_data/program_outputs/marginpolish/docker_test/":"/data/" \
+--rm -it --ipc=host --user=`id -u`:`id -g` \
+kishwars/helen:latest \
+helen download_models \
+--output_dir /data/model_out/
+
+docker run \
+-v "/nvme_data/program_outputs/marginpolish/docker_test/":"/data/" \
+--rm -it --ipc=host --user=`id -u`:`id -g` \
+kishwars/helen:latest \
+helen download_models \
+--output_dir /data/model_out/
+
+# run marginpolish
+mkdir marginpolish_output
+
+docker run \
+-v "/nvme_data/program_outputs/marginpolish/docker_test/":"/data/" \
+--rm -it --ipc=host --user=`id -u`:`id -g` \
+kishwars/helen:latest \
+marginpolish \
+/data/Bacterial_reads_to_shasta_validate_StaphAur.bam \
+/data/Bacterial_shasta_assembly_validate_StaphAur.fasta \
+/data/model_out/MP_r941_guppy344_microbial.json  \
+-t 38 \
+-o /data/marginpolish_output/mp_images \
+-f
+
+# run HELEN
+docker run \
+-v "/nvme_data/program_outputs/marginpolish/docker_test/":"/data/" \
+--rm -it --ipc=host --user=`id -u`:`id -g` \
+kishwars/helen:latest \
+helen polish \
+--image_dir /data/marginpolish_output/ \
+--model_path /data/model_out/HELEN_r941_guppy344_microbial.pkl \
+--threads 38 \
+--output_dir /data/helen_polished/
+
+
+sudo apt-get install cmake wget bzip2 gcc-4.9 g++-4.9 zlib1g-dev libncurses5-dev python3-all-dev libhdf5-dev libatlas-base-dev libopenblas-base libopenblas-dev libbz2-dev liblzma-dev libffi-dev make python-virtualenv

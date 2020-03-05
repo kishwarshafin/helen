@@ -23,6 +23,9 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 * We tested GPU usage on `Amazon Web Services (AWS)` and `Google Cloud Platform (GCP)` to ensure scalability.
 * Open source [(MIT License)](LICENSE).
 
+## Walkthrough
+* [Docker based installation walkthrough](./docs/walkthrough_docker.md).
+* [Local installation walkthrough](./docs/walkthrough_local.md).
 
 ## Installation
 `MarginPolish-HELEN` is supported on  <b>`Ubuntu 16.10/18.04`</b> or any other Linux-based system.
@@ -79,19 +82,27 @@ helen --help
 
 ##### CPU based docker:
 ```bash
+# SEE CONFIGURATION
 docker run --rm -it --ipc=host kishwars/helen:latest helen --help
 docker run --rm -it --ipc=host kishwars/helen:latest marginpolish --help
 
-docker run --rm -it --ipc=host kishwars/helen:latest helen torch_stat
+docker run -it --ipc=host --user=`id -u`:`id -g` --cpus="16" \
+-v </directory/with/inputs_outputs>:/data kishwars/helen:latest \
+helen --help
 ```
 
 ##### GPU based docker:
 ```bash
 sudo apt-get install -y nvidia-docker2
+# SEE CONFIGURATION
+nvidia-docker run -it --ipc=host kishwars/helen:latest helen torch_stat
+nvidia-docker run -it --ipc=host kishwars/helen:latest helen --help
+nvidia-docker run -it --ipc=host kishwars/helen:latest marginpolish --help
 
-nvidia-docker run -it --ipc=host helen:latest helen torch_stat
-nvidia-docker run -it --ipc=host helen:latest helen --help
-nvidia-docker run -it --ipc=host helen:latest marginpolish --help
+# RUN HELEN
+nvidia-docker run -it --ipc=host --user=`id -u`:`id -g` --cpus="16" \
+-v </directory/with/inputs_outputs>:/data kishwars/helen:latest \
+helen --help
 ```
 ## Usage
 `MarginPolish` requires a draft assembly and a mapping of reads to the draft assembly. We commend using `Shasta` as the initial assembler and `MiniMap2` for the mapping.
