@@ -7,7 +7,7 @@ One of the issues with `MarginPolish` was disregarding the run-length count duri
 <img src="../img/bug.png" alt="BUG">
 </p>
 
-The newest version of `MarginPolish` uses the RLE counts during alignment which ensures proper alignment in Run-length encoded mode. Following is another repeat region where we don't see the jitter anymore due to the fix in the alignment parameters. We have extensively tested the applicability of the new alignment model and the results are satisfactory.
+The newest version of `MarginPolish` uses the RLE counts during alignment which ensures proper alignment in Run-length encoded mode. Following is another repeat region where we don't see the jitter anymore after the fix in the alignment parameters. We have extensively tested the applicability of the new alignment model and the results are satisfactory.
 <p align="center">
 <img src="../img/fixed.png" alt="BUG FIXED">
 </p>
@@ -21,14 +21,14 @@ The new version of `HELEN` uses `ONNX-RUNTIME` to provide accelerated inference 
 
 #### 3. Distributed GPU inference
 <p align="center">
-<img src="../img/pytorch_logo.png" alt="PYTORCH_LOGO" height="80px">
+<img src="../img/Pytorch_logo.png" alt="PYTORCH_LOGO" height="80px">
 </p>
 
-If you own a multi-GPU computer, `HELEN` can utilize all of the available GPUs by default. On a 8-GPU machine, a human-scale genome takes `~50mins` for inference. It was `~4 hours` in our initial release.
+If you own a multi-GPU system, `HELEN` can utilize all of the available GPUs by default. On a 8-GPU machine, a human-scale genome takes `~40mins` for inference. It was `~4 hours` in our initial release.
 
 #### 4. Simplified installation and user-experience
 <p align="center">
-<img src="../img/Pip_logo.svg" alt="PIP_LOGO" height="100px">
+<img src="../img/pip_logo.svg" alt="PIP_LOGO" height="100px">
 </p>
 
 We have improved the installation methods for `MarginPolish-HELEN`. Now the installation of `HELEN` also installs `MarginPolish`. It is available through `pip` and other methods. It is as simple as:
@@ -43,3 +43,9 @@ marginpolish --help
 ```
 
 #### 5. MarginPolish-HELEN outperforms Racon-Medaka.
+We polished the latest Shasta assembly of CHM13 (rel4) and saw significant improvement in performance compared to the existing polishing tool.
+<p align="center">
+<img src="../img/HELEN_release_error_rate.png" alt="comparison">
+</p>
+
+All assmblies are available [here](https://console.cloud.google.com/storage/browser/kishwar-helen/polished_genomes/CHM13/rel4_guppy344/).
