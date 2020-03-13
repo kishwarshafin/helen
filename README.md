@@ -29,7 +29,7 @@ Computational Genomics Lab (CGL), University of California, Santa Cruz.
 
 ## Installation
 `MarginPolish-HELEN` is supported on  <b>`Ubuntu 16.10/18.04`</b> or any other Linux-based system.
-
+Â
 #### Install prerequisites
 Before you follow any of the methods, make sure you install all the dependencies:
 ```bash
@@ -151,10 +151,10 @@ helen polish \
 --threads <num_of_threads> \
 --output_dir </path/to/output_dir> \
 --output_prefix <output_filename.fa> \
---gpu
+--gpu_mode
 ```
 
-If you are using `CPUs` then remove the `--gpu` argument.
+If you are using `CPUs` then remove the `--gpu_mode` argument.
 
 ## Help
 Please open a github issue if you face any difficulties.
