@@ -17,10 +17,9 @@ RUN git clone https://github.com/kishwarshafin/helen.git && \
     git fetch && \
     git submodule update --init && \
     git pull origin master && \
-    python3 -m pip uninstall numpy && \
+    python3 -m pip uninstall -y numpy && \
     python3 -m pip install numpy && \
     python3 -m pip install .
 
 # setup entrypoint
 WORKDIR /data
-ENTRYPOINT ["sh"]
