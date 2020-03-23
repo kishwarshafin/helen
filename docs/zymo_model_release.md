@@ -1,6 +1,20 @@
 ## Assembly and polishing of Zymo microbial community.
 In this experiment, we show that `MarginPolish-HELEN` can effectively polish microbial genomes and achieve higher accuracy than existing `Racon-Medaka` pipeline. We make sure that all the results are **reproducible** and we trained the probabilistic models with properly **held-out** sets to ensure generalizability of the models. Most of the reported models of `Medaka` do not report train-validation split which makes it difficult to evaluate the pipeline to ensure generalizability.
 
+We are releasing four `MP-HELEN` models to polish Microbial genomes:
+* HELEN_r941_guppy344_microbial
+* HELEN_r941_bonito_microbial
+* HELEN_r10_3_guppy_microbial
+* MP_r941_guppy344_microbial
+* MP_r941_bonito_microbial
+* MP_r10_3_guppy_microbial
+
+You can download the models by running:
+```bash
+helen download_models \
+--output_dir </Path/to/output_dir>
+```
+
 ### Experimental Setup
 To evaluate the pipeline we used three datasets which are publicly available:
 * [R10.3 Zymo dataset basecalled with Guppy](https://storage.googleapis.com/kishwar-helen/polished_genomes/Zymo_experiment/Zymo_reads/R10.3_Zymo_Guppy_reads.fastq)
