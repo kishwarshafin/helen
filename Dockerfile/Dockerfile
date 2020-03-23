@@ -19,7 +19,6 @@ RUN git clone https://github.com/kishwarshafin/helen.git && \
     git pull origin master && \
     python3 -m pip install .
 
-WORKDIR /opt/helen
-
 # setup entrypoint
 WORKDIR /data
+ENTRYPOINT ["sh"]
