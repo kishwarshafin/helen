@@ -101,6 +101,6 @@ def perform_stitch(input_directory, output_path, output_prefix, threads):
                          + ", POLISHED SEQUENCE LENGTH: " + str(len(consensus_sequence)) + ".\n" + TextColor.END)
 
         # if theres a sequence then write it to the file
-        if consensus_sequence is not None:
+        if consensus_sequence is not None and len(consensus_sequence) > 0:
             consensus_fasta_file.write('>' + contig + "\n")
             consensus_fasta_file.write(consensus_sequence+"\n")
