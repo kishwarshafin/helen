@@ -84,7 +84,7 @@ We used the model reported on [Bonito's gihub page](https://nanoporetech.box.com
 
 We used `r10_min_high_g303` to run `Medaka`. Although we have a lower coverage for this dataset it provides the best polished assemblies. We think higher coverage of this dataset will help us achieve mean Q50.
 
-### K-mer accuracy comparison
+### Homopolymer accuracy comparison
 <p align="center">
 <img src="./zymo_img/Kmer_Zymo_R941_Guppy_3.4.4.png">
 </p>
@@ -95,7 +95,7 @@ We used `r10_min_high_g303` to run `Medaka`. Although we have a lower coverage f
 <img src="./zymo_img/Kmer_Zymo_R10.3_Guppy.png">
 </p>
 
-The K-mer accuracy plot shows that the polishing improves the overall accuracy of each K-mer category from the draft assembly. The R9.4.1 Guppy 3.4.4 and R10.3 Guppy models do not report any hold-out set, so the comparison is difficult. We see that with Guppy R10.3 the long run-length accuracy of `MarginPolish-HELEN` is higher than `Racon-Medaka`.
+The homopolymer accuracy plot shows that the polishing improves the overall accuracy of each homopolymer category from the draft assembly. The R9.4.1 Guppy 3.4.4 and R10.3 Guppy models do not report any hold-out set, so the comparison is difficult. We see that with Guppy R10.3 the long run-length accuracy of `MarginPolish-HELEN` is higher than `Racon-Medaka`.
 
 ### Data availability
 The Shasta assemblies:
