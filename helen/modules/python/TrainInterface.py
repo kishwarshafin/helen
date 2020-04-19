@@ -143,7 +143,6 @@ def train_interface(train_dir, test_dir, gpu_mode, caller_per_gpu, device_ids, e
     tm = TrainModule(train_dir,
                      test_dir,
                      gpu_mode,
-                     caller_per_gpu,
                      device_ids,
                      epoch_size,
                      batch_size,
