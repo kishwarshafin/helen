@@ -11,7 +11,7 @@ class StitchOptions(object):
 
 
 class ImageSizeOptions(object):
-    IMAGE_HEIGHT = 90
+    IMAGE_HEIGHT = 180
     IMAGE_CHANNELS = 1
     SEQ_LENGTH = 1000
     SEQ_OVERLAP = 200

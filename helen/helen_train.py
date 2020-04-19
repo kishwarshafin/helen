@@ -75,6 +75,14 @@ def add_train_arguments(parser):
              "If none then it will use all available devices."
     )
     parser.add_argument(
+        "-per_gpu",
+        "--callers_per_gpu",
+        type=int,
+        required=False,
+        default=1,
+        help="Number of callers to initialize per GPU, on a 11GB GPU, you can go up to 10. Default is 4."
+    )
+    parser.add_argument(
         "--num_workers",
         type=int,
         required=False,
@@ -231,6 +239,7 @@ def main():
         train_interface(FLAGS.train_image_dir,
                         FLAGS.test_image_dir,
                         FLAGS.gpu_mode,
+                        FLAGS.callers_per_gpu,
                         FLAGS.device_ids,
                         FLAGS.epoch_size,
                         FLAGS.batch_size,
