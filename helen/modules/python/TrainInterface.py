@@ -99,8 +99,6 @@ class TrainModule:
         device_ids = multiplied_device_ids
 
         total_callers = len(device_ids)
-        print(device_ids)
-        exit()
 
         # train a model
         train_distributed(self.train_file,
