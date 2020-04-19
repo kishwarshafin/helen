@@ -65,7 +65,6 @@ def add_train_arguments(parser):
         help="If set then PyTorch will use GPUs for inference. CUDA required."
     )
     parser.add_argument(
-        "-d_ids",
         "--device_ids",
         type=str,
         required=False,
@@ -75,7 +74,6 @@ def add_train_arguments(parser):
              "If none then it will use all available devices."
     )
     parser.add_argument(
-        "-per_gpu",
         "--callers_per_gpu",
         type=int,
         required=False,

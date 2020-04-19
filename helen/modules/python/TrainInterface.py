@@ -55,7 +55,7 @@ class TrainModule:
               self.stats_dir,
               not_hyperband=True)
 
-    def train_model_gpu(self, caller_per_gpu):
+    def train_model_gpu(self, callers_per_gpu):
         """
         DO DISTRIBUTED GPU INFERENCE. THIS MODE WILL ENABLE ONE MODEL PER GPU
         """
@@ -122,7 +122,7 @@ class TrainModule:
                           train_mode=True)
 
 
-def train_interface(train_dir, test_dir, gpu_mode, caller_per_gpu, device_ids, epoch_size, batch_size, num_workers, output_dir,
+def train_interface(train_dir, test_dir, gpu_mode, callers_per_gpu, device_ids, epoch_size, batch_size, num_workers, output_dir,
                     retrain_model, retrain_model_path):
     """
     Interface to perform training
@@ -130,7 +130,7 @@ def train_interface(train_dir, test_dir, gpu_mode, caller_per_gpu, device_ids, e
     :param test_dir: Path to directory containing training images
     :param gpu_mode: GPU mode
     :param device_ids: Device IDs of devices to use for GPU inference
-    :param caller_per_gpu: Number of train instances per gpu
+    :param callers_per_gpu: Number of train instances per gpu
     :param epoch_size: Number of epochs to train on
     :param batch_size: Batch size
     :param num_workers: Number of workers for data loading
@@ -153,6 +153,6 @@ def train_interface(train_dir, test_dir, gpu_mode, caller_per_gpu, device_ids, e
                      stats_dir)
 
     if gpu_mode:
-        tm.train_model_gpu(caller_per_gpu)
+        tm.train_model_gpu(callers_per_gpu)
     else:
         tm.train_model()
