@@ -310,6 +310,7 @@ def train_distributed(train_file, test_file, batch_size, epochs, gpu_mode, num_w
     args = (train_file, test_file, batch_size, epochs, gpu_mode, num_workers, retrain_model,
             retrain_model_path, gru_layers, hidden_size, learning_rate, weight_decay, model_dir,
             stats_dir, total_callers, train_mode)
+
     mp.spawn(setup,
              args=(device_ids, args),
              nprocs=len(device_ids),

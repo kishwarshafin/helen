@@ -98,7 +98,7 @@ class TrainModule:
                 multiplied_device_ids.append(device_id)
         device_ids = multiplied_device_ids
 
-        total_callers = len(device_ids)
+        callers = len(device_ids)
 
         # train a model
         train_distributed(self.train_file,
