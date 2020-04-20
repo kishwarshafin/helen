@@ -81,7 +81,7 @@ class DataStore(object):
         self._meta.update(meta)
 
     def write_prediction(self, contig, contig_start, contig_end, chunk_id, position,
-                         predicted_bases, predicted_rles, filename):
+                         predicted_bases, predicted_rles, haplotype, filename):
         """
         This is the method we use to write the data to the HDF file. This method is called by each image we
         generate.
@@ -92,13 +92,13 @@ class DataStore(object):
         :param position: Array of values indicating genomic positions.
         :param predicted_bases: Array of values indicating predicted bases for each genomic position.
         :param predicted_rles: Array of values indicating predicted run-length for each genomic position.
+        :param haplotype: Haplotype tag of the chunk
         :param filename: Name of the file the image belongs to (used for debugging mostly)
         :return:
         """
         # get a chunk name prefix and suffix
-        chunk_name_prefix = str(contig) + "-" + str(contig_start.item()) + "-" + str(contig_end.item())
+        chunk_name_prefix = str(contig) + "-" + str(contig_start.item()) + "-" + str(contig_end.item()) + "-" + str(haplotype.item())
         chunk_name_suffix = str(chunk_id.item())
-
         name = contig + chunk_name_prefix + chunk_name_suffix
 
         if 'predictions' not in self.meta:
@@ -118,6 +118,8 @@ class DataStore(object):
                 = contig_start.item()
             self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'contig_end')] \
                 = contig_end.item()
+            self.file_handler['{}/{}/{}/{}'.format(self._prediction_path_, contig, chunk_name_prefix, 'haplotype')] \
+                = haplotype.item()
 
         # then we save the image predictions at the right place.
         if name not in self.meta['predictions']:

@@ -85,7 +85,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
         batch_iterator = 0
 
         # the dataloader loop, iterates in minibatches. tqdm is the progress logger.
-        for contig, contig_start, contig_end, chunk_id, images, position, filename in test_loader:
+        for contig, contig_start, contig_end, chunk_id, images, position, haplotype, filename in test_loader:
             start_time = time.time()
             # the images are usually in uint8, convert them to FloatTensor
             images = images.type(torch.FloatTensor)
@@ -167,7 +167,7 @@ def predict(test_file, output_filename, model_path, batch_size, num_workers, ran
             for i in range(images.size(0)):
                 prediction_data_file.write_prediction(contig[i], contig_start[i], contig_end[i], chunk_id[i],
                                                       position[i], predicted_base_labels[i], predicted_rle_labels[i],
-                                                      filename[i])
+                                                      haplotype[i], filename[i])
 
 
 def cleanup():

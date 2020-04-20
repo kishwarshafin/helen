@@ -206,7 +206,7 @@ class Stitch:
             with h5py.File(file_name, 'r') as hdf5_file:
                 if 'predictions' in hdf5_file:
                     smaller_chunks = set(hdf5_file['predictions'][contig][chunk_name].keys()) - \
-                                     {'contig_start', 'contig_end'}
+                                     {'contig_start', 'contig_end', 'haplotype'}
 
             smaller_chunks = sorted(smaller_chunks)
             all_positions = set()

@@ -1,6 +1,7 @@
 import h5py
 import sys
 import os
+import re
 from os.path import isfile, join
 from os import listdir
 from helen.modules.python.Stitch import Stitch
@@ -37,6 +38,16 @@ def get_file_paths_from_directory(directory_path):
     return file_paths
 
 
+def natural_key(string_):
+    """
+    Sorts chr names by chr1,chr2,chr3 instead of chr1,chr10...
+    :param string_:
+    :return:
+    See http://www.codinghorror.com/blog/archives/001018.html
+    """
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
+
+
 def perform_stitch(input_directory, output_path, output_prefix, threads):
     """
     This method gathers all contigs and calls the stitch module for each contig.
@@ -63,15 +74,19 @@ def perform_stitch(input_directory, output_path, output_prefix, threads):
                                  + TextColor.END)
     # convert set to a list
     all_contigs = list(all_contigs)
+    all_contigs = sorted(all_contigs, key=natural_key)
 
     # get output directory
     output_dir = FileManager.handle_output_directory(output_path)
 
     # open an output fasta file
     # we should really use a fasta handler for this, I don't like this.
-    output_filename = os.path.join(output_dir, output_prefix + '.fa')
-    consensus_fasta_file = open(output_filename, 'w')
-    sys.stderr.write(TextColor.GREEN + "INFO: OUTPUT FILE: " + output_filename + "\n" + TextColor.END)
+    output_filename_hap1 = os.path.join(output_dir, output_prefix + '_hap1.fa')
+    output_filename_hap2 = os.path.join(output_dir, output_prefix + '_hap2.fa')
+    consensus_fasta_file_hap1 = open(output_filename_hap1, 'w')
+    consensus_fasta_file_hap2 = open(output_filename_hap2, 'w')
+
+    sys.stderr.write(TextColor.GREEN + "INFO: OUTPUT FILE: " + output_filename_hap1 + " " + output_filename_hap2 + "\n" + TextColor.END)
 
     # for each contig
     for i, contig in enumerate(sorted(all_contigs)):
@@ -80,7 +95,8 @@ def perform_stitch(input_directory, output_path, output_prefix, threads):
                          + TextColor.END)
 
         # get all the chunk keys
-        chunk_name_tuple = list()
+        chunk_name_tuple_h1 = list()
+        chunk_name_tuple_h2 = list()
         for prediction_file in all_prediction_files:
             with h5py.File(prediction_file, 'r') as hdf5_file:
                 # check if the contig is contained in this file
@@ -92,15 +108,27 @@ def perform_stitch(input_directory, output_path, output_prefix, threads):
                 for chunk_key in chunk_keys:
                     chunk_contig_start = hdf5_file['predictions'][contig][chunk_key]['contig_start'][()]
                     chunk_contig_end = hdf5_file['predictions'][contig][chunk_key]['contig_end'][()]
-                    chunk_name_tuple.append((prediction_file, chunk_key, chunk_contig_start, chunk_contig_end))
+                    haplotype = hdf5_file['predictions'][contig][chunk_key]['haplotype'][()]
+                    if int(haplotype) == 1:
+                        chunk_name_tuple_h1.append((prediction_file, chunk_key, chunk_contig_start, chunk_contig_end))
+                    else:
+                        chunk_name_tuple_h2.append((prediction_file, chunk_key, chunk_contig_start, chunk_contig_end))
+
 
         # call stitch to generate a sequence for this contig
         stich_object = Stitch()
-        consensus_sequence = stich_object.create_consensus_sequence(contig, chunk_name_tuple, threads)
-        sys.stderr.write(TextColor.BLUE + "INFO: " + str(log_prefix) + " FINISHED PROCESSING " + contig
-                         + ", POLISHED SEQUENCE LENGTH: " + str(len(consensus_sequence)) + ".\n" + TextColor.END)
+        consensus_sequence_h1 = stich_object.create_consensus_sequence(contig, chunk_name_tuple_h1, threads)
+        consensus_sequence_h2 = stich_object.create_consensus_sequence(contig, chunk_name_tuple_h2, threads)
+
+        sys.stderr.write("INFO: " + str(log_prefix) + " FINISHED PROCESSING " + contig
+                         + ", POLISHED SEQUENCE LENGTH HAP1: " + str(len(consensus_sequence_h1))
+                         + " HAP2: " + str(len(consensus_sequence_h2)) + ".\n")
 
         # if theres a sequence then write it to the file
-        if consensus_sequence is not None and len(consensus_sequence) > 0:
-            consensus_fasta_file.write('>' + contig + "\n")
-            consensus_fasta_file.write(consensus_sequence+"\n")
+        if consensus_sequence_h1 is not None and len(consensus_sequence_h1) > 0:
+            consensus_fasta_file_hap1.write('>' + contig + "\n")
+            consensus_fasta_file_hap1.write(consensus_sequence_h1+"\n")
+
+        if consensus_sequence_h2 is not None and len(consensus_sequence_h2) > 0:
+            consensus_fasta_file_hap2.write('>' + contig + "\n")
+            consensus_fasta_file_hap2.write(consensus_sequence_h2+"\n")

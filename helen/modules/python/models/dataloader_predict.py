@@ -3,7 +3,6 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import h5py
 import sys
-from helen.modules.python.TextColor import TextColor
 from helen.modules.python.Options import ImageSizeOptions
 from helen.modules.python.FileManager import FileManager
 
@@ -45,8 +44,7 @@ class SequenceDataset(Dataset):
                     for image_name in image_names:
                         file_image_pair.append((hdf5_file_path, image_name))
                 else:
-                    sys.stderr.write(TextColor.YELLOW + "WARN: NO IMAGES FOUND IN FILE: "
-                                     + hdf5_file_path + "\n" + TextColor.END)
+                    sys.stderr.write("WARN: NO IMAGES FOUND IN FILE: " + hdf5_file_path + "\n")
 
         # save the list to all_images so we can access the list inside other methods
         self.all_images = file_image_pair
@@ -68,6 +66,7 @@ class SequenceDataset(Dataset):
             chunk_id = hdf5_file['images'][image_name]['feature_chunk_idx'][()][0].astype(np.int)
             image = hdf5_file['images'][image_name]['image'][()].astype(np.uint8)
             position = hdf5_file['images'][image_name]['position'][()].astype(np.int)
+            haplotype = hdf5_file['images'][image_name]['haplotype'][()].astype(np.int)
 
         # if the size of the image is smaller than the sequence length, then we need to pad to the image to make
         # it to image size.
@@ -85,7 +84,7 @@ class SequenceDataset(Dataset):
         if image.shape[0] < ImageSizeOptions.SEQ_LENGTH or position.shape[0] < ImageSizeOptions.SEQ_LENGTH:
             raise ValueError("IMAGE SIZE ERROR: " + str(hdf5_filepath) + " " + str(image.shape))
 
-        return contig, contig_start, contig_end, chunk_id, image, position, hdf5_filepath
+        return contig, contig_start, contig_end, chunk_id, image, position, haplotype, hdf5_filepath
 
     def __len__(self):
         """
