@@ -38,11 +38,10 @@ def get_elapsed_time_string(start_time, end_time):
     :return:
     """
     elapsed = end_time - start_time
-    hours = str(int(elapsed/3600))
-    elapsed = elapsed - (elapsed/3600)
-    mins = str(int(elapsed/60))
-    secs = str(int(elapsed) % 60)
-    time_string = hours + " HOURS " + mins + " MINS " + secs + " SECS."
+    hours = int(elapsed / 60**2)
+    mins = int(elapsed % 60**2 / 60)
+    secs = int(elapsed % 60**2 % 60)
+    time_string = "{} HOURS {} MINS {} SECS.".format(hours, mins, secs)
 
     return time_string
 
