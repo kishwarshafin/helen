@@ -1,11 +1,13 @@
-# H.E.L.E.N.
-H.E.L.E.N. (Homopolymer Encoded Long-read Error-corrector for Nanopore)
+# POLISHER UPDATE: P.E.P.P.E.R.
+We have released a new polisher [PEPPER](https://github.com/kishwarshafin/pepper/releases/tag/v0.1) that replaces `MarginPolish-HELEN`. If you have newer data `Guppy >= 3.0.5` please use `PEPPER` instead of `MarginPolish-HELEN`. `PEPPER` is fully supported by our team.
 
+## H.E.L.E.N.
+H.E.L.E.N. (Homopolymer Encoded Long-read Error-corrector for Nanopore)
 
 [![Build Status](https://travis-ci.com/kishwarshafin/helen.svg?branch=master)](https://travis-ci.com/kishwarshafin/helen)
 ___________________________________________________________
-Pre-print of a paper describing the methods and overview of a suggested `de novo assembly` pipeline is now available:
-#### [Efficient de novo assembly of eleven human genomes using PromethION sequencing and a novel nanopore toolkit](https://www.biorxiv.org/content/10.1101/715722v1)
+HELEN is published in Nature Biotechnology:
+#### [Nanopore sequencing and the Shasta toolkit enable efficient de novo assembly of eleven human genomes](https://www.nature.com/articles/s41587-020-0503-6)
 __________________________________________________________
 
 ## Overview
@@ -117,8 +119,9 @@ Generate an assembly using one of the ONT assemblers:
 #### Step 2: Create an alignment between reads and shasta assembly
 We recommend using `MiniMap2` to generate the mapping between the reads and the assembly. You don't have to follow these exact commands.
 ```bash
-minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools view -hb -q 60 -F 0x904 > unsorted.bam ; samtools sort -@ 32 unsorted.bam | samtools view > reads_2_assembly.0x904q60.bam
-samtools index -@32 reads_2_assembly.0x904q60.bam
+minimap2 -ax map-ont -t 32 shasta_assembly.fa reads.fq | samtools view -hb -F 0x904 > unsorted.bam;
+samtools sort -@32 -o reads_2_assembly.0x904.bam unsorted.bam;
+samtools index -@32 reads_2_assembly.0x904.bam
 ```
 #### Step 3: Generate images using MarginPolish
 ##### Download Model
